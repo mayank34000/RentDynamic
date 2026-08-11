@@ -19,10 +19,24 @@ const sampleBookings = [
     { id: 'BK-1024', listing: 'Camping Tent', dates: '10 Aug – 12 Aug', amount: 1500, status: 'Confirmed' }
 ];
 
-const sampleFeedback = [
-    { id: 'FB-01', text: 'Great booking experience.', rating: '★★★★★', status: 'Visible' },
-    { id: 'FB-02', text: 'Listing was misleading, host did not respond.', rating: '★☆☆☆☆', status: 'Visible' }
-];
+const FEEDBACK_STORAGE_KEY = 'rentiq_feedback';
+
+function getStoredFeedback() {
+    const data = localStorage.getItem(FEEDBACK_STORAGE_KEY);
+    if (data) {
+        return JSON.parse(data);
+    }
+    const initial = [
+        { id: 'FB-01', name: 'User 1', email: 'user1@test.com', type: 'Booking Experience', message: 'Great booking experience.', rating: 5, status: 'Visible', date: '2026-08-10' },
+        { id: 'FB-02', name: 'User 2', email: 'user2@test.com', type: 'Listing Experience', message: 'Listing was misleading, host did not respond.', rating: 1, status: 'Visible', date: '2026-08-11' }
+    ];
+    localStorage.setItem(FEEDBACK_STORAGE_KEY, JSON.stringify(initial));
+    return initial;
+}
+
+function saveStoredFeedback(list) {
+    localStorage.setItem(FEEDBACK_STORAGE_KEY, JSON.stringify(list));
+}
 
 const sampleReports = [
     { id: 'RP-01', type: 'Listing Report', reason: 'Inappropriate content', status: 'Pending' },
@@ -146,17 +160,27 @@ function renderFeedbackAndReports() {
 
     if (feedbackEl) {
         let fbHtml = '';
-        sampleFeedback.forEach(fb => {
+        const allFeedback = getStoredFeedback();
+        
+        if (allFeedback.length === 0) {
+            fbHtml = '<p style="padding:12px; color:#9ca3af; font-size:14px; text-align:center;">No feedback submitted yet.</p>';
+        }
+        
+        allFeedback.forEach(fb => {
+            let starsStr = '';
+            for(let i=1; i<=5; i++) starsStr += (i <= fb.rating) ? '★' : '☆';
+            
             fbHtml += `
                 <div style="padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.06); margin-bottom: 8px;">
                     <div style="display:flex; justify-content:space-between; margin-bottom: 4px;">
-                        <span style="color:#fbbf24">${fb.rating}</span>
+                        <span style="color:#fbbf24">${starsStr}</span>
                         <span class="badge badge-normal">${fb.status}</span>
                     </div>
-                    <p style="font-size:14px; margin-bottom: 8px; color: #cbd5e1;">"${fb.text}"</p>
+                    <p style="font-size:14px; margin-bottom: 4px; color: #cbd5e1;">"${fb.message}"</p>
+                    <div style="font-size:12px; color:#6b7280; margin-bottom:8px;">${fb.type} | ${fb.date}</div>
                     <div>
                         <button class="action-btn" onclick="alert('Viewing feedback ${fb.id}')">View</button>
-                        <button class="action-btn" style="color: #f87171;" onclick="alert('Removing feedback ${fb.id} from platform')">Remove</button>
+                        <button class="action-btn" style="color: #f87171;" onclick="removeAdminFeedback('${fb.id}')">Remove</button>
                     </div>
                 </div>
             `;
@@ -251,6 +275,16 @@ function confirmRemoveListing() {
     closeRemoveModal();
 }
 
+function removeAdminFeedback(id) {
+    if (confirm('Remove this feedback from the platform?')) {
+        let allFeedback = getStoredFeedback();
+        allFeedback = allFeedback.filter(fb => fb.id !== id);
+        saveStoredFeedback(allFeedback);
+        renderFeedbackAndReports();
+        showToast('Feedback removed successfully.');
+    }
+}
+
 // ─── TOAST NOTIFICATION ──────────────────────────────────────
 
 function showToast(message) {
@@ -330,6 +364,13 @@ document.addEventListener('DOMContentLoaded', () => {
     renderBookings();
     renderFeedbackAndReports();
     renderActivity();
+    
+    // Listen for storage changes across tabs
+    window.addEventListener('storage', (e) => {
+        if (e.key === FEEDBACK_STORAGE_KEY) {
+            renderFeedbackAndReports();
+        }
+    });
     
     // Attach events
     initMobileMenu();

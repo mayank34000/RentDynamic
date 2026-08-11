@@ -1,0 +1,463 @@
+/* ============================================================
+   RentIQ – Feedback Styles
+   Design Language: Dark glassmorphism matching login/admin
+   ============================================================ */
+
+/* ---------- Reset & Base ---------- */
+*,
+*::before,
+*::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    min-height: 100vh;
+    font-family: 'Inter', sans-serif;
+    background: #0b0e1a;
+    color: #f1f5f9;
+    line-height: 1.6;
+    overflow-x: hidden;
+}
+
+/* ---------- Background Video ---------- */
+.bg-video {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    object-fit: cover;
+    z-index: -1;
+    opacity: 0.08;
+}
+
+/* ---------- Navbar (Shared Pattern) ---------- */
+.navbar {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 32px;
+    background: rgba(11, 14, 26, 0.75);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.navbar-brand {
+    font-family: 'Manrope', sans-serif;
+    font-weight: 800;
+    font-size: 22px;
+    background: linear-gradient(135deg, #3b82f6, #6366f1);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-decoration: none;
+    letter-spacing: -0.5px;
+}
+
+.navbar-links {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    list-style: none;
+}
+
+.navbar-links a {
+    color: #9ca3af;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    padding: 8px 16px;
+    border-radius: 10px;
+    transition: color 0.25s, background 0.25s;
+}
+
+.navbar-links a:hover,
+.navbar-links a.active {
+    color: #f1f5f9;
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.navbar-links a.active {
+    background: rgba(59, 130, 246, 0.12);
+    color: #60a5fa;
+}
+
+.navbar-links .logout-link {
+    color: #f87171;
+}
+
+.navbar-links .logout-link:hover {
+    background: rgba(248, 113, 113, 0.1);
+    color: #fca5a5;
+}
+
+.menu-toggle {
+    display: none;
+    background: none;
+    border: none;
+    color: #f1f5f9;
+    font-size: 24px;
+    cursor: pointer;
+    padding: 4px;
+}
+
+/* ---------- Feedback Page Layout ---------- */
+.feedback-page {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 32px 28px 60px;
+}
+
+.page-header {
+    margin-bottom: 32px;
+}
+
+.page-header h1 {
+    font-family: 'Manrope', sans-serif;
+    font-size: 28px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    margin-bottom: 4px;
+}
+
+.page-header p {
+    color: #9ca3af;
+    font-size: 15px;
+}
+
+.feedback-layout {
+    display: grid;
+    grid-template-columns: 3fr 2fr;
+    gap: 32px;
+    align-items: start;
+}
+
+/* ---------- Glass Card (Shared) ---------- */
+.glass-card {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    border-radius: 20px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+}
+
+/* ---------- Form Card ---------- */
+.form-card {
+    padding: 32px;
+    animation: fadeInUp 0.4s ease-out both;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    font-size: 13px;
+    color: #cbd5e1;
+    font-weight: 500;
+}
+
+.required {
+    color: #f87171;
+}
+
+.optional {
+    color: #6b7280;
+    font-size: 12px;
+    font-weight: 400;
+}
+
+.form-control {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.06);
+    color: #f1f5f9;
+    font-size: 14px;
+    font-family: 'Inter', sans-serif;
+    outline: none;
+    transition: border-color 0.3s;
+}
+
+.form-control::placeholder {
+    color: #6b7280;
+}
+
+.form-control:focus {
+    border-color: #3b82f6;
+}
+
+.form-control.input-error {
+    border-color: #f87171;
+}
+
+select.form-control option {
+    background: #1a1d2e;
+    color: #f1f5f9;
+}
+
+/* Inline Error */
+.field-error {
+    color: #f87171;
+    font-size: 12px;
+    min-height: 16px;
+}
+
+/* ---------- Star Rating ---------- */
+.rating-subtitle {
+    font-size: 12px;
+    color: #9ca3af;
+    margin-bottom: 4px;
+}
+
+.star-rating {
+    display: flex;
+    gap: 4px;
+}
+
+.star {
+    font-size: 28px;
+    color: #6b7280;
+    cursor: pointer;
+    user-select: none;
+    transition: color 0.2s, transform 0.1s;
+}
+
+.star.active {
+    color: #fbbf24; /* yellow/gold */
+}
+
+.star:hover {
+    transform: scale(1.1);
+}
+
+/* ---------- Submit Button ---------- */
+.btn-submit {
+    width: 100%;
+    padding: 14px;
+    border: none;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #3b82f6, #6366f1);
+    color: #fff;
+    font-size: 15px;
+    font-weight: 600;
+    font-family: 'Inter', sans-serif;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: transform 0.2s, box-shadow 0.3s;
+}
+
+.btn-submit:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 20px rgba(99, 102, 241, 0.4);
+}
+
+.btn-submit:active {
+    transform: translateY(0);
+}
+
+/* ---------- Recent Feedback Section ---------- */
+.section-title {
+    font-family: 'Manrope', sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 18px;
+    letter-spacing: -0.3px;
+}
+
+.feedback-list-card {
+    padding: 24px;
+    animation: fadeInUp 0.5s ease-out both;
+    animation-delay: 0.1s;
+}
+
+.feedback-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.feedback-item {
+    padding: 16px;
+    background: rgba(255, 255, 255, 0.025);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 14px;
+}
+
+.feedback-stars {
+    color: #fbbf24;
+    font-size: 14px;
+    letter-spacing: 2px;
+    margin-bottom: 6px;
+}
+
+.feedback-message {
+    font-size: 14px;
+    color: #cbd5e1;
+    margin-bottom: 12px;
+    line-height: 1.5;
+}
+
+.feedback-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+    color: #6b7280;
+}
+
+.feedback-type-badge {
+    background: rgba(59, 130, 246, 0.12);
+    color: #60a5fa;
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-weight: 500;
+}
+
+/* Empty State */
+.empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: #9ca3af;
+}
+
+.empty-state p {
+    font-size: 14px;
+    margin-bottom: 4px;
+}
+
+.empty-state small {
+    font-size: 12px;
+    color: #6b7280;
+}
+
+/* ---------- Moderation ---------- */
+.admin-actions {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    display: flex;
+    gap: 8px;
+}
+
+.btn-remove {
+    background: rgba(239, 68, 68, 0.1);
+    color: #f87171;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-remove:hover {
+    background: rgba(239, 68, 68, 0.2);
+}
+
+/* ---------- Toasts ---------- */
+.toast-container {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    z-index: 2000;
+}
+
+.toast-message {
+    background: rgba(16, 185, 129, 0.9);
+    color: #fff;
+    padding: 14px 20px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 500;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    opacity: 0;
+    transform: translateX(100%);
+    transition: opacity 0.3s, transform 0.3s;
+    backdrop-filter: blur(8px);
+}
+
+.toast-message.show {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+/* ---------- Animation ---------- */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 968px) {
+    .feedback-layout {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .navbar {
+        padding: 12px 20px;
+    }
+
+    .navbar-links {
+        display: none;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        flex-direction: column;
+        background: rgba(11, 14, 26, 0.95);
+        backdrop-filter: blur(18px);
+        -webkit-backdrop-filter: blur(18px);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        padding: 12px 20px;
+        gap: 2px;
+    }
+
+    .navbar-links.open {
+        display: flex;
+    }
+
+    .navbar-links a {
+        padding: 12px 16px;
+        width: 100%;
+    }
+
+    .menu-toggle {
+        display: block;
+    }
+
+    .feedback-page {
+        padding: 24px 16px 48px;
+    }
+
+    .page-header h1 {
+        font-size: 24px;
+    }
+
+    .form-card {
+        padding: 24px;
+    }
+}

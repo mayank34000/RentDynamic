@@ -53,11 +53,6 @@ let handleSubmit = () => {
         return;
     }
 
-
-<<<<<<< HEAD
-=======
-
->>>>>>> 892dfb5b9408229c9c2eba33aebaee504fc94436
     // PASSWORD
 
     if (password.value.length < 8) {
@@ -157,11 +152,9 @@ let handleSubmit = () => {
 
 
     alert("Account created successfully!");
-
-<<<<<<< HEAD
     window.location.href = "bookings.html";
-=======
+
     window.location.href = "login.html";
->>>>>>> 892dfb5b9408229c9c2eba33aebaee504fc94436
+
 
 };

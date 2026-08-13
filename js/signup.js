@@ -39,9 +39,10 @@ let handleSubmit = () => {
     let phonePattern = /^[0-9]{10}$/;
 
     if (!phonePattern.test(phone.value)) {
-        alert("Phone number must contain exactly 10 digits!");
+        alert("Please enter a valid phone number!");
         return;
     }
+
 
 
     // PASSWORD

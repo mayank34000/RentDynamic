@@ -36,7 +36,7 @@ let handleLogin = () => {
         alert("Login Successful");
 
 
-        window.location.href = "index.html";
+        // window.location.href = "index.html";
 
         window.location.href = "booking.html";
 

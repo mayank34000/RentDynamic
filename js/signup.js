@@ -149,7 +149,7 @@ let handleSubmit = () => {
 
 
     alert("Account created successfully!");
-    window.location.href = "bookings.html";
+    // window.location.href = "bookings.html";
 
     window.location.href = "login.html";
 

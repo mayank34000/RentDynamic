@@ -113,7 +113,8 @@ let handleSubmit = () => {
         username: name.value.trim(),
         useremail: email.value.trim(),
         userphone: phone.value.trim(),
-        userpassword: password.value
+        userpassword: password.value,
+        role: 'customer'
     };
 
 

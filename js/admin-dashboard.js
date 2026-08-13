@@ -1,42 +1,9 @@
 /* ============================================================
    RentIQ – Admin Dashboard JavaScript (Platform Moderator)
+   Uses shared storage.js for all data access.
    ============================================================ */
 
-// ─── SAMPLE DATA (PHASE 1) ──────────────────────────────────
-
-let sampleListings = [
-    { id: 'LST-001', name: 'Sony A7IV', category: 'Camera Gear', basePrice: 1000, status: 'Active', date: '2023-08-01' },
-    { id: 'LST-002', name: 'BMW 3 Series', category: 'Vehicle', basePrice: 5000, status: 'Active', date: '2023-08-05' },
-    { id: 'LST-003', name: 'Conference Hall', category: 'Venue', basePrice: 8000, status: 'Pending', date: '2023-08-10' },
-    { id: 'LST-004', name: 'Camping Tent', category: 'Outdoor', basePrice: 500, status: 'Active', date: '2023-08-12' },
-    { id: 'LST-005', name: 'DJI Mavic 3', category: 'Camera Gear', basePrice: 1500, status: 'Inactive', date: '2023-07-20' }
-];
-
-const sampleBookings = [
-    { id: 'BK-1021', listing: 'Sony A7IV', dates: '15 Aug – 18 Aug', amount: 3240, status: 'Confirmed' },
-    { id: 'BK-1022', listing: 'BMW 3 Series', dates: '20 Aug – 22 Aug', amount: 11500, status: 'Pending' },
-    { id: 'BK-1023', listing: 'Conference Hall', dates: '01 Sep – 02 Sep', amount: 16000, status: 'Cancelled' },
-    { id: 'BK-1024', listing: 'Camping Tent', dates: '10 Aug – 12 Aug', amount: 1500, status: 'Confirmed' }
-];
-
-const FEEDBACK_STORAGE_KEY = 'rentiq_feedback';
-
-function getStoredFeedback() {
-    const data = localStorage.getItem(FEEDBACK_STORAGE_KEY);
-    if (data) {
-        return JSON.parse(data);
-    }
-    const initial = [
-        { id: 'FB-01', name: 'User 1', email: 'user1@test.com', type: 'Booking Experience', message: 'Great booking experience.', rating: 5, status: 'Visible', date: '2026-08-10' },
-        { id: 'FB-02', name: 'User 2', email: 'user2@test.com', type: 'Listing Experience', message: 'Listing was misleading, host did not respond.', rating: 1, status: 'Visible', date: '2026-08-11' }
-    ];
-    localStorage.setItem(FEEDBACK_STORAGE_KEY, JSON.stringify(initial));
-    return initial;
-}
-
-function saveStoredFeedback(list) {
-    localStorage.setItem(FEEDBACK_STORAGE_KEY, JSON.stringify(list));
-}
+// ─── SAMPLE DATA (PHASE 1 — non-persistent) ─────────────────
 
 const sampleReports = [
     { id: 'RP-01', type: 'Listing Report', reason: 'Inappropriate content', status: 'Pending' },
@@ -57,19 +24,50 @@ const sampleActivity = [
 
 let listingToRemove = null;
 
+// ─── KPI RENDERING ──────────────────────────────────────────
+
+function renderKPIs() {
+    const users = getUsers();
+    const listings = getListings();
+    const bookings = getBookings();
+    const revenue = calculateTotalRevenue(bookings);
+
+    const kpiUsers = document.getElementById('kpiUsers');
+    const kpiSellers = document.getElementById('kpiSellers');
+    const kpiListings = document.getElementById('kpiListings');
+    const kpiBookings = document.getElementById('kpiBookings');
+    const kpiRevenue = document.getElementById('kpiRevenue');
+
+    if (kpiUsers) kpiUsers.textContent = users.length;
+    if (kpiSellers) {
+        const sellerCount = users.filter(u => (u.role || '').toLowerCase() === 'seller').length;
+        kpiSellers.textContent = sellerCount;
+    }
+    if (kpiListings) kpiListings.textContent = listings.length;
+    if (kpiBookings) kpiBookings.textContent = bookings.length;
+    if (kpiRevenue) kpiRevenue.textContent = formatCurrency(revenue);
+}
+
 // ─── RENDER FUNCTIONS ────────────────────────────────────────
 
 function renderListings() {
     const list = document.getElementById('listingList');
-    const searchQuery = document.getElementById('listingSearch').value.toLowerCase();
-    const categoryFilter = document.getElementById('listingCategoryFilter').value;
-    const statusFilter = document.getElementById('listingStatusFilter').value;
-    const sortVal = document.getElementById('listingSort').value;
+    const searchInput = document.getElementById('listingSearch');
+    const categorySelect = document.getElementById('listingCategoryFilter');
+    const statusSelect = document.getElementById('listingStatusFilter');
+    const sortSelect = document.getElementById('listingSort');
 
     if (!list) return;
 
+    const searchQuery = searchInput ? searchInput.value.toLowerCase() : '';
+    const categoryFilter = categorySelect ? categorySelect.value : 'All';
+    const statusFilter = statusSelect ? statusSelect.value : 'All';
+    const sortVal = sortSelect ? sortSelect.value : 'newest';
+
+    const allListings = getListings();
+
     // Filter
-    let filtered = sampleListings.filter(listing => {
+    let filtered = allListings.filter(listing => {
         const matchesSearch = listing.name.toLowerCase().includes(searchQuery) || listing.id.toLowerCase().includes(searchQuery);
         const matchesCategory = categoryFilter === 'All' || listing.category === categoryFilter;
         const matchesStatus = statusFilter === 'All' || listing.status === statusFilter;
@@ -128,9 +126,10 @@ function renderBookings() {
     const list = document.getElementById('bookingList');
     if (!list) return;
 
+    const allBookings = getBookings();
     let html = '';
 
-    sampleBookings.forEach(booking => {
+    allBookings.forEach(booking => {
         let statusClass = 'badge-normal';
         if (booking.status === 'Confirmed') statusClass = 'badge-low';
         if (booking.status === 'Cancelled') statusClass = 'badge-orange';
@@ -160,7 +159,7 @@ function renderFeedbackAndReports() {
 
     if (feedbackEl) {
         let fbHtml = '';
-        const allFeedback = getStoredFeedback();
+        const allFeedback = getFeedback();
         
         if (allFeedback.length === 0) {
             fbHtml = '<p style="padding:12px; color:#9ca3af; font-size:14px; text-align:center;">No feedback submitted yet.</p>';
@@ -241,10 +240,13 @@ function editListing(id) {
 }
 
 function toggleListing(id, newStatus) {
-    const listing = sampleListings.find(l => l.id === id);
+    const allListings = getListings();
+    const listing = allListings.find(l => l.id === id);
     if (listing) {
         listing.status = newStatus;
+        saveListings(allListings);
         renderListings();
+        renderKPIs();
         showToast(`Listing ${id} is now ${listing.status}.`);
     }
 }
@@ -267,9 +269,11 @@ function closeRemoveModal() {
 
 function confirmRemoveListing() {
     if (listingToRemove) {
-        // Remove from array
-        sampleListings = sampleListings.filter(l => l.id !== listingToRemove);
+        const allListings = getListings();
+        const updated = allListings.filter(l => l.id !== listingToRemove);
+        saveListings(updated);
         renderListings();
+        renderKPIs();
         showToast(`Listing ${listingToRemove} successfully removed from the platform.`);
     }
     closeRemoveModal();
@@ -277,10 +281,11 @@ function confirmRemoveListing() {
 
 function removeAdminFeedback(id) {
     if (confirm('Remove this feedback from the platform?')) {
-        let allFeedback = getStoredFeedback();
+        let allFeedback = getFeedback();
         allFeedback = allFeedback.filter(fb => fb.id !== id);
-        saveStoredFeedback(allFeedback);
+        saveFeedback(allFeedback);
         renderFeedbackAndReports();
+        renderKPIs();
         showToast('Feedback removed successfully.');
     }
 }
@@ -355,20 +360,29 @@ function initMobileMenu() {
     });
 }
 
+/** Re-render all data-driven sections */
+function refreshAll() {
+    renderKPIs();
+    renderListings();
+    renderBookings();
+    renderFeedbackAndReports();
+}
 
 // ─── INITIALISE ──────────────────────────────────────────────
 
 document.addEventListener('DOMContentLoaded', () => {
     // Initial renders
+    renderKPIs();
     renderListings();
     renderBookings();
     renderFeedbackAndReports();
     renderActivity();
     
-    // Listen for storage changes across tabs
+    // Listen for storage changes from OTHER tabs/windows
     window.addEventListener('storage', (e) => {
-        if (e.key === FEEDBACK_STORAGE_KEY) {
-            renderFeedbackAndReports();
+        if (e.key === STORAGE_KEYS.USERS || e.key === STORAGE_KEYS.LISTINGS ||
+            e.key === STORAGE_KEYS.BOOKINGS || e.key === STORAGE_KEYS.FEEDBACK) {
+            refreshAll();
         }
     });
     

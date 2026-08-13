@@ -1,55 +1,11 @@
 /* ============================================================
    RentIQ – Feedback JavaScript
+   Uses shared storage.js for all data access.
    ============================================================ */
-
-const FEEDBACK_STORAGE_KEY = 'rentiq_feedback';
-
-// Fictional sample data to pre-populate if empty
-const initialFeedback = [
-    {
-        id: 'FB-001',
-        name: 'Rahul',
-        email: 'rahul@example.com',
-        type: 'Booking Experience',
-        rating: 5,
-        message: 'The booking process was simple and smooth.',
-        bookingId: 'BK-1021',
-        date: '2026-08-12',
-        status: 'Visible'
-    },
-    {
-        id: 'FB-002',
-        name: 'Aman',
-        email: 'aman@example.com',
-        type: 'Listing Experience',
-        rating: 4,
-        message: 'Great vehicle, exactly as described in the listing.',
-        bookingId: '',
-        date: '2026-08-10',
-        status: 'Visible'
-    }
-];
 
 // Check if current user is admin (Phase 1 mock)
 // We assume 'currentUserRole' is stored elsewhere, defaulting to user if not found.
 const isAdmin = localStorage.getItem('currentUserRole') === 'admin';
-
-
-// ─── STATE & STORAGE ─────────────────────────────────────────
-
-function getStoredFeedback() {
-    const data = localStorage.getItem(FEEDBACK_STORAGE_KEY);
-    if (data) {
-        return JSON.parse(data);
-    }
-    // Set initial data if none exists
-    localStorage.setItem(FEEDBACK_STORAGE_KEY, JSON.stringify(initialFeedback));
-    return initialFeedback;
-}
-
-function saveFeedback(feedbackList) {
-    localStorage.setItem(FEEDBACK_STORAGE_KEY, JSON.stringify(feedbackList));
-}
 
 
 // ─── STAR RATING LOGIC ───────────────────────────────────────
@@ -166,7 +122,7 @@ function handleFormSubmit(e) {
     };
 
     // Save and re-render
-    const allFeedback = getStoredFeedback();
+    const allFeedback = getFeedback();
     allFeedback.unshift(newFeedback); // add to top
     saveFeedback(allFeedback);
 
@@ -192,7 +148,7 @@ function getStars(rating) {
 // Global scope for onclick
 window.removeFeedback = function(id) {
     if (confirm('Remove this feedback from the platform?')) {
-        let allFeedback = getStoredFeedback();
+        let allFeedback = getFeedback();
         allFeedback = allFeedback.filter(fb => fb.id !== id);
         saveFeedback(allFeedback);
         renderFeedbackList();
@@ -202,7 +158,7 @@ window.removeFeedback = function(id) {
 
 function renderFeedbackList() {
     const container = document.getElementById('feedbackListContainer');
-    const allFeedback = getStoredFeedback();
+    const allFeedback = getFeedback();
     
     // Only show 'Visible' feedback unless admin, but for Phase 1 we can just show all 
     // or assume removal deletes it.
@@ -307,4 +263,11 @@ document.addEventListener('DOMContentLoaded', () => {
     if (form) {
         form.addEventListener('submit', handleFormSubmit);
     }
+
+    // Listen for storage changes from OTHER tabs/windows
+    window.addEventListener('storage', (e) => {
+        if (e.key === STORAGE_KEYS.FEEDBACK) {
+            renderFeedbackList();
+        }
+    });
 });

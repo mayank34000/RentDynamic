@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analytics – RentIQ</title>
+    <meta name="description" content="RentIQ Platform Analytics — Monitor performance and user interactions.">
+
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Dashboard Styles -->
+    <link rel="stylesheet" href="css/admin-dashboard.css">
+    <link rel="stylesheet" href="css/analytics.css">
+</head>
+<body>
+
+    <!-- Background Video -->
+    <video class="bg-video" autoplay muted loop playsinline>
+        <source src="assets/video.mp4" type="video/mp4">
+    </video>
+
+    <!-- ===================== NAVBAR ===================== -->
+    <nav class="navbar" id="navbar">
+        <a href="admin-dashboard.html" class="navbar-brand">RentIQ</a>
+
+        <button class="menu-toggle" id="menuToggle" aria-label="Toggle menu">☰</button>
+
+        <ul class="navbar-links" id="navLinks">
+            <li><a href="admin-dashboard.html">Dashboard</a></li>
+            <li><a href="analytics.html" class="active">Analytics</a></li>
+            <li><a href="feedback.html">Feedback</a></li>
+            <li><a href="profile.html">Profile</a></li>
+            <li><a href="login.html" class="logout-link">Logout</a></li>
+        </ul>
+    </nav>
+
+    <!-- ===================== DASHBOARD ===================== -->
+    <main class="dashboard">
+
+        <!-- Page Header -->
+        <header class="page-header">
+            <h1>Analytics</h1>
+            <p>Monitor platform performance and understand how users are interacting with RentIQ.</p>
+        </header>
+
+        <!-- ============ KPI OVERVIEW ============ -->
+        <section class="kpi-grid" id="kpiOverview" aria-label="Key performance indicators">
+            <article class="glass-card kpi-card">
+                <div class="kpi-icon">👥</div>
+                <div class="kpi-value" id="statUsers">-</div>
+                <div class="kpi-label">Total Users</div>
+            </article>
+
+            <article class="glass-card kpi-card">
+                <div class="kpi-icon">📋</div>
+                <div class="kpi-value" id="statListings">-</div>
+                <div class="kpi-label">Total Listings</div>
+            </article>
+
+            <article class="glass-card kpi-card">
+                <div class="kpi-icon">📦</div>
+                <div class="kpi-value" id="statBookings">-</div>
+                <div class="kpi-label">Total Bookings</div>
+            </article>
+
+            <article class="glass-card kpi-card">
+                <div class="kpi-icon">💰</div>
+                <div class="kpi-value" id="statRevenue">-</div>
+                <div class="kpi-label">Total Revenue</div>
+            </article>
+        </section>
+
+        <!-- ============ ANALYTICS GRID ============ -->
+        <div class="analytics-grid">
+            
+            <!-- Booking Analytics -->
+            <section class="glass-card analytics-card" aria-label="Booking Analytics">
+                <div class="card-header">
+                    <h2 class="section-title">Booking Trends</h2>
+                    <p class="section-subtitle">Booking activity over time</p>
+                </div>
+                <div class="card-body" id="bookingAnalyticsBody">
+                    <!-- Populated by JS -->
+                </div>
+            </section>
+
+            <!-- Revenue Analytics -->
+            <section class="glass-card analytics-card" aria-label="Revenue Analytics">
+                <div class="card-header">
+                    <h2 class="section-title">Revenue Overview</h2>
+                    <p class="section-subtitle">Financial performance</p>
+                </div>
+                <div class="card-body" id="revenueAnalyticsBody">
+                    <!-- Populated by JS -->
+                </div>
+            </section>
+
+            <!-- Listing Performance -->
+            <section class="glass-card analytics-card full-width" aria-label="Listing Performance">
+                <div class="card-header">
+                    <h2 class="section-title">Top Performing Listings</h2>
+                    <p class="section-subtitle">Based on completed bookings and revenue</p>
+                </div>
+                <div class="table-responsive">
+                    <table class="platform-table" id="listingPerformanceTable">
+                        <thead>
+                            <tr>
+                                <th>Listing Name</th>
+                                <th>Category</th>
+                                <th>Total Bookings</th>
+                                <th>Revenue Generated</th>
+                            </tr>
+                        </thead>
+                        <tbody id="listingPerformanceBody">
+                            <!-- Populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Category Distribution -->
+            <section class="glass-card analytics-card" aria-label="Category Distribution">
+                <div class="card-header">
+                    <h2 class="section-title">Category Distribution</h2>
+                    <p class="section-subtitle">Listings by category</p>
+                </div>
+                <div class="card-body" id="categoryAnalyticsBody">
+                    <!-- Populated by JS -->
+                </div>
+            </section>
+
+            <!-- User Overview -->
+            <section class="glass-card analytics-card" aria-label="User Overview">
+                <div class="card-header">
+                    <h2 class="section-title">User Overview</h2>
+                    <p class="section-subtitle">Platform user breakdown</p>
+                </div>
+                <div class="card-body" id="userAnalyticsBody">
+                    <!-- Populated by JS -->
+                </div>
+            </section>
+
+            <!-- Feedback Analytics -->
+            <section class="glass-card analytics-card full-width" aria-label="Feedback Analytics">
+                <div class="card-header">
+                    <h2 class="section-title">Feedback Overview</h2>
+                    <p class="section-subtitle">User satisfaction and ratings</p>
+                </div>
+                <div class="card-body" id="feedbackAnalyticsBody">
+                    <!-- Populated by JS -->
+                </div>
+            </section>
+
+        </div>
+
+    </main>
+
+    <!-- Shared Storage & Data Helpers -->
+    <script src="js/storage.js"></script>
+    <!-- Analytics JS -->
+    <script src="js/analytics.js"></script>
+</body>
+</html>

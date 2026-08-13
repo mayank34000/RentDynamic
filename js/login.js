@@ -35,11 +35,11 @@ let handleLogin = () => {
 
         alert("Login Successful");
 
-<<<<<<< HEAD
+
         window.location.href = "index.html";
-=======
+
         window.location.href = "booking.html";
->>>>>>> 892dfb5b9408229c9c2eba33aebaee504fc94436
+
 
     } else {
 

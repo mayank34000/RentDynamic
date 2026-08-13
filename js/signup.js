@@ -1,9 +1,8 @@
 let handleSubmit = () => {
 
-<<<<<<< HEAD
-=======
+
     // Get form values
->>>>>>> 892dfb5b9408229c9c2eba33aebaee504fc94436
+
     let name = document.getElementById("username");
     let email = document.getElementById("email");
     let phone = document.getElementById("phone");
@@ -13,11 +12,9 @@ let handleSubmit = () => {
 
 
 
-<<<<<<< HEAD
-=======
     // USERNAME VALIDATION
 
->>>>>>> 892dfb5b9408229c9c2eba33aebaee504fc94436
+
 
     if (name.value.trim().length < 3) {
         alert("Username must be at least 3 characters long!");
@@ -45,11 +42,11 @@ let handleSubmit = () => {
     let phonePattern = /^[0-9]{10}$/;
 
     if (!phonePattern.test(phone.value)) {
-<<<<<<< HEAD
+
         alert("Phone number must contain exactly 10 digits!");
-=======
+
         alert("Please enter a valid phone number!");
->>>>>>> 892dfb5b9408229c9c2eba33aebaee504fc94436
+
         return;
     }
 

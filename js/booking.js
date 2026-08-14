@@ -45,6 +45,8 @@ document.addEventListener("DOMContentLoaded", () => {
     let allListings = [];
     let currentCategory = "All";
     let userLocation = null; // { lat, lon, city }
+    let filteredListings = [];
+    let visibleCount = 20;
     
     // DOM Elements
     const listingsGrid = document.getElementById("listings-grid");
@@ -55,7 +57,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Modal Elements
     const bookingModal = document.getElementById("booking-modal");
-    const chatModal = document.getElementById("chat-modal");
     const proModal = document.getElementById("pro-modal");
     
     // Booking Form Elements
@@ -63,23 +64,17 @@ document.addEventListener("DOMContentLoaded", () => {
     const bookingStart = document.getElementById("booking-start");
     const bookingEnd = document.getElementById("booking-end");
 
-    // Chat Form Elements
-    const chatForm = document.getElementById("chat-form");
-    const chatInput = document.getElementById("chat-input");
-    const chatMessages = document.getElementById("chat-messages");
-
     // Currently active interaction contexts
     let activeBookingListingId = null;
-    let activeChatListingId = null;
 
     // ========================================
     // 2. INITIALIZATION (IIFE-like start)
     // ========================================
     init();
 
-    function init() {
+    async function init() {
         // Load data from Local Storage (using JSON parsing)
-        fetchListings();
+        await fetchListings();
         
         // Render initial UI state
         renderListings(allListings);
@@ -100,17 +95,39 @@ document.addEventListener("DOMContentLoaded", () => {
      * Fetches listings from localStorage.
      * If empty, injects some default mock data to demonstrate the UI.
      */
-    function fetchListings() {
+    async function fetchListings() {
         const stored = localStorage.getItem('RentFlow_listings');
         if (stored) {
             try {
                 allListings = JSON.parse(stored);
+                // If local storage has fewer than 200 items, auto-seed them from central API (products.json)
+                if (allListings.length < 200) {
+                    const response = await fetch('js/products.json');
+                    if (response.ok) {
+                        const apiListings = await response.json();
+                        const existingIds = new Set(allListings.map(item => item.id));
+                        const newItems = apiListings.filter(item => !existingIds.has(item.id));
+                        if (newItems.length > 0) {
+                            allListings = [...newItems, ...allListings];
+                            localStorage.setItem('RentFlow_listings', JSON.stringify(allListings));
+                        }
+                    }
+                }
             } catch (e) {
                 console.error("Error parsing listings", e);
                 allListings = getMockListings();
             }
         } else {
-            allListings = getMockListings();
+            try {
+                const response = await fetch('js/products.json');
+                if (response.ok) {
+                    allListings = await response.json();
+                } else {
+                    allListings = getMockListings();
+                }
+            } catch (e) {
+                allListings = getMockListings();
+            }
             // Save mock data back to local storage for persistence
             localStorage.setItem('RentFlow_listings', JSON.stringify(allListings));
         }
@@ -149,8 +166,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const isPro = checkProStatus();
 
+        const visibleListings = listings.slice(0, visibleCount);
+
         // Using map() to transform object data into DOM HTML
-        listingsGrid.innerHTML = listings.map(item => {
+        listingsGrid.innerHTML = visibleListings.map(item => {
             const initial = item.seller?.name?.charAt(0).toUpperCase() || 'S';
             let distanceHtml = '';
             
@@ -196,14 +215,25 @@ document.addEventListener("DOMContentLoaded", () => {
                                 ₹${item.price.toLocaleString('en-IN')}<span>/${item.period}</span>
                             </div>
                             <div class="card-actions">
-                                <button class="btn-chat" onclick="window.openChatModal('${item.id}')">Chat</button>
-                                <button class="btn-book" onclick="window.openBookingModal('${item.id}')">Book</button>
+                                <button class="btn-book" onclick="window.openBookingModal('${item.id}')" style="width: 100%;">Book</button>
                             </div>
                         </div>
                     </div>
                 </div>
             `;
         }).join('');
+
+        if (listings.length > visibleCount) {
+            listingsGrid.innerHTML += `
+                <div style="grid-column: 1 / -1; text-align: center; margin-top: 20px;">
+                    <button id="show-more-btn" class="btn-secondary" style="padding: 10px 20px; cursor: pointer;">Show More</button>
+                </div>
+            `;
+            document.getElementById('show-more-btn').addEventListener('click', () => {
+                visibleCount += 20;
+                renderListings(listings);
+            });
+        }
 
         // Attach event listeners to unlock triggers (Pro gate)
         document.querySelectorAll('.unlock-trigger').forEach(el => {
@@ -235,7 +265,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // Modal Close Buttons
         document.getElementById("close-booking-modal").addEventListener("click", () => bookingModal.classList.remove("show"));
-        document.getElementById("close-chat-modal").addEventListener("click", () => chatModal.classList.remove("show"));
         document.getElementById("close-pro-modal").addEventListener("click", () => proModal.classList.remove("show"));
         
         // Close modals on outside click
@@ -251,9 +280,6 @@ document.addEventListener("DOMContentLoaded", () => {
         bookingStart.addEventListener("change", updateBookingCalculations);
         bookingEnd.addEventListener("change", updateBookingCalculations);
         bookingForm.addEventListener("submit", handleBookingSubmit);
-
-        // Chat Form Logic
-        chatForm.addEventListener("submit", handleChatSubmit);
     }
 
     // ========================================
@@ -282,15 +308,15 @@ document.addEventListener("DOMContentLoaded", () => {
             userLocation = { lat: latitude, lon: longitude };
 
             // Fetch API call to OpenStreetMap Nominatim
-            const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=10`);
+            const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=18&addressdetails=1`);
             
             if (!response.ok) throw new Error("Network response was not ok");
             
             const data = await response.json();
-            const city = data.address.city || data.address.town || data.address.state || "Unknown Location";
+            const preciseLocation = data.display_name ? data.display_name.split(",").slice(0, 3).join(",").trim() : "Unknown Location";
             
-            locationInput.value = city;
-            showToast(`Location detected: ${city}`);
+            locationInput.value = preciseLocation;
+            showToast(`Location detected: ${preciseLocation}`);
             
             // Re-render to show distances
             filterAndSortListings();
@@ -309,22 +335,23 @@ document.addEventListener("DOMContentLoaded", () => {
      * Uses Array.prototype.filter() and Array.prototype.sort().
      */
     function filterAndSortListings() {
-        let filtered = allListings;
+        filteredListings = allListings;
+        visibleCount = 20;
 
         if (currentCategory !== "All") {
-            filtered = allListings.filter(item => item.category === currentCategory);
+            filteredListings = allListings.filter(item => item.category === currentCategory);
         }
 
         if (userLocation) {
             // Sort by distance (closest first)
-            filtered.sort((a, b) => {
+            filteredListings.sort((a, b) => {
                 const distA = calculateDistance(userLocation.lat, userLocation.lon, a.lat, a.lon);
                 const distB = calculateDistance(userLocation.lat, userLocation.lon, b.lat, b.lon);
                 return distA - distB;
             });
         }
 
-        renderListings(filtered);
+        renderListings(filteredListings);
     }
 
     // ========================================
@@ -449,80 +476,7 @@ document.addEventListener("DOMContentLoaded", () => {
         showToast("Booking request sent successfully! Check My Rentals.");
     }
 
-    // ========================================
-    // 9. CHAT SYSTEM (OLX STYLE)
-    // ========================================
-    window.openChatModal = function(listingId) {
-        const listing = allListings.find(l => l.id === listingId);
-        if (!listing) return;
 
-        activeChatListingId = listingId;
-        
-        document.getElementById("chat-lender-name").textContent = listing.seller?.name || 'Verified Owner';
-        document.getElementById("chat-lender-avatar").textContent = (listing.seller?.name || 'V').charAt(0).toUpperCase();
-
-        // Load existing chat history from localStorage
-        loadChatHistory(listingId);
-
-        chatModal.classList.add("show");
-        chatInput.focus();
-    };
-
-    function loadChatHistory(listingId) {
-        chatMessages.innerHTML = `<div style="text-align: center; font-size: 12px; color: #8b93a1; margin-bottom: 10px;">This conversation is secured by RentFlow.</div>`;
-        
-        let chats = {};
-        try {
-            chats = JSON.parse(localStorage.getItem('rentflow_chats')) || {};
-        } catch(e) {}
-
-        const thread = chats[listingId] || [];
-
-        thread.forEach(msg => {
-            appendMessageToUI(msg.text, msg.sender, msg.time);
-        });
-
-        scrollToBottom(chatMessages);
-    }
-
-    function handleChatSubmit(e) {
-        e.preventDefault();
-        const text = chatInput.value.trim();
-        if (!text) return;
-
-        const time = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-        
-        // 1. Append user message
-        appendMessageToUI(text, "user", time);
-        saveChatMessage(activeChatListingId, { text, sender: "user", time });
-        chatInput.value = "";
-        // Peer-to-peer chat simulation: we only save the sent message.
-        // The lender would reply from their own dashboard when they log in.
-    }
-
-    function appendMessageToUI(text, sender, time) {
-        const bubble = document.createElement("div");
-        bubble.className = `chat-bubble ${sender === "user" ? "sent" : "received"}`;
-        bubble.innerHTML = `${text}<span class="chat-time">${time}</span>`;
-        chatMessages.appendChild(bubble);
-        scrollToBottom(chatMessages);
-    }
-
-    function saveChatMessage(listingId, messageObj) {
-        let chats = {};
-        try {
-            chats = JSON.parse(localStorage.getItem('rentflow_chats')) || {};
-        } catch(e) {}
-
-        if (!chats[listingId]) chats[listingId] = [];
-        chats[listingId].push(messageObj);
-        
-        localStorage.setItem('rentflow_chats', JSON.stringify(chats));
-    }
-
-    function scrollToBottom(element) {
-        element.scrollTop = element.scrollHeight;
-    }
 
     // ========================================
     // 10. UTILITIES
@@ -530,7 +484,7 @@ document.addEventListener("DOMContentLoaded", () => {
     function checkProStatus() {
         try {
             const user = JSON.parse(localStorage.getItem('current_user'));
-            return user?.isPro === true;
+            return user?.isPro === true || user?.isPremium === true;
         } catch(e) {
             return false;
         }

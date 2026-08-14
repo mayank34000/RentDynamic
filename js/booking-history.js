@@ -206,9 +206,32 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
 
-        // Download Receipt (Mock)
+        // Download Receipt (PDF)
         document.getElementById("btn-download-receipt").addEventListener("click", () => {
-            alert("Downloading invoice PDF...");
+            const element = document.getElementById("receipt-content");
+            const itemName = document.getElementById("receipt-item").textContent.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+            const opt = {
+                margin:       10,
+                filename:     `rentflow_receipt_${itemName}.pdf`,
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2, backgroundColor: '#1a1d24' }, // matches dark theme if needed, or white if preferred. Wait, the modal card in RentFlow has dark bg (#1f2937). We'll let it capture naturally.
+                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+
+            const btn = document.getElementById("btn-download-receipt");
+            const originalText = btn.textContent;
+            btn.textContent = "Generating PDF...";
+            btn.disabled = true;
+
+            html2pdf().set(opt).from(element).save().then(() => {
+                btn.textContent = originalText;
+                btn.disabled = false;
+            }).catch(err => {
+                console.error("PDF generation error:", err);
+                btn.textContent = originalText;
+                btn.disabled = false;
+                alert("Failed to generate PDF.");
+            });
         });
     }
 

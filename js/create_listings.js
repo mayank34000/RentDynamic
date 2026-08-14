@@ -1,5 +1,12 @@
 document.addEventListener('DOMContentLoaded', () => {
 
+    // Redirect if not logged in
+    const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+    if (!isLoggedIn) {
+        window.location.href = "login.html";
+        return;
+    }
+
     let uploadedImages = [];
     let editingListingId = null;
 
@@ -230,7 +237,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     seller: {
                         name: sellerName,
                         phone: sellerPhone,
-                        city: sellerCity
+                        city: sellerCity,
+                        email: JSON.parse(localStorage.getItem('current_user'))?.useremail || 'admin@rentflow.com'
                     },
                     images: imagesList,
                     securityDeposit,
@@ -252,7 +260,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 seller: {
                     name: sellerName,
                     phone: sellerPhone,
-                    city: sellerCity
+                    city: sellerCity,
+                    email: JSON.parse(localStorage.getItem('current_user'))?.useremail || 'admin@rentflow.com'
                 },
                 images: imagesList,
                 securityDeposit,
@@ -292,7 +301,16 @@ document.addEventListener('DOMContentLoaded', () => {
         const countSpan = document.getElementById('total-listings-count');
         if (!grid) return;
 
-        const listings = getStoredListings();
+        let listings = getStoredListings();
+        
+        const currentUser = JSON.parse(localStorage.getItem('current_user'));
+        const userEmail = currentUser ? currentUser.useremail : '';
+        
+        listings = listings.filter(item => {
+            const sellerEmail = (item.seller && item.seller.email) ? item.seller.email : 'admin@rentflow.com';
+            return sellerEmail === userEmail;
+        });
+
         if (countSpan) countSpan.textContent = listings.length;
 
         if (listings.length === 0) {
@@ -378,16 +396,94 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function initSellerDetails() {
         const savedSeller = localStorage.getItem('RentFlow_sellerProfile');
+        let profile = null;
         if (savedSeller) {
             try {
-                const profile = JSON.parse(savedSeller);
-                if (sellerNameInput && profile.name) sellerNameInput.value = profile.name;
-                if (sellerPhoneInput && profile.phone) sellerPhoneInput.value = profile.phone;
-                if (sellerCityInput && profile.city) sellerCityInput.value = profile.city;
+                profile = JSON.parse(savedSeller);
             } catch (e) {
                 console.error('Error loading seller profile', e);
             }
         }
+        
+        // Fallback to logged-in user details if no custom seller profile has been saved
+        if (!profile || !profile.name) {
+            const currentUser = JSON.parse(localStorage.getItem('current_user'));
+            if (currentUser) {
+                profile = {
+                    name: currentUser.name || currentUser.username || '',
+                    phone: currentUser.userphone || '',
+                    city: currentUser.address || ''
+                };
+            }
+        }
+
+        if (profile) {
+            if (sellerNameInput && profile.name) sellerNameInput.value = profile.name;
+            if (sellerPhoneInput && profile.phone) sellerPhoneInput.value = profile.phone;
+            if (sellerCityInput && profile.city) sellerCityInput.value = profile.city;
+        }
+    }
+
+    // Set up API Product Sync functionality
+    const apiSyncBtn = document.getElementById('api-sync-btn');
+    if (apiSyncBtn) {
+        apiSyncBtn.addEventListener('click', async () => {
+            const originalHTML = apiSyncBtn.innerHTML;
+            apiSyncBtn.disabled = true;
+            apiSyncBtn.innerHTML = `
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="animation: spin 1s linear infinite;"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+                <span>Syncing API...</span>
+            `;
+            
+            // Add style for spinning animation inline to avoid editing index.css unnecessarily
+            if (!document.getElementById('api-spin-style')) {
+                const style = document.createElement('style');
+                style.id = 'api-spin-style';
+                style.innerHTML = `@keyframes spin { to { transform: rotate(360deg); } }`;
+                document.head.appendChild(style);
+            }
+
+            try {
+                const response = await fetch('js/products.json');
+                if (!response.ok) {
+                    throw new Error('API request failed');
+                }
+                const apiListings = await response.json();
+                
+                let existingListings = getStoredListings();
+                const existingIds = new Set(existingListings.map(item => item.id));
+                const newItems = apiListings.filter(item => !existingIds.has(item.id));
+                
+                if (newItems.length > 0) {
+                    // Prepend new listings
+                    existingListings = [...newItems, ...existingListings];
+                    localStorage.setItem('RentFlow_listings', JSON.stringify(existingListings));
+                    
+                    renderMyListingsDashboard();
+                    updateLivePreviewAndCalculator();
+                    alert(`Successfully fetched and added ${newItems.length} products from the central inventory API!`);
+                } else {
+                    alert('All central API products are already synchronized with your local listings.');
+                }
+                
+                apiSyncBtn.innerHTML = `
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                    <span>Synced!</span>
+                `;
+                apiSyncBtn.style.background = 'linear-gradient(135deg, #10b981, #059669)';
+                
+                setTimeout(() => {
+                    apiSyncBtn.innerHTML = originalHTML;
+                    apiSyncBtn.style.background = '';
+                    apiSyncBtn.disabled = false;
+                }, 3000);
+            } catch (error) {
+                console.error('API Sync Error:', error);
+                alert('Error syncing products from local API server: ' + error.message);
+                apiSyncBtn.innerHTML = originalHTML;
+                apiSyncBtn.disabled = false;
+            }
+        });
     }
 
     function getStoredListings() {

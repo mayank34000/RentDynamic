@@ -16,13 +16,18 @@ document.addEventListener('DOMContentLoaded', () => {
         if(authButtons) authButtons.style.display = 'none';
         if(userProfile) userProfile.style.display = 'flex';
         
-        // Set User Info (Removed "Hi, ")
-        if(profileName) profileName.innerText = currentUser.name.split(' ')[0];
+        // Set User Info safely
+        if(profileName) {
+            const nameToDisplay = currentUser.name || currentUser.username || 'User';
+            profileName.innerText = nameToDisplay.split(' ')[0];
+        }
 
         // Fetch Profile Image
         const savedImage = localStorage.getItem('profileImage');
         if (savedImage && navProfileImg) {
             navProfileImg.src = savedImage;
+        } else if (navProfileImg) {
+            navProfileImg.src = "assets/profile.png";
         }
 
         // Hide "Go Premium" if they already bought it
@@ -48,18 +53,56 @@ document.addEventListener('DOMContentLoaded', () => {
             window.location.href = 'index.html'; 
         });
     }
+
+    // 4. Hamburger Menu Toggle
+    const hamburger = document.getElementById('hamburger');
+    const mobileMenu = document.getElementById('mobile-menu');
+    if (hamburger && mobileMenu) {
+        hamburger.addEventListener('click', () => {
+            hamburger.classList.toggle('open');
+            mobileMenu.classList.toggle('open');
+        });
+    }
+
+    // 5. Dynamic About Page CTA buttons rendering
+    const aboutCtaButtons = document.getElementById('about-cta-buttons');
+    if (aboutCtaButtons) {
+        if (isLoggedIn && currentUser) {
+            aboutCtaButtons.innerHTML = `
+                <a href="profile.html" class="btn-primary">Go to Profile</a>
+                <a href="booking.html" class="btn-secondary">Explore Rentals</a>
+            `;
+        } else {
+            aboutCtaButtons.innerHTML = `
+                <a href="signup.html" class="btn-primary">Get Started Free</a>
+                <a href="login.html" class="btn-secondary">Log In</a>
+            `;
+        }
+    }
 });
 
 function handleExpiredPremium(currentUser) {
-    alert("Your RentFlow Premium subscription has expired. Please renew to continue accessing premium features.");
-    currentUser.isPremium = false;
-    localStorage.setItem('current_user', JSON.stringify(currentUser));
-    
-    let allUsers = JSON.parse(localStorage.getItem('user')) || [];
-    const userIndex = allUsers.findIndex(u => u.useremail === currentUser.useremail);
-    if (userIndex !== -1) {
-        allUsers[userIndex].isPremium = false;
-        localStorage.setItem('user', JSON.stringify(allUsers));
+    if (confirm("Your RentFlow Premium subscription has expired. Do you want to renew now to continue accessing premium features (like your phone number visibility)?")) {
+        currentUser.isPremium = false;
+        localStorage.setItem('current_user', JSON.stringify(currentUser));
+        
+        let allUsers = JSON.parse(localStorage.getItem('user')) || [];
+        const userIndex = allUsers.findIndex(u => u.useremail === currentUser.useremail);
+        if (userIndex !== -1) {
+            allUsers[userIndex].isPremium = false;
+            localStorage.setItem('user', JSON.stringify(allUsers));
+        }
+        window.location.href = "premium.html";
+    } else {
+        currentUser.isPremium = false;
+        localStorage.setItem('current_user', JSON.stringify(currentUser));
+        
+        let allUsers = JSON.parse(localStorage.getItem('user')) || [];
+        const userIndex = allUsers.findIndex(u => u.useremail === currentUser.useremail);
+        if (userIndex !== -1) {
+            allUsers[userIndex].isPremium = false;
+            localStorage.setItem('user', JSON.stringify(allUsers));
+        }
+        window.location.reload();
     }
-    window.location.reload();
 }

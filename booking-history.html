@@ -91,30 +91,32 @@
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
             </button>
             
-            <h3 class="modal-title">Rental Receipt</h3>
-            
-            <div class="receipt-header">
-                <div class="receipt-item-name" id="receipt-item">Item Name</div>
-                <div class="receipt-lender" id="receipt-lender">Lender: Name</div>
-                <div class="receipt-lender" id="receipt-dates" style="margin-top: 4px;">Dates</div>
-            </div>
-            
-            <div class="receipt-breakdown">
-                <div class="receipt-row">
-                    <span>Base Rate (<span id="receipt-rate"></span>/day) × <span id="receipt-duration"></span> days</span>
-                    <span id="receipt-subtotal">₹0</span>
+            <div id="receipt-content">
+                <h3 class="modal-title">Rental Receipt</h3>
+                
+                <div class="receipt-header">
+                    <div class="receipt-item-name" id="receipt-item">Item Name</div>
+                    <div class="receipt-lender" id="receipt-lender">Lender: Name</div>
+                    <div class="receipt-lender" id="receipt-dates" style="margin-top: 4px;">Dates</div>
                 </div>
-                <div class="receipt-row">
-                    <span>Security Deposit (Refundable)</span>
-                    <span id="receipt-deposit">₹0</span>
-                </div>
-                <div class="receipt-row">
-                    <span>Platform Fee</span>
-                    <span style="color: #10b981;">₹0 (Free)</span>
-                </div>
-                <div class="receipt-row total-row">
-                    <span>Grand Total</span>
-                    <span id="receipt-total">₹0</span>
+                
+                <div class="receipt-breakdown">
+                    <div class="receipt-row">
+                        <span>Base Rate (<span id="receipt-rate"></span>/day) × <span id="receipt-duration"></span> days</span>
+                        <span id="receipt-subtotal">₹0</span>
+                    </div>
+                    <div class="receipt-row">
+                        <span>Security Deposit (Refundable)</span>
+                        <span id="receipt-deposit">₹0</span>
+                    </div>
+                    <div class="receipt-row">
+                        <span>Platform Fee</span>
+                        <span style="color: #10b981;">₹0 (Free)</span>
+                    </div>
+                    <div class="receipt-row total-row">
+                        <span>Grand Total</span>
+                        <span id="receipt-total">₹0</span>
+                    </div>
                 </div>
             </div>
             
@@ -122,6 +124,8 @@
         </div>
     </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="js/booking-history.js"></script>
+<script src="js/navbar-scroll.js"></script>
 </body>
 </html>

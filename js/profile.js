@@ -1,1142 +1,276 @@
-let handlelogout = () => {
-    localStorage.removeItem("token");
+// ========================================
+// GLOBAL MODAL & AUTH FUNCTIONS
+// ========================================
+function handlelogout() {
+    localStorage.removeItem("isLoggedIn");
+    localStorage.removeItem("current_user");
     window.location.href = "login.html";
-
 }
 
-// ================================
-// SETTINGS POPUP
-// ================================
+function openSettings() { document.getElementById("settingsOverlay").classList.add("show"); }
+function closeSettings() { document.getElementById("settingsOverlay").classList.remove("show"); }
+function openSecurity() { document.getElementById("securityOverlay").classList.add("show"); }
+function closeSecurity() { document.getElementById("securityOverlay").classList.remove("show"); }
 
-const settingsBtn = document.getElementById("settingsBtn");
+function showToast(message) {
+    const toast = document.getElementById("toast");
+    document.getElementById("toastMsg").textContent = message;
+    toast.style.display = "flex";
+    toast.classList.add("show");
+    setTimeout(() => {
+        toast.classList.remove("show");
+        toast.style.display = "none";
+    }, 3000);
+}
 
-const settingsCloseBtn = document.getElementById("settingsCloseBtn");
-const settingsCancelBtn = document.getElementById("settingsCancelBtn");
-
-
-// ================================
-// SETTINGS POPUP
-// ================================
-
-const settingsOverlay =
-    document.getElementById("settingsOverlay");
+// ========================================
+// MAIN APPLICATION LOGIC
+// ========================================
+document.addEventListener("DOMContentLoaded", () => {
     
-
-function openSettings() {
-    settingsOverlay.classList.add("show");
-}
-
-function closeSettings() {
-    settingsOverlay.classList.remove("show");
-}
-
-
-// ================================
-// SECURITY POPUP
-// ================================
-
-const securityOverlay =
-    document.getElementById("securityOverlay");
-
-
-// OPEN SECURITY
-function openSecurity() {
-
-    securityOverlay.classList.add("show");
-
-}
-
-
-// CLOSE SECURITY
-function closeSecurity() {
-
-    securityOverlay.classList.remove("show");
-
-}
-
-// ================================
-// APPEARANCE / THEME
-// ================================
-
-const themeSelect =
-    document.getElementById("themeSelect");
-
-
-// ================================
-// APPLY THEME
-// ================================
-
-function applyTheme(theme) {
-
-    if (theme === "light") {
-
-        document.body.classList.add("light-theme");
-
-    } else {
-
-        document.body.classList.remove("light-theme");
-
-    }
-}
-
-
-// ================================
-// LOAD SAVED THEME
-// ================================
-
-const savedTheme =
-    localStorage.getItem("theme") || "dark";
-
-
-// Set dropdown to saved theme
-themeSelect.value = savedTheme;
-
-
-// Apply saved theme
-applyTheme(savedTheme);
-
-
-// ================================
-// CHANGE THEME
-// ================================
-
-themeSelect.addEventListener("change", function () {
-
-    const selectedTheme =
-        themeSelect.value;
-
-
-    // Apply immediately
-    applyTheme(selectedTheme);
-
-
-    // Save for future page loads
-    localStorage.setItem(
-        "theme",
-        selectedTheme
-    );
-
-});
-
-// ================================
-// DELETE ACCOUNT
-// ================================
-
-const deleteAccountBtn =
-    document.getElementById("deleteAccountBtn");
-
-
-deleteAccountBtn.addEventListener("click", function () {
-
-    const confirmDelete = confirm(
-        "Are you sure you want to delete your RentFlow account?\n\n" +
-        "This action cannot be undone."
-    );
-
-    if (confirmDelete) {
-
-        // Remove stored account information
-        localStorage.removeItem("token");
-        localStorage.removeItem("user");
-        localStorage.removeItem("email");
-        localStorage.removeItem("name");
-        localStorage.removeItem("phone");
-        localStorage.removeItem("theme");
-
-        // Redirect to signup page
-        window.location.href = "signup.html";
-    }
-
-});
-
-
-// ================================
-// FETCH CURRENT USER PROFILE
-// ================================
-
-function loadProfile() {
-
-    // Get currently logged-in user
-    const currentUser =
-        localStorage.getItem("current_user");
-
-    // Check if user exists
-    if (!currentUser) {
-        console.log("No current user found in localStorage.");
+    // 1. AUTHENTICATION & DATA LOAD
+    const currentUserData = localStorage.getItem("current_user");
+    if (!currentUserData) {
+        window.location.href = "login.html";
         return;
     }
-
-    // Convert JSON string into JavaScript object
-    const user = JSON.parse(currentUser);
-
-    console.log("Current User:", user);
-
-
-    // ================================
-    // BASIC INFORMATION
-    // ================================
-
-    const fullName =
-        document.getElementById("fullName");
-
-    const email =
-        document.getElementById("email");
-
-    const phone =
-        document.getElementById("phone");
-
-
-    // Full Name
-    if (fullName) {
-        fullName.value = user.username || "";
-    }
-
-
-    // Email
-    if (email) {
-        email.value = user.useremail || "";
-    }
-
-
-    // Phone
-    if (phone) {
-        phone.value = user.userphone || "";
-    }
-
-
-    // ================================
-    // ADDITIONAL PROFILE INFORMATION
-    // ================================
-
-    const dob =
-        document.getElementById("dob");
-
-    const gender =
-        document.getElementById("gender");
-
-    const city =
-        document.getElementById("city");
-
-    const address =
-        document.getElementById("address");
-
-    const state =
-        document.getElementById("state");
-
-    const country =
-        document.getElementById("country");
-
-    const pin =
-        document.getElementById("pin");
-
-    const bio =
-        document.getElementById("bio");
-
-
-    if (dob) {
-        dob.value = user.dob || "";
-    }
-
-    if (gender) {
-        gender.value = user.gender || "";
-    }
-
-    if (city) {
-        city.value = user.city || "";
-    }
-
-    if (address) {
-        address.value = user.address || "";
-    }
-
-    if (state) {
-        state.value = user.state || "";
-    }
-
-    if (country) {
-        country.value = user.country || "";
-    }
-
-    if (pin) {
-        pin.value = user.pin || "";
-    }
-
-    if (bio) {
-        bio.value = user.bio || "";
-    }
-}
-
-
-// ================================
-// LOAD WHEN PAGE IS READY
-// ================================
-
-document.addEventListener(
-    "DOMContentLoaded",
-    loadProfile
-);
-
-// ================================
-// PROFILE IMAGE
-// ================================
-
-const DEFAULT_PROFILE_IMAGE =
-    "assets/profile.png"; // <-- put your image path here
-
-
-// ================================
-// LOAD PROFILE IMAGE
-// ================================
-
-function loadProfileImage() {
-
-    const profileImage =
-        document.getElementById("profileImage");
-
-    if (!profileImage) {
-        return;
-    }
-
-
-    // Check if user has uploaded an image
-    const savedImage =
-        localStorage.getItem("profileImage");
-
-
-    if (savedImage) {
-
-        // User uploaded an image
-        profileImage.src = savedImage;
-
-    } else {
-
-        // No image uploaded → use default
-        profileImage.src = DEFAULT_PROFILE_IMAGE;
-
-    }
-}
-
-
-// ================================
-// UPLOAD PROFILE IMAGE
-// ================================
-
-function setupProfileImageUpload() {
-
-    const profileImageInput =
-        document.getElementById("profileImageInput");
-
-    const profileImage =
-        document.getElementById("profileImage");
-
-
-    if (!profileImageInput || !profileImage) {
-        return;
-    }
-
-
-    profileImageInput.addEventListener(
-        "change",
-        function () {
-
-            const file = this.files[0];
-
-
-            if (!file) {
-                return;
+    
+    const user = JSON.parse(currentUserData);
+    
+    // Fill Display Information
+    document.getElementById("profileNameDisplay").textContent = user.username || user.name || "RentFlow User";
+    document.getElementById("profileEmailDisplay").textContent = user.useremail || "";
+    
+    // Premium Badge Check with Expiry Date
+    if (user.isPremium) {
+        let metaHtml = `<span style="color: #10b981; font-weight: 700;">👑 RentFlow Premium Active</span>`;
+        
+        if (user.premiumExpiryDate) {
+            const expiry = new Date(user.premiumExpiryDate);
+            const now = new Date();
+            
+            if (now > expiry) {
+                user.isPremium = false;
+                metaHtml = `<span style="color: #ef4444; font-weight: 700;">Premium Expired</span><br>
+                            <a href="premium.html" style="color: white; background: #2563eb; padding: 5px 12px; border-radius: 4px; display: inline-block; margin-top: 10px; text-decoration: none; font-size: 14px;">Renew Premium</a>`;
+            } else {
+                const options = { day: 'numeric', month: 'short', year: 'numeric' };
+                const formattedDate = expiry.toLocaleDateString('en-IN', options);
+                
+                metaHtml += `<br><span style="font-size: 0.85rem; color: #94a3b8; display: block; margin-top: 6px;">Valid till: ${formattedDate}</span>`;
             }
-
-
-            // Make sure the selected file is an image
-            if (!file.type.startsWith("image/")) {
-
-                alert("Please select a valid image.");
-
-                return;
-            }
-
-
-            const reader =
-                new FileReader();
-
-
-            reader.onload = function (event) {
-
-                const imageData =
-                    event.target.result;
-
-
-                // Show uploaded image
-                profileImage.src =
-                    imageData;
-
-
-                // Save uploaded image
-                localStorage.setItem(
-                    "profileImage",
-                    imageData
-                );
-
-            };
-
-
-            reader.readAsDataURL(file);
-
         }
-    );
-}
-
-
-// ================================
-// PAGE LOAD
-// ================================
-
-document.addEventListener(
-    "DOMContentLoaded",
-    function () {
-
-        loadProfileImage();
-
-        setupProfileImageUpload();
-
+        
+        document.getElementById("profileMetaDisplay").innerHTML = metaHtml;
     }
-);
 
-document.addEventListener("DOMContentLoaded", function () {
+    // Fill Form Inputs (Matching data correctly)
+    document.getElementById("fullName").value = user.username || user.name || "";
+    document.getElementById("email").value = user.useremail || "";
+    
+    const phoneInput = document.getElementById("phone");
+    phoneInput.value = user.userphone || "";
+    phoneInput.type = "tel";
+    phoneInput.dataset.locked = "false";
 
-    const editToggleBtn =
-        document.getElementById("editToggleBtn");
+    document.getElementById("dob").value = user.dob || "";
+    document.getElementById("gender").value = user.gender || "";
+    document.getElementById("address").value = user.address || "";
+    document.getElementById("bio").value = user.bio || "";
 
-    const editToggleLabel =
-        document.getElementById("editToggleLabel");
+    // 2. IMAGE UPLOAD LOGIC
+    const profileImage = document.getElementById("profileImage");
+    const profileImageInput = document.getElementById("profileImageInput");
+    const savedImage = localStorage.getItem("profileImage");
+    
+    if (savedImage) {
+        profileImage.src = savedImage;
+    } else {
+        profileImage.src = "assets/profile.png"; // Default fallback
+    }
 
-    const saveBtn =
-        document.getElementById("saveBtn");
+    profileImageInput.addEventListener("change", function () {
+        const file = this.files[0];
+        if (!file || !file.type.startsWith("image/")) return;
 
+        const reader = new FileReader();
+        reader.onload = function (event) {
+            const imageData = event.target.result;
+            profileImage.src = imageData;
+            localStorage.setItem("profileImage", imageData);
+        };
+        reader.readAsDataURL(file);
+    });
 
-    const profileFields = [
-        "fullName",
-        "email",
-        "phone",
-        "dob",
-        "gender",
-        "city",
-        "address",
-        "state",
-        "country",
-        "pin",
-        "bio"
-    ];
+    // 3. EDIT TOGGLE LOGIC
+    const editToggleBtn = document.getElementById("editToggleBtn");
+    const editToggleLabel = document.getElementById("editToggleLabel");
+    const saveBtn = document.getElementById("saveBtn");
+    const locationBtn = document.getElementById("getLocationBtn");
+    
+    // Get all inputs except email (usually unchangeable)
+    const formFields = document.querySelectorAll("#profileForm input:not(#email), #profileForm select, #profileForm textarea");
 
+    editToggleBtn.addEventListener("click", () => {
+        const isEditing = editToggleBtn.classList.contains("editing");
 
-    editToggleBtn.addEventListener("click", function () {
-
-        console.log("Edit clicked");
-
-
-        profileFields.forEach(function (id) {
-
-            const field =
-                document.getElementById(id);
-
-            if (field) {
-
-                field.disabled = false;
-
-                // In case CSS/pointer-events is blocking it
-                field.style.pointerEvents = "auto";
-                field.style.opacity = "1";
-                field.removeAttribute("readonly");
-
-            }
-
-        });
-
-
-        editToggleLabel.textContent = "Editing";
-
-        editToggleBtn.classList.add("editing");
-
-
-        if (saveBtn) {
+        if (isEditing) {
+            // Cancel Editing
+            formFields.forEach(field => field.disabled = true);
+            locationBtn.disabled = true;
+            editToggleBtn.classList.remove("editing");
+            editToggleLabel.textContent = "Edit";
+            saveBtn.style.display = "none";
+        } else {
+            // Start Editing
+            formFields.forEach(field => {
+                if (field.dataset.locked !== "true") {
+                    field.disabled = false;
+                }
+            });
+            locationBtn.disabled = false;
+            editToggleBtn.classList.add("editing");
+            editToggleLabel.textContent = "Cancel";
             saveBtn.style.display = "flex";
         }
-
     });
 
-});
+    // 4. SAVE PROFILE LOGIC
+    document.getElementById("profileForm").addEventListener("submit", (e) => {
+        e.preventDefault();
 
-// ================================
-// SAVE PROFILE CHANGES
-// ================================
+        const oldEmail = user.useremail;
 
-document.addEventListener("DOMContentLoaded", function () {
+        // Update User Object
+        const newName = document.getElementById("fullName").value.trim();
+        user.username = newName;
+        user.name = newName;
+        user.userphone = document.getElementById("phone").value.trim();
 
-    const profileForm =
-        document.getElementById("profileForm");
+        user.dob = document.getElementById("dob").value;
+        user.gender = document.getElementById("gender").value;
+        user.address = document.getElementById("address").value.trim();
+        user.bio = document.getElementById("bio").value.trim();
 
-    const saveBtn =
-        document.getElementById("saveBtn");
+        // Save Current User
+        localStorage.setItem("current_user", JSON.stringify(user));
 
-
-    if (!profileForm || !saveBtn) {
-        console.log("Profile form or Save button not found.");
-        return;
-    }
-
-
-    // ================================
-    // SAVE BUTTON
-    // ================================
-
-    profileForm.addEventListener("submit", function (event) {
-
-        event.preventDefault();
-
-
-        // Get currently logged-in user
-        const currentUserData =
-            localStorage.getItem("current_user");
-
-
-        if (!currentUserData) {
-
-            alert("User information not found.");
-
-            return;
-
+        // Update Main Users Array
+        let allUsers = JSON.parse(localStorage.getItem("user")) || [];
+        const userIndex = allUsers.findIndex(u => u.useremail === oldEmail);
+        if (userIndex !== -1) {
+            allUsers[userIndex] = user;
+            localStorage.setItem("user", JSON.stringify(allUsers));
         }
 
-
-        // Convert JSON into object
-        const user =
-            JSON.parse(currentUserData);
-
-
-        // Store old email BEFORE changing it
-        const oldEmail =
-            user.useremail;
-
-
-        // ================================
-        // GET UPDATED VALUES
-        // ================================
-
-        user.username =
-            document.getElementById("fullName").value.trim();
-
-        user.useremail =
-            document.getElementById("email").value.trim();
-
-        user.userphone =
-            document.getElementById("phone").value.trim();
-
-        user.dob =
-            document.getElementById("dob").value.trim();
-
-        user.gender =
-            document.getElementById("gender").value;
-
-        user.city =
-            document.getElementById("city").value.trim();
-
-        user.address =
-            document.getElementById("address").value.trim();
-
-        user.state =
-            document.getElementById("state").value;
-
-        user.country =
-            document.getElementById("country").value;
-
-        user.pin =
-            document.getElementById("pin").value.trim();
-
-        user.bio =
-            document.getElementById("bio").value.trim();
-
-
-        // ================================
-        // SAVE CURRENT USER
-        // ================================
-
-        localStorage.setItem(
-            "current_user",
-            JSON.stringify(user)
-        );
-
-
-        // ================================
-        // UPDATE USER ARRAY
-        // ================================
-
-        const usersData =
-            localStorage.getItem("user");
-
-
-        if (usersData) {
-
-            const users =
-                JSON.parse(usersData);
-
-
-            const userIndex =
-                users.findIndex(function (storedUser) {
-
-                    return storedUser.useremail === oldEmail;
-
-                });
-
-
-            if (userIndex !== -1) {
-
-                users[userIndex] = user;
-
-                localStorage.setItem(
-                    "user",
-                    JSON.stringify(users)
-                );
-
-            }
-
-        }
-
-
-        // ================================
-        // UPDATE PROFILE CARD
-        // ================================
-
-        const profileName =
-            document.getElementById("profileName");
-
-        const profileEmail =
-            document.getElementById("profileEmail");
-
-
-        if (profileName) {
-
-            profileName.textContent =
-                user.username || "";
-
-        }
-
-
-        if (profileEmail) {
-
-            profileEmail.textContent =
-                user.useremail || "";
-
-        }
-
-
-        // ================================
-        // DISABLE FIELDS AFTER SAVING
-        // ================================
-
-        const profileFields = [
-            "fullName",
-            "email",
-            "phone",
-            "dob",
-            "gender",
-            "city",
-            "address",
-            "state",
-            "country",
-            "pin",
-            "bio"
-        ];
-
-
-        profileFields.forEach(function (id) {
-
-            const field =
-                document.getElementById(id);
-
-            if (field) {
-                field.disabled = true;
-            }
-
-        });
-
-
-        // ================================
-        // CHANGE EDIT BUTTON BACK
-        // ================================
-
-        const editToggleBtn =
-            document.getElementById("editToggleBtn");
-
-        const editToggleLabel =
-            document.getElementById("editToggleLabel");
-
-
-        if (editToggleBtn) {
-
-            editToggleBtn.classList.remove("editing");
-
-        }
-
-
-        if (editToggleLabel) {
-
-            editToggleLabel.textContent = "Edit";
-
-        }
-
-
-        // Hide Save button
-        saveBtn.style.display = "none";
-
-
-        alert("Profile updated successfully!");
-
+        // Update UI & Lock Form
+        document.getElementById("profileNameDisplay").textContent = user.username;
+        editToggleBtn.click(); // Programmatically click to cancel/lock
+        showToast("Profile updated successfully!");
     });
 
-});
-
-
-// ========================================
-// CURRENT LOCATION - OPENSTREETMAP
-// ========================================
-
-document.addEventListener("DOMContentLoaded", function () {
-
-    const locationBtn =
-        document.getElementById("getLocationBtn");
-
-
-    if (!locationBtn) {
-        console.error("Location button not found!");
-        return;
-    }
-
-
-    locationBtn.addEventListener("click", function () {
-
-        console.log("Getting current location...");
-
-
+    // 5. OPENSTREETMAP LOCATION LOGIC
+    locationBtn.addEventListener("click", () => {
         if (!navigator.geolocation) {
-
-            alert(
-                "Geolocation is not supported by your browser."
-            );
-
+            alert("Geolocation is not supported by your browser.");
             return;
         }
 
-
-        locationBtn.textContent =
-            "📍 Getting Location...";
-
-
-        navigator.geolocation.getCurrentPosition(
-
-            async function (position) {
-
-                const latitude =
-                    position.coords.latitude;
-
-                const longitude =
-                    position.coords.longitude;
-
-
-                console.log("Latitude:", latitude);
-                console.log("Longitude:", longitude);
-
-
-                // Save coordinates
-                localStorage.setItem(
-                    "userLatitude",
-                    latitude
-                );
-
-                localStorage.setItem(
-                    "userLongitude",
-                    longitude
-                );
-
-
-                try {
-
-                    // ========================================
-                    // OPENSTREETMAP REVERSE GEOCODING
-                    // ========================================
-
-                    const url =
-                        `https://nominatim.openstreetmap.org/reverse?` +
-                        `format=json&` +
-                        `lat=${latitude}&` +
-                        `lon=${longitude}&` +
-                        `zoom=18&` +
-                        `addressdetails=1`;
-
-
-                    const response =
-                        await fetch(url, {
-                            headers: {
-                                "Accept": "application/json"
-                            }
-                        });
-
-
-                    if (!response.ok) {
-
-                        throw new Error(
-                            "Nominatim request failed"
-                        );
-
-                    }
-
-
-                    const data =
-                        await response.json();
-
-
-                    console.log(
-                        "OpenStreetMap response:",
-                        data
-                    );
-
-
-                    if (!data.address) {
-
-                        throw new Error(
-                            "No address information found"
-                        );
-
-                    }
-
-
-                    const addressData =
-                        data.address;
-
-
-                    // ========================================
-                    // GET ADDRESS
-                    // ========================================
-
-                    const fullAddress =
-                        data.display_name || "";
-
-
-                    // ========================================
-                    // GET CITY
-                    // ========================================
-
-                    const city =
-                        addressData.city ||
-                        addressData.town ||
-                        addressData.village ||
-                        addressData.municipality ||
-                        "";
-
-
-                    // ========================================
-                    // GET STATE
-                    // ========================================
-
-                    const state =
-                        addressData.state || "";
-
-
-                    // ========================================
-                    // GET COUNTRY
-                    // ========================================
-
-                    const country =
-                        addressData.country || "";
-
-
-                    // ========================================
-                    // GET PIN
-                    // ========================================
-
-                    const pin =
-                        addressData.postcode || "";
-
-
-                    console.log(
-                        "Address:",
-                        fullAddress
-                    );
-
-                    console.log(
-                        "City:",
-                        city
-                    );
-
-                    console.log(
-                        "State:",
-                        state
-                    );
-
-                    console.log(
-                        "Country:",
-                        country
-                    );
-
-                    console.log(
-                        "PIN:",
-                        pin
-                    );
-
-
-                    // ========================================
-                    // FILL ADDRESS
-                    // ========================================
-
-                    const addressInput =
-                        document.getElementById("address");
-
-
-                    if (addressInput) {
-
-                        addressInput.value =
-                            fullAddress;
-
-                    }
-
-
-                    // ========================================
-                    // FILL CITY
-                    // ========================================
-
-                    const cityInput =
-                        document.getElementById("city");
-
-
-                    if (cityInput) {
-
-                        cityInput.value =
-                            city;
-
-                    }
-
-
-                    // ========================================
-                    // FILL STATE
-                    // ========================================
-
-                    setSelectValue(
-                        "state",
-                        state
-                    );
-
-
-                    // ========================================
-                    // FILL COUNTRY
-                    // ========================================
-
-                    setSelectValue(
-                        "country",
-                        country
-                    );
-
-
-                    // ========================================
-                    // FILL PIN
-                    // ========================================
-
-                    const pinInput =
-                        document.getElementById("pin");
-
-
-                    if (pinInput) {
-
-                        pinInput.value =
-                            pin;
-
-                    }
-
-
-                    // ========================================
-                    // SAVE LOCATION
-                    // ========================================
-
-                    localStorage.setItem(
-                        "address",
-                        fullAddress
-                    );
-
-                    localStorage.setItem(
-                        "city",
-                        city
-                    );
-
-                    localStorage.setItem(
-                        "state",
-                        state
-                    );
-
-                    localStorage.setItem(
-                        "country",
-                        country
-                    );
-
-                    localStorage.setItem(
-                        "pin",
-                        pin
-                    );
-
-
-                    // ========================================
-                    // SUCCESS
-                    // ========================================
-
-                    locationBtn.textContent =
-                        "✓ Location Found";
-
-
-                    console.log(
-                        "Location successfully filled!"
-                    );
-
+        locationBtn.textContent = "📍 Getting Location...";
+
+        navigator.geolocation.getCurrentPosition(async (position) => {
+            const lat = position.coords.latitude;
+            const lon = position.coords.longitude;
+
+            try {
+                const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=18&addressdetails=1`;
+                const response = await fetch(url, { headers: { "Accept": "application/json" } });
+                
+                if (!response.ok) throw new Error("Request failed");
+                const data = await response.json();
+                
+                if (data.display_name) {
+                    document.getElementById("address").value = data.display_name;
+                    locationBtn.textContent = "✓ Location Found";
                 }
-
-
-                catch (error) {
-
-                    console.error(
-                        "Location conversion error:",
-                        error
-                    );
-
-
-                    locationBtn.textContent =
-                        "📍 Use Current Location";
-
-
-                    alert(
-                        "Could not find your address. Please try again."
-                    );
-
-                }
-
-            },
-
-
-            function (error) {
-
-                console.error(
-                    "GPS Error:",
-                    error
-                );
-
-
-                locationBtn.textContent =
-                    "📍 Use Current Location";
-
-
-                if (error.code === 1) {
-
-                    alert(
-                        "Location permission denied. Please allow location access."
-                    );
-
-                }
-
-                else if (error.code === 2) {
-
-                    alert(
-                        "Your location could not be determined."
-                    );
-
-                }
-
-                else if (error.code === 3) {
-
-                    alert(
-                        "Location request timed out."
-                    );
-
-                }
-
-                else {
-
-                    alert(
-                        "Unable to get your location."
-                    );
-
-                }
-
-            },
-
-            {
-                enableHighAccuracy: true,
-                timeout: 15000,
-                maximumAge: 0
+            } catch (error) {
+                console.error("Location Error:", error);
+                locationBtn.textContent = "📍 Try Again";
+                alert("Could not fetch address. Please enter manually.");
             }
-
-        );
-
+        }, (error) => {
+            locationBtn.textContent = "📍 Use Current Location";
+            alert("Location access denied or unavailable.");
+        });
     });
 
-});
+    // 6. DELETE ACCOUNT LOGIC
+    document.getElementById("deleteAccountBtn").addEventListener("click", () => {
+        if (confirm("Are you sure you want to delete your RentFlow account? This cannot be undone.")) {
+            const emailToDelete = user.useremail;
+            
+            // Remove from main array
+            let allUsers = JSON.parse(localStorage.getItem("user")) || [];
+            allUsers = allUsers.filter(u => u.useremail !== emailToDelete);
+            localStorage.setItem("user", JSON.stringify(allUsers));
+            
+            // Clear session
+            localStorage.removeItem("isLoggedIn");
+            localStorage.removeItem("current_user");
+            window.location.href = "signup.html";
+        }
+    });
 
+    // 7. THEME LOGIC
+    const themeSelect = document.getElementById("themeSelect");
+    const applyTheme = (theme) => {
+        if (theme === "light") document.body.classList.add("light-theme");
+        else document.body.classList.remove("light-theme");
+    };
 
-// ========================================
-// SET SELECT VALUE
-// ========================================
-
-function setSelectValue(
-    elementId,
-    value
-) {
-
-    const select =
-        document.getElementById(elementId);
-
-
-    if (!select || !value) {
-        return;
+    const savedTheme = localStorage.getItem("theme") || "dark";
+    if (themeSelect) {
+        themeSelect.value = savedTheme;
+        themeSelect.addEventListener("change", function () {
+            applyTheme(this.value);
+            localStorage.setItem("theme", this.value);
+        });
     }
+    applyTheme(savedTheme);
 
+    // 8. NOTIFICATIONS
+    const bellBtn = document.getElementById("bellBtn");
+    if (bellBtn) {
+        // Check for notifications
+        let notifications = [];
+        try {
+            notifications = JSON.parse(localStorage.getItem('rentflow_notifications')) || [];
+        } catch(e) {}
 
-    let optionExists = false;
-
-
-    for (
-        let i = 0;
-        i < select.options.length;
-        i++
-    ) {
-
-        if (
-            select.options[i].value === value
-        ) {
-
-            optionExists = true;
-            break;
-
+        const myNotifications = notifications.filter(n => n.recipientName === user.name && !n.read);
+        const badgeDot = bellBtn.querySelector('.badge-dot');
+        
+        if (myNotifications.length > 0) {
+            if (badgeDot) badgeDot.style.display = 'block';
+        } else {
+            if (badgeDot) badgeDot.style.display = 'none';
         }
 
+        bellBtn.addEventListener('click', () => {
+            if (myNotifications.length > 0) {
+                let msgs = myNotifications.map(n => n.message).join('\n\n');
+                alert("You have new notifications:\n\n" + msgs);
+                
+                // Mark as read
+                myNotifications.forEach(n => n.read = true);
+                localStorage.setItem('rentflow_notifications', JSON.stringify(notifications));
+                if (badgeDot) badgeDot.style.display = 'none';
+                
+                // Refresh list
+                myNotifications.length = 0;
+            } else {
+                alert("You have no new notifications.");
+            }
+        });
     }
-
-
-    // Add new option if necessary
-    if (!optionExists) {
-
-        const option =
-            document.createElement("option");
-
-
-        option.value =
-            value;
-
-        option.textContent =
-            value;
-
-
-        select.appendChild(option);
-
-    }
-
-
-    select.value =
-        value;
-
-}
-
-
+});

@@ -1,5 +1,5 @@
 /* ============================================================
-   RentIQ - Feedback Styles
+   RentFlow - Feedback Styles
    Design Language: Dark glassmorphism matching index.css
    ============================================================ */
 
@@ -48,16 +48,26 @@ body {
 .navbar {
     position: sticky;
     top: 0;
-    z-index: 100;
+    z-index: 1000;
+    width: calc(100% - 48px);
+    max-width: 1200px;
+    margin: 0 auto;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 16px 40px;
-    background: rgba(5, 10, 24, 0.92);
+    padding: 24px 40px;
+    background: rgba(5, 10, 24, 0.72);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     border-bottom: 1px solid var(--border, rgba(255, 255, 255, 0.08));
-    transition: background var(--transition, 0.25s ease);
+    border-radius: 0 0 18px 18px;
+    transition: background var(--transition, 0.25s ease), padding var(--transition, 0.25s ease), border-color var(--transition, 0.25s ease);
+}
+
+.navbar.scrolled {
+    background: rgba(5, 10, 24, 0.94);
+    border-color: rgba(255, 255, 255, 0.12);
+    padding-block: 16px;
 }
 
 .navbar-brand {
@@ -69,14 +79,18 @@ body {
     letter-spacing: -1px;
 }
 
-.navbar-brand span {
+.navbar-brand .brand-rent {
+    color: var(--text-primary, #ffffff);
+}
+
+.navbar-brand .brand-flow {
     color: var(--accent-blue-bright, #3b82f6);
 }
 
 .navbar-links {
     display: flex;
     align-items: center;
-    gap: 16px;
+    gap: 32px;
     list-style: none;
 }
 
@@ -85,19 +99,34 @@ body {
     text-decoration: none;
     font-size: 14px;
     font-weight: 600;
-    padding: 9px 18px;
-    border-radius: 10px;
-    transition: color 0.25s, background 0.25s;
+    padding: 0;
+    transition: color 0.25s;
+    position: relative;
+}
+
+.navbar-links a::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: -6px;
+    width: 0;
+    height: 2px;
+    background: var(--accent-blue-bright, #3b82f6);
+    border-radius: 999px;
+    transition: width 0.25s;
 }
 
 .navbar-links a:hover {
     color: var(--text-primary, #ffffff);
-    background: rgba(255, 255, 255, 0.06);
+}
+
+.navbar-links a:hover::after,
+.navbar-links a.active::after {
+    width: 100%;
 }
 
 .navbar-links a.active {
-    background: rgba(59, 130, 246, 0.12);
-    color: var(--accent-blue-light, #60a5fa);
+    color: var(--text-primary, #ffffff);
 }
 
 .navbar-links .logout-link {
@@ -105,18 +134,36 @@ body {
 }
 
 .navbar-links .logout-link:hover {
-    background: rgba(248, 113, 113, 0.1);
     color: #fca5a5;
 }
 
 .menu-toggle {
     display: none;
-    background: none;
+    flex-direction: column;
+    gap: 5px;
+    background: transparent;
     border: none;
-    color: var(--text-primary, #ffffff);
-    font-size: 24px;
     cursor: pointer;
-    padding: 4px;
+    padding: 6px;
+}
+
+.menu-toggle span {
+    display: block;
+    width: 24px;
+    height: 2px;
+    background: var(--text-secondary, #94a3b8);
+    border-radius: 2px;
+    transition: transform 0.25s, opacity 0.25s, background 0.25s;
+}
+
+.menu-toggle:hover span,
+.menu-toggle.open span {
+    background: var(--text-primary, #ffffff);
+}
+
+.menu-toggle.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+.menu-toggle.open span:nth-child(2) { opacity: 0; }
+.menu-toggle.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
 }
 
 /* ---------- Feedback Page Layout ---------- */
@@ -184,6 +231,25 @@ body {
 /* ---------- Form Card ---------- */
 .form-card {
     padding: 40px;
+    position: relative;
+    overflow: hidden;
+}
+
+.form-card::before,
+.feedback-list-card::before {
+    content: '';
+    display: block;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent-blue-bright, #3b82f6), transparent);
+    opacity: 0.8;
+}
+
+.form-card::before {
+    margin: -40px -40px 32px;
+}
+
+.feedback-list-card::before {
+    margin: -32px -32px 28px;
 }
 
 .form-group {
@@ -265,6 +331,8 @@ select.form-control option {
 .star-rating {
     display: flex;
     gap: 8px;
+    min-height: 42px;
+    align-items: center;
 }
 
 .star {
@@ -323,6 +391,8 @@ select.form-control option {
 
 .feedback-list-card {
     padding: 32px;
+    position: relative;
+    overflow: hidden;
 }
 
 .feedback-list {
@@ -333,7 +403,7 @@ select.form-control option {
 
 .feedback-item {
     padding: 20px;
-    background: rgba(255, 255, 255, 0.03);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.025));
     border: 1px solid rgba(255, 255, 255, 0.06);
     border-radius: 16px;
     transition: transform 0.3s ease, border-color 0.3s ease, background 0.3s ease;
@@ -627,6 +697,8 @@ body.light-theme input[readonly].form-control {
 
 @media (max-width: 768px) {
     .navbar {
+        width: 100%;
+        border-radius: 0;
         padding: 16px 24px;
     }
 
@@ -657,10 +729,21 @@ body.light-theme input[readonly].form-control {
     .navbar-links a {
         padding: 12px 16px;
         width: 100%;
+        border-radius: 10px;
+    }
+
+    .navbar-links a::after {
+        display: none;
+    }
+
+    .navbar-links a.active,
+    .navbar-links a:hover {
+        background: rgba(59, 130, 246, 0.12);
+        color: var(--text-primary, #ffffff);
     }
 
     .menu-toggle {
-        display: block;
+        display: flex;
     }
 
     .feedback-page {
@@ -673,5 +756,11 @@ body.light-theme input[readonly].form-control {
 
     .form-card {
         padding: 32px 24px;
+    }
+
+    .form-card::before,
+    .feedback-list-card::before {
+        margin-left: -24px;
+        margin-right: -24px;
     }
 }

@@ -1,23 +1,38 @@
 /* ============================================================
-   RentIQ - Analytics Page Styles
+   RentFlow - Analytics Page Styles
    Builds upon admin-dashboard.css for a consistent premium look.
    ============================================================ */
 
+#kpiOverview {
+    align-items: stretch;
+    justify-content: center;
+}
+
+#kpiOverview .kpi-card {
+    width: 100%;
+}
+
 .analytics-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 400px), 1fr));
     gap: 28px;
     margin-bottom: 48px;
+    min-width: 0;
+    width: 100%;
 }
 
 .full-width {
     grid-column: 1 / -1;
+    min-width: 0;
 }
 
 .analytics-card {
     padding: 32px;
     display: flex;
     flex-direction: column;
+    min-width: 0;
+    width: 100%;
+    max-width: 100%;
 }
 
 .card-header {
@@ -49,6 +64,7 @@
     gap: 16px;
     padding: 8px 0;
     transition: transform var(--transition);
+    min-width: 0;
 }
 
 .bar-row:hover {
@@ -70,6 +86,7 @@
 
 .bar-track {
     flex: 1;
+    min-width: 0;
     height: 10px;
     background: rgba(255, 255, 255, 0.04);
     border-radius: 100px;
@@ -137,6 +154,11 @@
     margin-top: 24px;
     padding-top: 24px;
     border-top: 1px solid var(--border);
+}
+
+.table-responsive {
+    max-width: 100%;
+    overflow-x: auto;
 }
 
 .stat-item {
@@ -288,6 +310,38 @@ body.light-theme .rating-total {
 @media (max-width: 768px) {
     .analytics-grid {
         grid-template-columns: 1fr;
+    }
+
+    .analytics-card {
+        padding: 24px 20px;
+    }
+
+    .bar-row {
+        gap: 10px;
+    }
+
+    .bar-label,
+    .bar-row .bar-label[style] {
+        width: 88px !important;
+        max-width: 34%;
+        font-size: 12px;
+        text-align: left !important;
+        overflow-wrap: anywhere;
+    }
+
+    .bar-value {
+        width: 34px;
+        text-align: right;
+        flex-shrink: 0;
+    }
+
+    .revenue-highlight {
+        font-size: 34px;
+    }
+
+    .revenue-stats {
+        flex-direction: column;
+        gap: 16px;
     }
     
     .rating-overview {

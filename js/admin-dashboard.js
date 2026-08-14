@@ -1,5 +1,5 @@
 /* ============================================================
-   RentIQ – Admin Dashboard JavaScript (Platform Moderator)
+   RentFlow – Admin Dashboard JavaScript (Platform Moderator)
    Uses shared storage.js for all data access.
    ============================================================ */
 
@@ -389,20 +389,36 @@ function attachModalListeners() {
 function initMobileMenu() {
     const toggle = document.getElementById('menuToggle');
     const links  = document.getElementById('navLinks');
+    const navbar = document.getElementById('navbar');
 
     if (!toggle || !links) return;
 
+    const closeMenu = () => {
+        links.classList.remove('open');
+        toggle.classList.remove('open');
+        toggle.setAttribute('aria-expanded', 'false');
+    };
+
     toggle.addEventListener('click', () => {
-        links.classList.toggle('open');
-        toggle.textContent = links.classList.contains('open') ? '✕' : '☰';
+        const isOpen = links.classList.toggle('open');
+        toggle.classList.toggle('open', isOpen);
+        toggle.setAttribute('aria-expanded', String(isOpen));
     });
 
     links.querySelectorAll('a').forEach(link => {
         link.addEventListener('click', () => {
-            links.classList.remove('open');
-            toggle.textContent = '☰';
+            closeMenu();
         });
     });
+
+    if (navbar) {
+        const syncScrolledState = () => {
+            navbar.classList.toggle('scrolled', window.scrollY > 50);
+        };
+
+        syncScrolledState();
+        window.addEventListener('scroll', syncScrolledState, { passive: true });
+    }
 }
 
 /** Re-render all data-driven sections */

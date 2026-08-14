@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard – RentIQ</title>
-    <meta name="description" content="RentIQ admin control center — monitor rental KPIs and platform operations.">
+    <title>RentFlow | Admin Dashboard</title>
+    <meta name="description" content="RentFlow admin control center for rental KPIs and platform operations.">
 
     <!-- Fonts (same as login/signup) -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
@@ -19,12 +19,17 @@
     <video class="bg-video" autoplay muted loop playsinline>
         <source src="assets/video.mp4" type="video/mp4">
     </video>
+    <div class="overlay"></div>
 
     <!-- ===================== NAVBAR ===================== -->
     <nav class="navbar" id="navbar">
-        <a href="admin-dashboard.html" class="navbar-brand">RentIQ</a>
+        <a href="admin-dashboard.html" class="navbar-brand" aria-label="RentFlow Admin Dashboard">
+            <span class="brand-rent">Rent</span><span class="brand-flow">Flow</span>
+        </a>
 
-        <button class="menu-toggle" id="menuToggle" aria-label="Toggle menu">☰</button>
+        <button class="menu-toggle" id="menuToggle" aria-label="Toggle menu" aria-expanded="false">
+            <span></span><span></span><span></span>
+        </button>
 
         <ul class="navbar-links" id="navLinks">
             <li><a href="admin-dashboard.html" class="active">Dashboard</a></li>

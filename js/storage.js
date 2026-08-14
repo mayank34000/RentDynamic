@@ -1,5 +1,5 @@
 /* ============================================================
-   RentIQ – Centralized Storage Helper
+   RentFlow – Centralized Storage Helper
    Single source of truth for Users, Listings, Bookings, Feedback
    ============================================================ */
 
@@ -13,7 +13,7 @@ const STORAGE_KEYS = {
 
 // Initial Seed Data for Phase 1 LocalStorage
 const DEFAULT_USERS = [
-    { username: 'Admin User', useremail: 'admin@rentiq.com', userphone: '9876543210', userpassword: 'Admin@123', role: 'admin' },
+    { username: 'Admin User', useremail: 'admin@rentflow.com', userphone: '9876543210', userpassword: 'Admin@123', role: 'admin' },
     { username: 'Rahul Sharma', useremail: 'rahul@example.com', userphone: '9876543211', userpassword: 'User@1234', role: 'customer' },
     { username: 'Aman Verma', useremail: 'aman@example.com', userphone: '9876543212', userpassword: 'User@1234', role: 'seller' },
     { username: 'Priya Singh', useremail: 'priya@example.com', userphone: '9876543213', userpassword: 'User@1234', role: 'customer' },

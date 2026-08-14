@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
             "key": "rzp_test_TPWlCTZ9mczHSa", 
             "amount": "30000",   
             "currency": "INR",   
-            "order_id": "order_TPcdAcEQdF9pci", 
+            "order_id": "order_TPdQ5TxpiJCvoA", 
             "name": "RentFlow",
             "description": "Premium Pass - 1 Month Access",
             "handler": function (response) {

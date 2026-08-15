@@ -25,16 +25,44 @@ document.addEventListener("DOMContentLoaded", () => {
             authContainer.style.display = 'flex';
             authContainer.style.alignItems = 'center';
             authContainer.style.gap = '15px';
+            authContainer.style.position = 'relative';
             authContainer.innerHTML = `
-                <a href="profile.html" style="display: flex; align-items: center; gap: 8px; cursor: pointer; text-decoration: none;">
+                <div class="profile-dropdown-trigger" id="profile-dropdown-trigger" style="display: flex; align-items: center; gap: 8px; cursor: pointer; user-select: none;">
                     <div style="width: 32px; height: 32px; background: #3b82f6; border-radius: 50%; display: flex; align-items: center; justify-content: center; overflow: hidden; border: 1px solid rgba(255,255,255,0.2);">
                         <img src="${savedImage}" alt="Profile" style="width: 100%; height: 100%; object-fit: cover;">
                     </div>
                     <span id="profile-name" style="font-weight: 600; color: #fff;">${firstName}</span>
-                </a>
-                <button id="logout-btn" class="btn-ghost" style="padding: 8px 16px; border: 1px solid rgba(255,255,255,0.2);">Logout</button>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-left: 2px;"><polyline points="6 9 12 15 18 9"/></svg>
+                </div>
+                
+                <div class="profile-dropdown-menu" id="profile-dropdown-menu" style="display: none; position: absolute; top: 40px; right: 0; background: #12172b; border: 1px solid rgba(255,255,255,0.12); border-radius: 12px; width: 160px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); z-index: 1000; padding: 6px 0; flex-direction: column;">
+                    <a href="profile.html" style="padding: 10px 16px; color: #b0b8c6; text-decoration: none; font-size: 14px; font-weight: 500; transition: background 0.2s, color 0.2s; display: block;">My Profile</a>
+                    <a href="#" id="nav-my-wallet" style="padding: 10px 16px; color: #b0b8c6; text-decoration: none; font-size: 14px; font-weight: 500; transition: background 0.2s, color 0.2s; display: block;">My Wallet</a>
+                    <div style="height: 1px; background: rgba(255,255,255,0.08); margin: 6px 0;"></div>
+                    <a href="#" id="dropdown-logout" style="padding: 10px 16px; color: #ef4444; text-decoration: none; font-size: 14px; font-weight: 600; transition: background 0.2s; display: block;">Logout</a>
+                </div>
             `;
-            document.getElementById("logout-btn").addEventListener("click", (e) => {
+            
+            const trigger = document.getElementById("profile-dropdown-trigger");
+            const menu = document.getElementById("profile-dropdown-menu");
+            
+            trigger.addEventListener("click", (e) => {
+                e.stopPropagation();
+                menu.style.display = menu.style.display === "flex" ? "none" : "flex";
+            });
+            
+            document.addEventListener("click", () => {
+                menu.style.display = "none";
+            });
+            
+            document.getElementById("nav-my-wallet").addEventListener("click", (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                menu.style.display = "none";
+                openWalletModal();
+            });
+            
+            document.getElementById("dropdown-logout").addEventListener("click", (e) => {
                 e.preventDefault();
                 localStorage.removeItem("isLoggedIn");
                 localStorage.removeItem("current_user");

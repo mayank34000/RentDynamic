@@ -65,6 +65,7 @@ document.addEventListener('DOMContentLoaded', () => {
     updateLivePreviewAndCalculator();
     renderMyListingsDashboard();
     renderPendingRequests();
+    renderCompletedSettlements();
 
     function updateLivePreviewAndCalculator() {
         const title = titleInput.value.trim() || 'Your Product Name';
@@ -239,7 +240,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         name: sellerName,
                         phone: sellerPhone,
                         city: sellerCity,
-                        email: JSON.parse(localStorage.getItem('current_user'))?.useremail || 'admin@rentflow.com'
+                        email: JSON.parse(localStorage.getItem('current_user'))?.useremail || 'aryanharit14@gmail.com'
                     },
                     images: imagesList,
                     securityDeposit,
@@ -262,7 +263,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     name: sellerName,
                     phone: sellerPhone,
                     city: sellerCity,
-                    email: JSON.parse(localStorage.getItem('current_user'))?.useremail || 'admin@rentflow.com'
+                    email: JSON.parse(localStorage.getItem('current_user'))?.useremail || 'aryanharit14@gmail.com'
                 },
                 images: imagesList,
                 securityDeposit,
@@ -309,7 +310,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const userEmail = currentUser ? currentUser.useremail : '';
         
         listings = listings.filter(item => {
-            const sellerEmail = (item.seller && item.seller.email) ? item.seller.email : 'admin@rentflow.com';
+            const sellerEmail = (item.seller && item.seller.email) ? item.seller.email : 'aryanharit14@gmail.com';
             return sellerEmail === userEmail;
         });
 
@@ -406,7 +407,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const userEmail = currentUser ? currentUser.useremail : '';
         
         const myListingIds = listings.filter(item => {
-            const sellerEmail = (item.seller && item.seller.email) ? item.seller.email : 'admin@rentflow.com';
+            const sellerEmail = (item.seller && item.seller.email) ? item.seller.email : 'aryanharit14@gmail.com';
             return sellerEmail === userEmail;
         }).map(l => l.id);
 
@@ -477,6 +478,131 @@ document.addEventListener('DOMContentLoaded', () => {
             bookings[bIndex].status = 'Cancelled';
             localStorage.setItem('rentflow_bookings', JSON.stringify(bookings));
             renderPendingRequests();
+            renderCompletedSettlements();
+        }
+    };
+
+    function renderCompletedSettlements() {
+        const grid = document.getElementById('completed-settlements-grid');
+        const countSpan = document.getElementById('completed-settlements-count');
+        if (!grid) return;
+
+        let listings = getStoredListings();
+        const currentUser = JSON.parse(localStorage.getItem('current_user'));
+        const userEmail = currentUser ? currentUser.useremail : '';
+        
+        // Find user owned listing IDs
+        const myListingIds = listings.filter(item => {
+            const sellerEmail = (item.seller && item.seller.email) ? item.seller.email : 'aryanharit14@gmail.com';
+            return sellerEmail === userEmail;
+        }).map(l => l.id);
+
+        let bookings = [];
+        try {
+            bookings = JSON.parse(localStorage.getItem('rentflow_bookings')) || [];
+        } catch(e) {}
+
+        // Filter bookings of status 'Completed' (which means period ended and needs settlement)
+        const completedBookings = bookings.filter(b => b.status === 'Completed' && myListingIds.includes(b.listingId));
+
+        if (countSpan) countSpan.textContent = completedBookings.length;
+
+        if (completedBookings.length === 0) {
+            grid.innerHTML = `
+                <div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: var(--text-muted);">
+                    <p style="font-size: 16px;">No completed rentals pending settlement.</p>
+                </div>
+            `;
+            return;
+        }
+
+        grid.innerHTML = completedBookings.map(req => `
+            <div class="listing-card-dash" style="border: 1px solid #10b981;">
+                <div class="dash-img-wrap">
+                    <img src="${req.itemImage}" alt="${req.itemTitle}" />
+                    <span class="dash-badge-status" style="background: #10b981;">Completed</span>
+                </div>
+                <div class="dash-content">
+                    <h4 class="dash-title">${req.itemTitle}</h4>
+                    <div style="font-size: 14px; font-weight: 700; color: var(--text-primary); margin-bottom: 8px;">
+                        Renter: ${req.renterEmail || 'Guest'}
+                    </div>
+                    <div class="dash-meta-stats">
+                        <span>Deposit: ₹${req.deposit}</span>
+                        <span>Rent: ₹${req.subtotal}</span>
+                    </div>
+                    <div class="dash-actions" style="margin-top: 10px;">
+                        <button type="button" class="btn-sm" style="background: #10b981; color: white; border: none; width: 100%; font-weight: 700;" onclick="settleRentalReturn('${req.id}', true)">Item Returned (Refund Deposit & Pay Out)</button>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    window.settleRentalReturn = function(bookingId, isReturned) {
+        if (!confirm('Confirm return and process payments? This will refund security deposit to buyer and credit payout to your wallet.')) return;
+        
+        let bookings = [];
+        try {
+            bookings = JSON.parse(localStorage.getItem('rentflow_bookings')) || [];
+        } catch(e) {}
+        
+        const bIndex = bookings.findIndex(b => b.id === bookingId);
+        if (bIndex === -1) return;
+        const booking = bookings[bIndex];
+
+        if (isReturned) {
+            const buyerEmail = booking.renterEmail || 'guest@example.com';
+            const securityAmount = booking.deposit;
+            
+            // Refund security deposit to buyer's wallet
+            updateWalletBalance(buyerEmail, securityAmount);
+            
+            // Save transaction for buyer
+            let buyerTx = [];
+            try {
+                buyerTx = JSON.parse(localStorage.getItem(`wallet_tx_${buyerEmail}`)) || [];
+            } catch(e) {}
+            buyerTx.push({
+                type: 'Credit',
+                amount: securityAmount,
+                desc: `Refund: Security Deposit (${booking.itemTitle})`,
+                date: new Date().toLocaleDateString('en-IN')
+            });
+            localStorage.setItem(`wallet_tx_${buyerEmail}`, JSON.stringify(buyerTx));
+
+            // Get seller email
+            const currentUser = JSON.parse(localStorage.getItem('current_user'));
+            const sellerEmail = currentUser ? currentUser.useremail : 'aryanharit14@gmail.com';
+            
+            // Transfer rental payment (minus 2% commission) to seller's wallet
+            const rentAmount = booking.subtotal;
+            const commission = Math.round(rentAmount * 0.02);
+            const sellerEarnings = rentAmount - commission;
+            
+            updateWalletBalance(sellerEmail, sellerEarnings);
+            
+            // Save transaction for seller
+            let sellerTx = [];
+            try {
+                sellerTx = JSON.parse(localStorage.getItem(`wallet_tx_${sellerEmail}`)) || [];
+            } catch(e) {}
+            sellerTx.push({
+                type: 'Credit',
+                amount: sellerEarnings,
+                desc: `Rent Earning: ${booking.itemTitle} (2% commission cut)`,
+                date: new Date().toLocaleDateString('en-IN')
+            });
+            localStorage.setItem(`wallet_tx_${sellerEmail}`, JSON.stringify(sellerTx));
+
+            // Update booking status to 'Returned'
+            bookings[bIndex].status = 'Returned';
+            localStorage.setItem('rentflow_bookings', JSON.stringify(bookings));
+            
+            alert(`Settle Successful!\n- Security Deposit of ₹${securityAmount} refunded to buyer (${buyerEmail}).\n- Rent payout of ₹${sellerEarnings} (after 2% commission of ₹${commission}) transferred to your wallet.`);
+            
+            // Re-render dashboards
+            renderCompletedSettlements();
         }
     };
 

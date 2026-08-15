@@ -27,16 +27,44 @@ document.addEventListener("DOMContentLoaded", () => {
             authContainer.style.display = 'flex';
             authContainer.style.alignItems = 'center';
             authContainer.style.gap = '15px';
+            authContainer.style.position = 'relative';
             authContainer.innerHTML = `
-                <a href="profile.html" style="display: flex; align-items: center; gap: 8px; cursor: pointer; text-decoration: none;">
+                <div class="profile-dropdown-trigger" id="profile-dropdown-trigger" style="display: flex; align-items: center; gap: 8px; cursor: pointer; user-select: none;">
                     <div style="width: 32px; height: 32px; background: #3b82f6; border-radius: 50%; display: flex; align-items: center; justify-content: center; overflow: hidden; border: 1px solid rgba(255,255,255,0.2);">
                         <img src="${savedImage}" alt="Profile" style="width: 100%; height: 100%; object-fit: cover;">
                     </div>
                     <span id="profile-name" style="font-weight: 600; color: #fff;">${firstName}</span>
-                </a>
-                <button id="logout-btn" class="btn-ghost" style="padding: 8px 16px; border: 1px solid rgba(255,255,255,0.2);">Logout</button>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-left: 2px;"><polyline points="6 9 12 15 18 9"/></svg>
+                </div>
+                
+                <div class="profile-dropdown-menu" id="profile-dropdown-menu" style="display: none; position: absolute; top: 40px; right: 0; background: #12172b; border: 1px solid rgba(255,255,255,0.12); border-radius: 12px; width: 160px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); z-index: 1000; padding: 6px 0; flex-direction: column;">
+                    <a href="profile.html" style="padding: 10px 16px; color: #b0b8c6; text-decoration: none; font-size: 14px; font-weight: 500; transition: background 0.2s, color 0.2s; display: block;">My Profile</a>
+                    <a href="#" id="nav-my-wallet" style="padding: 10px 16px; color: #b0b8c6; text-decoration: none; font-size: 14px; font-weight: 500; transition: background 0.2s, color 0.2s; display: block;">My Wallet</a>
+                    <div style="height: 1px; background: rgba(255,255,255,0.08); margin: 6px 0;"></div>
+                    <a href="#" id="dropdown-logout" style="padding: 10px 16px; color: #ef4444; text-decoration: none; font-size: 14px; font-weight: 600; transition: background 0.2s; display: block;">Logout</a>
+                </div>
             `;
-            document.getElementById("logout-btn").addEventListener("click", (e) => {
+            
+            const trigger = document.getElementById("profile-dropdown-trigger");
+            const menu = document.getElementById("profile-dropdown-menu");
+            
+            trigger.addEventListener("click", (e) => {
+                e.stopPropagation();
+                menu.style.display = menu.style.display === "flex" ? "none" : "flex";
+            });
+            
+            document.addEventListener("click", () => {
+                menu.style.display = "none";
+            });
+            
+            document.getElementById("nav-my-wallet").addEventListener("click", (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                menu.style.display = "none";
+                openWalletModal();
+            });
+            
+            document.getElementById("dropdown-logout").addEventListener("click", (e) => {
                 e.preventDefault();
                 localStorage.removeItem("isLoggedIn");
                 localStorage.removeItem("current_user");
@@ -89,10 +117,18 @@ document.addEventListener("DOMContentLoaded", () => {
         // Setup Event Listeners
         setupEventListeners();
         
-        // Set minimum dates for booking form
-        const today = new Date().toISOString().split('T')[0];
-        bookingStart.min = today;
-        bookingEnd.min = today;
+        // Set minimum datetime for booking form
+        const now = new Date();
+        const formatForDatetimeLocal = (date) => {
+            const y = date.getFullYear();
+            const m = String(date.getMonth() + 1).padStart(2, '0');
+            const d = String(date.getDate()).padStart(2, '0');
+            const hh = String(date.getHours()).padStart(2, '0');
+            const mm = String(date.getMinutes()).padStart(2, '0');
+            return `${y}-${m}-${d}T${hh}:${mm}`;
+        };
+        bookingStart.min = formatForDatetimeLocal(now);
+        bookingEnd.min = formatForDatetimeLocal(now);
     }
 
     // ========================================
@@ -487,36 +523,147 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById("booking-item-price").value = listing.price;
         document.getElementById("booking-item-deposit").value = listing.securityDeposit || Math.round(listing.price * 0.1);
         
-        // Reset form
+        // Reset form & set defaults
         bookingForm.reset();
-        document.getElementById("calc-days").textContent = "0";
+        
+        const now = new Date();
+        now.setMinutes(Math.ceil(now.getMinutes() / 30) * 30, 0, 0); // round to next 30 mins
+        
+        const formatForDatetimeLocal = (date) => {
+            const y = date.getFullYear();
+            const m = String(date.getMonth() + 1).padStart(2, '0');
+            const d = String(date.getDate()).padStart(2, '0');
+            const hh = String(date.getHours()).padStart(2, '0');
+            const mm = String(date.getMinutes()).padStart(2, '0');
+            return `${y}-${m}-${d}T${hh}:${mm}`;
+        };
+        
+        bookingStart.value = formatForDatetimeLocal(now);
+        const tomorrow = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+        bookingEnd.value = formatForDatetimeLocal(tomorrow);
+        
         document.getElementById("calc-rate-display").textContent = "₹" + listing.price;
-        document.getElementById("calc-subtotal").textContent = "₹0";
-        document.getElementById("calc-deposit").textContent = "₹0";
-        document.getElementById("calc-total").textContent = "₹0";
+        updateBookingCalculations();
 
         bookingModal.classList.add("show");
     };
 
+    function calculateRentalDuration(start, end) {
+        if (!start || !end || start >= end) {
+            return { hours: 0, days: 0, chargedDays: 0, description: '' };
+        }
+        const diffMs = end - start;
+        const totalHours = diffMs / (1000 * 60 * 60);
+        const fullDays = Math.floor(totalHours / 24);
+        const remainingHours = totalHours % 24;
+        
+        let chargedDays = 0;
+        if (fullDays === 0) {
+            chargedDays = remainingHours < 12 ? 0.5 : 1.0;
+        } else {
+            if (remainingHours === 0) {
+                chargedDays = fullDays;
+            } else if (remainingHours < 12) {
+                chargedDays = fullDays + 0.5;
+            } else {
+                chargedDays = fullDays + 1.0;
+            }
+        }
+        
+        // Create user-friendly description
+        let desc = '';
+        if (fullDays > 0) {
+            desc += `${fullDays} day${fullDays > 1 ? 's' : ''}`;
+            if (remainingHours > 0) {
+                const roundedHours = Math.round(remainingHours * 10) / 10;
+                desc += `, ${roundedHours} hour${roundedHours !== 1 ? 's' : ''}`;
+            }
+        } else {
+            const roundedHours = Math.round(totalHours * 10) / 10;
+            desc = `${roundedHours} hour${roundedHours !== 1 ? 's' : ''}`;
+        }
+        
+        return {
+            hours: totalHours,
+            days: fullDays,
+            chargedDays: chargedDays,
+            description: desc
+        };
+    }
+
     function updateBookingCalculations() {
         const start = new Date(bookingStart.value);
         const end = new Date(bookingEnd.value);
+        const now = new Date();
         const price = parseFloat(document.getElementById("booking-item-price").value);
         const deposit = parseFloat(document.getElementById("booking-item-deposit").value);
+        const errorEl = document.getElementById("booking-validation-error");
+        const submitBtn = bookingForm.querySelector("button[type='submit']");
 
-        if (start && end && start <= end) {
-            // Calculate difference in days (minimum 1 day)
-            const diffTime = Math.abs(end - start);
-            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1; // +1 to include start day
-            
-            const subtotal = diffDays * price;
-            const total = subtotal + deposit; // Platform fee for renter is Free (₹0)
+        // Reset state
+        if (errorEl) {
+            errorEl.style.display = "none";
+            errorEl.textContent = "";
+        }
+        if (submitBtn) {
+            submitBtn.disabled = false;
+        }
 
-            document.getElementById("calc-days").textContent = diffDays;
+        let isValid = true;
+
+        if (bookingStart.value && bookingEnd.value) {
+            // Check if start time is in the past (allow 1 minute buffer)
+            if (start.getTime() < now.getTime() - 60000) {
+                if (errorEl) {
+                    errorEl.style.display = "block";
+                    errorEl.textContent = "⚠️ Start time cannot be in the past.";
+                }
+                if (submitBtn) submitBtn.disabled = true;
+                isValid = false;
+            }
+            // Check if end time is in the past
+            else if (end.getTime() < now.getTime()) {
+                if (errorEl) {
+                    errorEl.style.display = "block";
+                    errorEl.textContent = "⚠️ End time cannot be earlier than actual (current) time.";
+                }
+                if (submitBtn) submitBtn.disabled = true;
+                isValid = false;
+            }
+            // Check if end time is earlier than or equal to start time
+            else if (end.getTime() <= start.getTime()) {
+                if (errorEl) {
+                    errorEl.style.display = "block";
+                    errorEl.textContent = "⚠️ End time must be after the start time.";
+                }
+                if (submitBtn) submitBtn.disabled = true;
+                isValid = false;
+            }
+        } else {
+            isValid = false;
+        }
+
+        if (isValid) {
+            const durationObj = calculateRentalDuration(start, end);
+            const chargedDays = durationObj.chargedDays;
+            const subtotal = chargedDays * price;
+            const total = subtotal + deposit;
+
+            const descRow = document.getElementById("duration-desc-row");
+            const descEl = document.getElementById("calc-duration-desc");
+            if (descRow && descEl) {
+                descRow.style.display = "flex";
+                descEl.textContent = `${durationObj.description} (Charged as ${chargedDays} day${chargedDays !== 1 ? 's' : ''})`;
+            }
+
+            document.getElementById("calc-days").textContent = chargedDays;
             document.getElementById("calc-subtotal").textContent = "₹" + subtotal.toLocaleString('en-IN');
             document.getElementById("calc-deposit").textContent = "₹" + deposit.toLocaleString('en-IN');
             document.getElementById("calc-total").textContent = "₹" + total.toLocaleString('en-IN');
         } else {
+            const descRow = document.getElementById("duration-desc-row");
+            if (descRow) descRow.style.display = "none";
+            
             document.getElementById("calc-days").textContent = "0";
             document.getElementById("calc-subtotal").textContent = "₹0";
             document.getElementById("calc-total").textContent = "₹0";
@@ -528,9 +675,9 @@ document.addEventListener("DOMContentLoaded", () => {
         
         const start = bookingStart.value;
         const end = bookingEnd.value;
-        const days = parseInt(document.getElementById("calc-days").textContent);
+        const days = parseFloat(document.getElementById("calc-days").textContent);
         
-        if (days <= 0) {
+        if (days <= 0 || isNaN(days)) {
             showToast("Invalid date range selected.", "error");
             return;
         }
@@ -539,20 +686,28 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!listing) return;
 
         // Construct Booking Object
+        const deposit = listing.securityDeposit || Math.round(listing.price * 0.1);
+        const subtotal = listing.price * days;
+        const grandTotal = subtotal + deposit;
+
+        const currentUser = JSON.parse(localStorage.getItem('current_user'));
+        const renterEmail = currentUser ? currentUser.useremail : 'guest@example.com';
+
         const bookingRecord = {
             id: 'BKG-' + Date.now(),
             listingId: listing.id,
             itemTitle: listing.title,
             itemImage: listing.images?.[0] || 'https://via.placeholder.com/400x300',
             lenderName: listing.seller?.name || 'Verified Owner',
+            renterEmail: renterEmail,
             startDate: start,
             endDate: end,
             duration: days,
             rate: listing.price,
-            subtotal: listing.price * days,
-            deposit: listing.securityDeposit || Math.round(listing.price * 0.1),
+            subtotal: subtotal,
+            deposit: deposit,
             platformFee: 0,
-            grandTotal: (listing.price * days) + (listing.securityDeposit || Math.round(listing.price * 0.1)),
+            grandTotal: grandTotal,
             status: 'Pending', // Default status upon creation
             createdAt: new Date().toISOString()
         };

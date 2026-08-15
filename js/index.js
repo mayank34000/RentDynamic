@@ -16,6 +16,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if(authButtons) authButtons.style.display = 'none';
         if(userProfile) userProfile.style.display = 'flex';
         
+        const heroCtaSignup = document.getElementById('hero-cta-signup');
+        if(heroCtaSignup) heroCtaSignup.style.display = 'none';
+        
         // Set User Info safely
         if(profileName) {
             const nameToDisplay = currentUser.name || currentUser.username || 'User';

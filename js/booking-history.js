@@ -19,14 +19,21 @@ document.addEventListener("DOMContentLoaded", () => {
         if (isLoggedIn) {
             let user = { userfname: "User" };
             try { user = JSON.parse(localStorage.getItem("current_user")) || user; } catch(e) {}
-            const initial = user.userfname ? user.userfname.charAt(0).toUpperCase() : "U";
+            const nameToDisplay = user.name || user.username || user.userfname || 'User';
+            const firstName = nameToDisplay.split(' ')[0];
+            const savedImage = localStorage.getItem('profileImage') || 'assets/profile.png';
             
+            authContainer.style.display = 'flex';
+            authContainer.style.alignItems = 'center';
+            authContainer.style.gap = '15px';
             authContainer.innerHTML = `
-                <a href="profile.html" class="btn-ghost" style="display:flex; align-items:center; gap:8px;">
-                    <div style="width:24px; height:24px; border-radius:50%; background:var(--blue); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:12px;">${initial}</div>
-                    Profile
+                <a href="profile.html" style="display: flex; align-items: center; gap: 8px; cursor: pointer; text-decoration: none;">
+                    <div style="width: 32px; height: 32px; background: #3b82f6; border-radius: 50%; display: flex; align-items: center; justify-content: center; overflow: hidden; border: 1px solid rgba(255,255,255,0.2);">
+                        <img src="${savedImage}" alt="Profile" style="width: 100%; height: 100%; object-fit: cover;">
+                    </div>
+                    <span id="profile-name" style="font-weight: 600; color: #fff;">${firstName}</span>
                 </a>
-                <a href="#" class="btn-nav-primary" id="logout-btn">Log Out</a>
+                <button id="logout-btn" class="btn-ghost" style="padding: 8px 16px; border: 1px solid rgba(255,255,255,0.2);">Logout</button>
             `;
             document.getElementById("logout-btn").addEventListener("click", (e) => {
                 e.preventDefault();
@@ -209,12 +216,64 @@ document.addEventListener("DOMContentLoaded", () => {
         // Download Receipt (PDF)
         document.getElementById("btn-download-receipt").addEventListener("click", () => {
             const element = document.getElementById("receipt-content");
+            const modalCard = element.closest(".modal-card");
             const itemName = document.getElementById("receipt-item").textContent.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+
+            // --- Apply a temporary light/print theme so the PDF isn't all-black ---
+            const printStyles = document.createElement("style");
+            printStyles.id = "pdf-print-override";
+            printStyles.textContent = `
+                #receipt-content {
+                    background: #ffffff !important;
+                    color: #1a1a1a !important;
+                    padding: 32px !important;
+                    border-radius: 0 !important;
+                    width: 500px !important;
+                    min-width: 500px !important;
+                }
+                #receipt-content .modal-title {
+                    color: #111827 !important;
+                }
+                #receipt-content .receipt-item-name {
+                    color: #111827 !important;
+                }
+                #receipt-content .receipt-lender {
+                    color: #4b5563 !important;
+                }
+                #receipt-content .receipt-row {
+                    color: #374151 !important;
+                    flex-wrap: nowrap !important;
+                    overflow: visible !important;
+                }
+                #receipt-content .receipt-row span {
+                    white-space: nowrap !important;
+                    overflow: visible !important;
+                    flex-shrink: 0 !important;
+                }
+                #receipt-content .receipt-row.total-row {
+                    color: #111827 !important;
+                    border-top-color: #d1d5db !important;
+                }
+                #receipt-content .receipt-header {
+                    border-bottom-color: #d1d5db !important;
+                }
+                #receipt-content .receipt-breakdown {
+                    margin-bottom: 16px !important;
+                }
+            `;
+            document.head.appendChild(printStyles);
+
+            // --- Temporarily expand the modal so amounts don't get clipped ---
+            const origMaxWidth = modalCard.style.maxWidth;
+            const origWidth = modalCard.style.width;
+            modalCard.style.maxWidth = "600px";
+            modalCard.style.width = "600px";
+
             const opt = {
                 margin:       10,
                 filename:     `rentflow_receipt_${itemName}.pdf`,
                 image:        { type: 'jpeg', quality: 0.98 },
-                html2canvas:  { scale: 2, backgroundColor: '#1a1d24' }, // matches dark theme if needed, or white if preferred. Wait, the modal card in RentFlow has dark bg (#1f2937). We'll let it capture naturally.
+                html2canvas:  { scale: 2, backgroundColor: '#ffffff', useCORS: true, width: 500 },
                 jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
             };
 
@@ -226,10 +285,18 @@ document.addEventListener("DOMContentLoaded", () => {
             html2pdf().set(opt).from(element).save().then(() => {
                 btn.textContent = originalText;
                 btn.disabled = false;
+                // Remove temporary print styles and restore modal size
+                printStyles.remove();
+                modalCard.style.maxWidth = origMaxWidth;
+                modalCard.style.width = origWidth;
             }).catch(err => {
                 console.error("PDF generation error:", err);
                 btn.textContent = originalText;
                 btn.disabled = false;
+                // Clean up even on error
+                printStyles.remove();
+                modalCard.style.maxWidth = origMaxWidth;
+                modalCard.style.width = origWidth;
                 alert("Failed to generate PDF.");
             });
         });

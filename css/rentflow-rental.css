@@ -19,4 +19,55 @@
 
 /* Item detail + marketplace seller chat */
 .item-detail-modal{max-width:760px}.detail-image{height:260px;border-radius:16px;overflow:hidden;background:#0b1020;margin-bottom:16px}.detail-image img{width:100%;height:100%;object-fit:cover}.detail-content h3{font:800 25px Manrope;margin:12px 0 7px}.detail-top{display:flex;justify-content:space-between;gap:8px}.detail-meta{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:18px 0}.detail-meta>div{padding:12px;border:1px solid var(--border);border-radius:13px;background:rgba(255,255,255,.035)}.detail-meta small{display:block;color:var(--muted);font-size:10px;margin-bottom:4px}.detail-meta strong{font-size:12px}.seller-note{display:flex;flex-direction:column;gap:4px;padding:13px 15px;border:1px solid rgba(58,91,217,.35);border-radius:14px;background:rgba(58,91,217,.09);margin-bottom:14px}.seller-note strong{font-size:12px}.seller-note span{color:var(--muted);font-size:11px;line-height:1.5}.seller-chat-modal{max-width:620px;display:flex;flex-direction:column}.seller-chat-modal .chat-messages{min-height:300px;max-height:430px}.seller-chat-intro{font-size:11px;line-height:1.5;color:var(--muted);padding:11px 14px;border-bottom:1px solid var(--border)}.chat-empty{margin:auto}.message small{display:block;font-size:9px;opacity:.65;margin-top:4px}
+
+/* ========================================
+   LIGHT THEME OVERRIDES
+======================================== */
+body.light-theme { background: #f0f2f5; color: #111827; }
+body.light-theme:before { background: rgba(255, 255, 255, 0.85); }
+body.light-theme .bg-video { opacity: 0.1; filter: invert(1); }
+body.light-theme .site-header { background: linear-gradient(to bottom, rgba(255,255,255,0.95), rgba(255,255,255,0.72), transparent); }
+body.light-theme .logo { color: #6b7280; }
+body.light-theme .logo span { color: #111827; }
+body.light-theme .nav-links a { color: #4b5563; }
+body.light-theme .nav-links a:hover, body.light-theme .nav-links a.active { color: #111827; }
+body.light-theme .glass, body.light-theme .listing-card { background: rgba(255, 255, 255, 0.92); border-color: rgba(0, 0, 0, 0.1); }
+body.light-theme .hero h1 { color: #111827; }
+body.light-theme .hero p { color: #4b5563; }
+body.light-theme .input, body.light-theme .select, body.light-theme .textarea { background: #fff; border-color: rgba(0,0,0,0.1); color: #111827; }
+body.light-theme .chip { background: rgba(0,0,0,0.05); color: #4b5563; border-color: rgba(0,0,0,0.1); }
+body.light-theme .chip:hover { color: #111827; background: rgba(0,0,0,0.1); }
+body.light-theme .chip.active { background: #3a5bd9; color: #fff; border-color: #3a5bd9; }
+body.light-theme .results-head h2 { color: #111827; }
+body.light-theme .listing-title { color: #111827; }
+body.light-theme .listing-desc { color: #4b5563; }
+body.light-theme .price { color: #111827; }
+body.light-theme .price small { color: #6b7280; }
+body.light-theme .modal-backdrop { background: rgba(255,255,255,0.6); }
+body.light-theme .modal { background: rgba(255,255,255,0.95); border-color: rgba(0,0,0,0.1); color: #111827; }
+body.light-theme .modal h3 { color: #111827; }
+body.light-theme .modal-sub { color: #6b7280; }
+body.light-theme .summary { background: rgba(0,0,0,0.02); border-color: rgba(0,0,0,0.1); }
+body.light-theme .summary-row { color: #4b5563; }
+body.light-theme .summary-row strong { color: #111827; }
+body.light-theme .summary-total { border-color: rgba(0,0,0,0.1); }
+body.light-theme .toast { background: rgba(255,255,255,0.95); color: #111827; border-color: rgba(0,0,0,0.1); }
+body.light-theme .stat { background: rgba(255,255,255,0.92); border-color: rgba(0,0,0,0.1); }
+body.light-theme .stat strong { color: #111827; }
+body.light-theme .booking-info h3 { color: #111827; }
+body.light-theme .booking-info p { color: #6b7280; }
+body.light-theme .tab { color: #6b7280; }
+body.light-theme .tab.active { background: rgba(0,0,0,0.05); color: #111827; }
+body.light-theme .support-item, body.light-theme .faq-item { background: rgba(255,255,255,0.92); border-color: rgba(0,0,0,0.1); }
+body.light-theme .faq-question { color: #111827; }
+body.light-theme .conversation-list { background: rgba(255,255,255,0.92); border-color: rgba(0,0,0,0.1); }
+body.light-theme .conversation { color: #111827; border-color: rgba(0,0,0,0.1); }
+body.light-theme .conversation.active { background: rgba(0,0,0,0.05); }
+body.light-theme .chat-head { border-color: rgba(0,0,0,0.1); }
+body.light-theme .chat-head strong { color: #111827; }
+body.light-theme .message.lender { background: rgba(0,0,0,0.05); color: #111827; border-color: rgba(0,0,0,0.1); }
+body.light-theme .chat-input { border-color: rgba(0,0,0,0.1); }
+body.light-theme .detail-content h3 { color: #111827; }
+body.light-theme .detail-meta>div { background: rgba(255,255,255,0.92); border-color: rgba(0,0,0,0.1); color: #111827; }
+
 @media(max-width:650px){.detail-meta{grid-template-columns:1fr}.detail-image{height:210px}.seller-chat-modal .chat-messages{min-height:280px}}

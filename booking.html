@@ -15,6 +15,7 @@
     <link rel="stylesheet" href="css/booking.css" /> <!-- Specific to this page -->
 </head>
 <body>
+    <script src="js/theme.js"></script>
     <!-- Background Video -->
     <video class="bg-video" autoplay muted loop playsinline>
         <source src="assets/video.mp4" type="video/mp4">
@@ -134,6 +135,18 @@
             <p class="modal-subtitle">Upgrade to RentFlow Pro to instantly reveal lender phone numbers and call them directly.</p>
             <div style="font-size: 24px; font-weight: 800; color: #fff; margin-bottom: 24px;">₹299 <span style="font-size: 14px; font-weight: 500; color: #8b93a1;">/ month</span></div>
             <button type="button" class="btn-primary-full" onclick="alert('Razorpay Gateway Initiated...'); document.getElementById('pro-modal').classList.remove('show');">Upgrade via Razorpay</button>
+        </div>
+    </div>
+
+    <!-- Product Details Modal -->
+    <div class="modal-backdrop" id="product-details-modal">
+        <div class="modal-card" style="max-width: 500px;">
+            <button class="modal-close" id="close-details-modal">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+            <div id="details-modal-content">
+                <!-- Injected via JS -->
+            </div>
         </div>
     </div>
 

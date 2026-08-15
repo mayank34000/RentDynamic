@@ -18,14 +18,21 @@ document.addEventListener("DOMContentLoaded", () => {
         if (isLoggedIn) {
             let user = { userfname: "User" };
             try { user = JSON.parse(localStorage.getItem("current_user")) || user; } catch(e) {}
-            const initial = user.userfname ? user.userfname.charAt(0).toUpperCase() : "U";
+            const nameToDisplay = user.name || user.username || user.userfname || 'User';
+            const firstName = nameToDisplay.split(' ')[0];
+            const savedImage = localStorage.getItem('profileImage') || 'assets/profile.png';
             
+            authContainer.style.display = 'flex';
+            authContainer.style.alignItems = 'center';
+            authContainer.style.gap = '15px';
             authContainer.innerHTML = `
-                <a href="profile.html" class="btn-ghost" style="display:flex; align-items:center; gap:8px;">
-                    <div style="width:24px; height:24px; border-radius:50%; background:var(--blue); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:12px;">${initial}</div>
-                    Profile
+                <a href="profile.html" style="display: flex; align-items: center; gap: 8px; cursor: pointer; text-decoration: none;">
+                    <div style="width: 32px; height: 32px; background: #3b82f6; border-radius: 50%; display: flex; align-items: center; justify-content: center; overflow: hidden; border: 1px solid rgba(255,255,255,0.2);">
+                        <img src="${savedImage}" alt="Profile" style="width: 100%; height: 100%; object-fit: cover;">
+                    </div>
+                    <span id="profile-name" style="font-weight: 600; color: #fff;">${firstName}</span>
                 </a>
-                <a href="#" class="btn-nav-primary" id="logout-btn">Log Out</a>
+                <button id="logout-btn" class="btn-ghost" style="padding: 8px 16px; border: 1px solid rgba(255,255,255,0.2);">Logout</button>
             `;
             document.getElementById("logout-btn").addEventListener("click", (e) => {
                 e.preventDefault();

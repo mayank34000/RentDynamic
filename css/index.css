@@ -1333,7 +1333,634 @@ body {
     color: var(--text-muted);
 }
 
+/* ========================================
+   LIGHT THEME OVERRIDES
+======================================== */
+
+body.light-theme {
+    --bg-deep: #f0f2f5;
+    --bg-dark-blue: #ffffff;
+    --bg-card: rgba(255, 255, 255, 0.92);
+    --bg-card-hover: rgba(245, 247, 250, 0.98);
+    --border: rgba(0, 0, 0, 0.08);
+    --border-hover: rgba(59, 130, 246, 0.45);
+    --text-primary: #111827;
+    --text-secondary: #4b5563;
+    --text-muted: #6b7280;
+    --shadow-glow: 0 0 60px rgba(37, 99, 235, 0.08);
+}
+
+body.light-theme {
+    background: #f0f2f5;
+    color: #111827;
+}
+
+/* Hide dark bg-video in light mode */
+body.light-theme ~ .bg-video,
+body.light-theme .bg-video {
+    opacity: 0.06;
+    filter: brightness(1.2) contrast(0.9) saturate(0.5);
+}
+
+body.light-theme .overlay {
+    background: rgba(240, 242, 245, 0.88);
+}
+
+/* Navbar */
+body.light-theme .site-header.scrolled {
+    background: rgba(255, 255, 255, 0.92);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+body.light-theme .logo {
+    color: #111827;
+}
+
+body.light-theme .nav-links a {
+    color: #4b5563;
+}
+
+body.light-theme .nav-links a:hover {
+    color: #111827;
+}
+
+body.light-theme .btn-ghost {
+    color: #4b5563;
+}
+
+body.light-theme .btn-ghost:hover {
+    color: #111827;
+    background: rgba(0, 0, 0, 0.05);
+}
+
+body.light-theme .btn-nav-primary {
+    background: var(--accent-blue);
+    color: #ffffff;
+    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.20);
+}
+
+body.light-theme .btn-nav-primary:hover {
+    background: var(--accent-dark-blue);
+    box-shadow: 0 8px 24px rgba(37, 99, 235, 0.28);
+}
+
+body.light-theme .hamburger span {
+    background: #374151;
+}
+
+body.light-theme .mobile-menu {
+    background: rgba(255, 255, 255, 0.97);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+body.light-theme .mobile-menu a {
+    color: #4b5563;
+    border-bottom-color: rgba(0, 0, 0, 0.05);
+}
+
+body.light-theme .mobile-menu a:hover {
+    color: #111827;
+}
+
+/* Hero Section */
+body.light-theme .hero-headline {
+    color: #111827;
+}
+
+body.light-theme .hero-sub {
+    color: #4b5563;
+}
+
+/* Section Eyebrow */
+body.light-theme .section-eyebrow {
+    color: var(--accent-blue);
+    background: rgba(37, 99, 235, 0.08);
+}
+
+/* Section Headings */
+body.light-theme .section-heading {
+    color: #111827;
+}
+
+body.light-theme .section-sub {
+    color: #6b7280;
+}
+
+/* Feature Cards */
+body.light-theme .feature-card {
+    background: rgba(255, 255, 255, 0.90);
+    border-color: rgba(0, 0, 0, 0.06);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+}
+
+body.light-theme .feature-card:hover {
+    background: #ffffff;
+    border-color: rgba(0, 0, 0, 0.10);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+}
+
+body.light-theme .feature-card h4 {
+    color: #111827;
+}
+
+body.light-theme .feature-card p {
+    color: #6b7280;
+}
+
+/* Step Cards */
+body.light-theme .step-card {
+    background: rgba(255, 255, 255, 0.90);
+    border-color: rgba(0, 0, 0, 0.06);
+}
+
+body.light-theme .step-number {
+    color: rgba(37, 99, 235, 0.12);
+}
+
+body.light-theme .step-card h4 {
+    color: #111827;
+}
+
+body.light-theme .step-card p {
+    color: #6b7280;
+}
+
+/* Testimonial Cards */
+body.light-theme .testimonial-card {
+    background: rgba(255, 255, 255, 0.90);
+    border-color: rgba(0, 0, 0, 0.06);
+}
+
+body.light-theme .testimonial-text {
+    color: #374151;
+}
+
+body.light-theme .testimonial-author {
+    color: #111827;
+}
+
+body.light-theme .testimonial-role {
+    color: #6b7280;
+}
+
+/* Pricing Cards */
+body.light-theme .plan-card {
+    background: rgba(255, 255, 255, 0.92);
+    border-color: rgba(0, 0, 0, 0.08);
+}
+
+body.light-theme .plan-card:hover {
+    border-color: rgba(0, 0, 0, 0.14);
+}
+
+body.light-theme .plan-price {
+    color: #111827;
+}
+
+body.light-theme .plan-period {
+    color: #6b7280;
+}
+
+body.light-theme .plan-features li.included {
+    color: #374151;
+}
+
+body.light-theme .plan-cta-free {
+    background: rgba(0, 0, 0, 0.04);
+    color: #111827;
+    border-color: rgba(0, 0, 0, 0.12);
+}
+
+body.light-theme .plan-cta-free:hover {
+    background: rgba(0, 0, 0, 0.08);
+    border-color: rgba(0, 0, 0, 0.2);
+}
+
+body.light-theme .plan-cta-pro {
+    background: var(--accent-blue);
+    color: #ffffff;
+}
+
+body.light-theme .plan-cta-pro:hover {
+    background: var(--accent-dark-blue);
+}
+
+/* CTA Banner */
+body.light-theme .cta-banner {
+    background: rgba(255, 255, 255, 0.90);
+    border-color: rgba(0, 0, 0, 0.06);
+}
+
+body.light-theme .cta-banner h2 {
+    color: #111827;
+}
+
+body.light-theme .cta-banner p {
+    color: #6b7280;
+}
+
+/* Modal */
+body.light-theme .modal-backdrop {
+    background: rgba(0, 0, 0, 0.4);
+}
+
+body.light-theme .modal-card {
+    background: #ffffff;
+    border-color: rgba(0, 0, 0, 0.08);
+    box-shadow: 0 24px 48px rgba(0, 0, 0, 0.12);
+}
+
+/* Footer */
+body.light-theme .site-footer {
+    background: rgba(255, 255, 255, 0.80);
+    border-top: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+body.light-theme .footer-brand p {
+    color: #6b7280;
+}
+
+body.light-theme .footer-bottom {
+    border-top-color: rgba(0, 0, 0, 0.06);
+}
+
+/* Stat Cards (used across pages) */
+body.light-theme .stat-card {
+    background: rgba(255, 255, 255, 0.90);
+    border-color: rgba(0, 0, 0, 0.06);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+body.light-theme .stat-value {
+    color: #111827;
+}
+
+body.light-theme .stat-title {
+    color: #6b7280;
+}
+
+/* Generic card bg overrides for pages using rgba dark cards */
+body.light-theme .order-card,
+body.light-theme .booking-card,
+body.light-theme .listing-card,
+body.light-theme .card {
+    background: rgba(255, 255, 255, 0.92);
+    border-color: rgba(0, 0, 0, 0.06);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+body.light-theme .order-card:hover,
+body.light-theme .booking-card:hover,
+body.light-theme .listing-card:hover {
+    border-color: rgba(0, 0, 0, 0.12);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+}
+
+/* Input fields */
+body.light-theme input,
+body.light-theme select,
+body.light-theme textarea {
+    background: #f5f5f5;
+    border-color: #ddd;
+    color: #333;
+}
+
+body.light-theme input:focus,
+body.light-theme select:focus,
+body.light-theme textarea:focus {
+    border-color: var(--accent-blue);
+    background: #ffffff;
+}
+
+body.light-theme input::placeholder,
+body.light-theme textarea::placeholder {
+    color: #9ca3af;
+}
+
+/* Buttons with rgba(255,255,255,...) backgrounds */
+body.light-theme .btn-receipt {
+    background: rgba(0, 0, 0, 0.06);
+    color: #374151;
+}
+
+body.light-theme .btn-receipt:hover {
+    background: rgba(0, 0, 0, 0.10);
+}
+
+body.light-theme .btn-primary {
+    background: var(--accent-blue);
+    color: #ffffff;
+    box-shadow: 0 6px 24px rgba(37, 99, 235, 0.18);
+}
+
+body.light-theme .btn-primary:hover {
+    background: var(--accent-dark-blue);
+    box-shadow: 0 12px 36px rgba(37, 99, 235, 0.25);
+}
+
+body.light-theme .btn-primary-full {
+    background: var(--accent-blue);
+    color: #ffffff;
+}
+
+body.light-theme .btn-primary-full:hover {
+    background: var(--accent-dark-blue);
+}
+
+/* Secondary button — invisible rgba(255,255,255,...) bg on light */
+body.light-theme .btn-secondary {
+    background: rgba(0, 0, 0, 0.04);
+    color: #374151;
+    border-color: rgba(0, 0, 0, 0.12);
+}
+
+body.light-theme .btn-secondary:hover {
+    background: rgba(37, 99, 235, 0.08);
+    border-color: var(--accent-blue-bright);
+    color: var(--accent-blue);
+}
+
+/* Hero badge — light blue #93c5fd invisible on white */
+body.light-theme .hero-badge {
+    background: rgba(37, 99, 235, 0.08);
+    border-color: rgba(37, 99, 235, 0.20);
+    color: var(--accent-blue);
+}
+
+body.light-theme .badge-dot {
+    background: var(--accent-blue);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+}
+
+/* Hero title */
+body.light-theme .hero-title {
+    color: #111827;
+}
+
+/* Marquee city names — rgba(255,255,255,0.50) invisible on light bg */
+body.light-theme .marquee-group span {
+    color: rgba(0, 0, 0, 0.40);
+}
+
+body.light-theme .marquee-group span.dot {
+    color: var(--accent-blue-bright);
+    opacity: 0.5;
+}
+
+body.light-theme .marquee-group span:not(.dot):hover {
+    color: #111827;
+    text-shadow: none;
+}
+
+body.light-theme .marquee-label {
+    color: #6b7280;
+}
+
+/* Pillar cards — dark bg with white text, invisible on light */
+body.light-theme .pillar-card {
+    background: rgba(255, 255, 255, 0.85);
+    border-color: rgba(0, 0, 0, 0.08);
+    backdrop-filter: blur(12px);
+}
+
+body.light-theme .pillar-card:hover {
+    background: rgba(255, 255, 255, 0.95);
+    border-color: rgba(37, 99, 235, 0.25);
+}
+
+body.light-theme .pillar-text h4 {
+    color: #111827;
+}
+
+body.light-theme .pillar-text p {
+    color: #6b7280;
+}
+
+/* Feature card borders — rgba(255,255,255,0.08) invisible on light */
+body.light-theme .feature-card {
+    border-color: rgba(0, 0, 0, 0.06);
+}
+
+body.light-theme .feature-card:hover {
+    border-color: rgba(37, 99, 235, 0.30);
+    box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.08), 0 0 30px rgba(37, 99, 235, 0.06);
+}
+
+body.light-theme .feature-card h3 {
+    color: #111827;
+}
+
+body.light-theme .feature-card p {
+    color: #6b7280;
+}
+
+body.light-theme .feature-pro-highlight {
+    border-color: rgba(37, 99, 235, 0.20);
+    background: rgba(245, 247, 255, 0.95);
+}
+
+body.light-theme .feature-badge {
+    background: rgba(37, 99, 235, 0.08);
+    border-color: rgba(37, 99, 235, 0.20);
+    color: var(--accent-blue);
+}
+
+/* Step cards — white borders invisible on light, step numbers barely visible */
+body.light-theme .step-card:not(:last-child) {
+    border-bottom-color: rgba(0, 0, 0, 0.08);
+}
+
+body.light-theme .step-number {
+    color: rgba(37, 99, 235, 0.18);
+}
+
+body.light-theme .step-card:hover .step-number {
+    color: var(--accent-blue);
+}
+
+body.light-theme .step-content h3 {
+    color: #111827;
+}
+
+body.light-theme .step-content p {
+    color: #6b7280;
+}
+
+/* Testimonial cards */
+body.light-theme .testimonial-card {
+    background: rgba(255, 255, 255, 0.90);
+    border-color: rgba(0, 0, 0, 0.06);
+}
+
+body.light-theme .testimonial-text {
+    color: #374151;
+}
+
+body.light-theme .author-name {
+    color: #111827;
+}
+
+body.light-theme .author-location {
+    color: #6b7280;
+}
+
+body.light-theme .stars {
+    color: #f59e0b;
+}
+
+/* Modal overrides */
+body.light-theme .modal-backdrop {
+    background: rgba(0, 0, 0, 0.35);
+}
+
+body.light-theme .modal-card {
+    background: #ffffff;
+    border-color: rgba(0, 0, 0, 0.08);
+    box-shadow: 0 24px 48px rgba(0, 0, 0, 0.12);
+}
+
+body.light-theme .modal-title {
+    color: #111827;
+}
+
+body.light-theme .modal-sub {
+    color: #6b7280;
+}
+
+body.light-theme .modal-close {
+    color: #6b7280;
+}
+
+body.light-theme .modal-price-display {
+    color: #111827;
+}
+
+body.light-theme .modal-price-display span {
+    color: #6b7280;
+}
+
+body.light-theme .modal-features-mini div {
+    color: #374151;
+}
+
+body.light-theme .modal-disclaimer {
+    color: #9ca3af;
+}
+
+/* Profile name in nav — hardcoded inline color: #fff */
+body.light-theme #profile-name {
+    color: #111827 !important;
+}
+
+/* Logout button — hardcoded inline border */
+body.light-theme #logout-btn {
+    border-color: rgba(0, 0, 0, 0.12) !important;
+    color: #374151;
+}
+
+/* Profile avatar border — hardcoded inline */
+body.light-theme #user-profile a > div:first-child {
+    border-color: rgba(0, 0, 0, 0.12) !important;
+}
+
+/* Section titles and subtitles */
+body.light-theme .section-title {
+    color: #111827;
+}
+
+body.light-theme .section-subtitle {
+    color: #6b7280;
+}
+
+/* Footer */
+body.light-theme .site-footer {
+    background: rgba(255, 255, 255, 0.85);
+    border-top: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+body.light-theme .footer-col-title {
+    color: #111827;
+}
+
+body.light-theme .footer-col a {
+    color: #6b7280;
+}
+
+body.light-theme .footer-col a:hover {
+    color: var(--accent-blue);
+}
+
+body.light-theme .footer-brand p {
+    color: #6b7280;
+}
+
+body.light-theme .footer-bottom {
+    border-top-color: rgba(0, 0, 0, 0.06);
+}
+
+body.light-theme .footer-bottom p,
+body.light-theme .footer-tech {
+    color: #9ca3af;
+}
+
+/* CTA banner */
+body.light-theme .cta-banner {
+    background: rgba(255, 255, 255, 0.90);
+    border-color: rgba(0, 0, 0, 0.06);
+}
+
+body.light-theme .cta-banner h2 {
+    color: #111827;
+}
+
+body.light-theme .cta-banner p {
+    color: #6b7280;
+}
+
+/* Plan cards */
+body.light-theme .plan-card {
+    background: rgba(255, 255, 255, 0.92);
+    border-color: rgba(0, 0, 0, 0.08);
+}
+
+body.light-theme .plan-name {
+    color: #111827;
+}
+
+body.light-theme .plan-price {
+    color: #111827;
+}
+
+body.light-theme .plan-period {
+    color: #6b7280;
+}
+
+body.light-theme .plan-features li.included {
+    color: #374151;
+}
+
+body.light-theme .plan-features li.pro-feature strong {
+    color: #111827;
+}
+
+body.light-theme .plan-cta-free {
+    background: rgba(0, 0, 0, 0.04);
+    color: #111827;
+    border-color: rgba(0, 0, 0, 0.12);
+}
+
+body.light-theme .plan-cta-free:hover {
+    background: rgba(0, 0, 0, 0.08);
+    border-color: rgba(0, 0, 0, 0.2);
+}
+
+body.light-theme .plan-cta-pro {
+    background: var(--accent-blue);
+    color: #ffffff;
+}
+
 @media (max-width: 900px) {
+
     .site-header {
         padding: 20px 24px;
     }

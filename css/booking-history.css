@@ -440,3 +440,143 @@ body {
 .btn-primary-full:hover {
     background: #2a46b3;
 }
+
+/* ========================================
+   LIGHT THEME OVERRIDES
+======================================== */
+
+body.light-theme {
+    background-color: #f0f2f5;
+    color: #111827;
+}
+
+body.light-theme .bg-video {
+    opacity: 0.1;
+}
+
+body.light-theme .overlay {
+    background: rgba(255, 255, 255, 0.85);
+}
+
+body.light-theme .page-title {
+    color: #111827;
+}
+
+body.light-theme .page-subtitle {
+    color: #4b5563;
+}
+
+body.light-theme .stat-card {
+    background: rgba(255, 255, 255, 0.92);
+    border-color: rgba(0, 0, 0, 0.1);
+}
+
+body.light-theme .stat-title {
+    color: #6b7280;
+}
+
+body.light-theme .stat-value {
+    color: #111827;
+}
+
+body.light-theme .filter-tab {
+    color: #6b7280;
+}
+
+body.light-theme .filter-tab:hover {
+    color: #111827;
+}
+
+body.light-theme .filter-tab.active {
+    color: #3a5bd9;
+}
+
+body.light-theme .order-card {
+    background: rgba(255, 255, 255, 0.92);
+    border-color: rgba(0, 0, 0, 0.1);
+}
+
+body.light-theme .order-card:hover {
+    border-color: rgba(0, 0, 0, 0.2);
+}
+
+body.light-theme .order-title {
+    color: #111827;
+}
+
+body.light-theme .order-meta {
+    color: #6b7280;
+}
+
+body.light-theme .order-meta span {
+    color: #4b5563;
+}
+
+body.light-theme .order-price {
+    color: #111827;
+}
+
+body.light-theme .btn-receipt {
+    background: rgba(0, 0, 0, 0.05);
+    color: #111827;
+}
+
+body.light-theme .btn-receipt:hover {
+    background: rgba(0, 0, 0, 0.1);
+}
+
+body.light-theme .empty-state {
+    background: rgba(255, 255, 255, 0.92);
+    border-color: rgba(0, 0, 0, 0.1);
+}
+
+body.light-theme .empty-title {
+    color: #111827;
+}
+
+body.light-theme .empty-sub {
+    color: #6b7280;
+}
+
+body.light-theme .modal-backdrop {
+    background: rgba(255, 255, 255, 0.6);
+}
+
+body.light-theme .modal-card {
+    background: rgba(255, 255, 255, 0.95);
+    border-color: rgba(0, 0, 0, 0.1);
+    box-shadow: 0 24px 48px rgba(0, 0, 0, 0.1);
+}
+
+body.light-theme .modal-title {
+    color: #111827;
+}
+
+body.light-theme .modal-close {
+    color: #6b7280;
+}
+
+body.light-theme .modal-close:hover {
+    color: #111827;
+}
+
+body.light-theme .receipt-header,
+body.light-theme .receipt-row.total-row {
+    border-color: rgba(0, 0, 0, 0.1);
+}
+
+body.light-theme .receipt-item-name {
+    color: #111827;
+}
+
+body.light-theme .receipt-lender {
+    color: #6b7280;
+}
+
+body.light-theme .receipt-row {
+    color: #4b5563;
+}
+
+body.light-theme .receipt-row.total-row {
+    color: #111827;
+}

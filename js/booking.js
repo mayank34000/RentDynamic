@@ -20,14 +20,21 @@ document.addEventListener("DOMContentLoaded", () => {
         if (isLoggedIn) {
             let user = { userfname: "User" };
             try { user = JSON.parse(localStorage.getItem("current_user")) || user; } catch(e) {}
-            const initial = user.userfname ? user.userfname.charAt(0).toUpperCase() : "U";
+            const nameToDisplay = user.name || user.username || user.userfname || 'User';
+            const firstName = nameToDisplay.split(' ')[0];
+            const savedImage = localStorage.getItem('profileImage') || 'assets/profile.png';
             
+            authContainer.style.display = 'flex';
+            authContainer.style.alignItems = 'center';
+            authContainer.style.gap = '15px';
             authContainer.innerHTML = `
-                <a href="profile.html" class="btn-ghost" style="display:flex; align-items:center; gap:8px;">
-                    <div style="width:24px; height:24px; border-radius:50%; background:var(--blue); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:12px;">${initial}</div>
-                    Profile
+                <a href="profile.html" style="display: flex; align-items: center; gap: 8px; cursor: pointer; text-decoration: none;">
+                    <div style="width: 32px; height: 32px; background: #3b82f6; border-radius: 50%; display: flex; align-items: center; justify-content: center; overflow: hidden; border: 1px solid rgba(255,255,255,0.2);">
+                        <img src="${savedImage}" alt="Profile" style="width: 100%; height: 100%; object-fit: cover;">
+                    </div>
+                    <span id="profile-name" style="font-weight: 600; color: #fff;">${firstName}</span>
                 </a>
-                <a href="#" class="btn-nav-primary" id="logout-btn">Log Out</a>
+                <button id="logout-btn" class="btn-ghost" style="padding: 8px 16px; border: 1px solid rgba(255,255,255,0.2);">Logout</button>
             `;
             document.getElementById("logout-btn").addEventListener("click", (e) => {
                 e.preventDefault();
@@ -113,6 +120,44 @@ document.addEventListener("DOMContentLoaded", () => {
                         }
                     }
                 }
+
+                // Data Migration: Add mock addresses for cached listings that don't have them
+                let migrationNeeded = false;
+                const colonies = {
+                  'Delhi NCR': ['Connaught Place', 'Defense Colony', 'Vasant Vihar', 'Saket', 'Cyber City, Gurugram', 'Sector 62, Noida'],
+                  'Pune': ['Koregaon Park', 'Kalyani Nagar', 'Viman Nagar', 'Baner', 'Hinjewadi', 'Magarpatta'],
+                  'Hyderabad': ['Banjara Hills', 'Jubilee Hills', 'HITEC City', 'Gachibowli', 'Kondapur', 'Madhapur'],
+                  'Ahmedabad': ['Vastrapur', 'Satellite', 'Bodakdev', 'Prahlad Nagar', 'Navrangpura', 'Thaltej'],
+                  'Chandigarh': ['Sector 17', 'Sector 8', 'Sector 9', 'Sector 35', 'Sector 43', 'IT Park'],
+                  'Goa': ['Panaji', 'Calangute', 'Baga', 'Anjuna', 'Vagator', 'Margao'],
+                  'Indore': ['Vijay Nagar', 'Palasia', 'Bhawarkua', 'Rajendra Nagar', 'LIG Colony', 'Saket Nagar'],
+                  'Mumbai': ['Bandra West', 'Andheri West', 'Juhu', 'Powai', 'Colaba', 'Lower Parel'],
+                  'Bangalore': ['Koramangala', 'Indiranagar', 'Whitefield', 'HSR Layout', 'Jayanagar', 'Malleswaram'],
+                  'Chennai': ['Adyar', 'Besant Nagar', 'T. Nagar', 'Anna Nagar', 'Velachery', 'OMR'],
+                  'Kolkata': ['Salt Lake', 'New Town', 'Ballygunge', 'Alipore', 'Park Street', 'Jodhpur Park'],
+                  'Jaipur': ['Malviya Nagar', 'Vaishali Nagar', 'C-Scheme', 'Mansarovar', 'Bapu Nagar', 'Raja Park'],
+                  'Kochi': ['Marine Drive', 'Kakkanad', 'Edappally', 'Panampilly Nagar', 'Fort Kochi', 'Vyttila'],
+                  'Lucknow': ['Gomti Nagar', 'Aliganj', 'Hazratganj', 'Indira Nagar', 'Mahanagar', 'Ashiyana'],
+                  'Surat': ['Vesu', 'Adajan', 'Piplod', 'City Light', 'Athwa', 'Varachha']
+                };
+
+                allListings.forEach(item => {
+                    if (item.seller && !item.seller.address) {
+                        const city = item.seller.city;
+                        if (colonies[city]) {
+                            const randomColony = colonies[city][Math.floor(Math.random() * colonies[city].length)];
+                            item.seller.address = `${randomColony}, ${city}`;
+                        } else {
+                            item.seller.address = `Main Market, ${city || 'Unknown'}`;
+                        }
+                        migrationNeeded = true;
+                    }
+                });
+
+                if (migrationNeeded) {
+                    localStorage.setItem('RentFlow_listings', JSON.stringify(allListings));
+                }
+
             } catch (e) {
                 console.error("Error parsing listings", e);
                 allListings = getMockListings();
@@ -194,13 +239,16 @@ document.addEventListener("DOMContentLoaded", () => {
             return `
                 <div class="listing-card" data-id="${item.id}">
                     <div class="card-image-wrapper">
-                        <img src="${item.images?.[0] || 'https://via.placeholder.com/400x300'}" alt="${item.title}" class="card-image" />
+                        <img src="${item.images?.[0] || 'https://via.placeholder.com/400x300'}" alt="${item.title}" class="card-image" style="cursor: pointer;" onclick="window.openDetailsModal('${item.id}')" />
                         <div class="card-category-badge">${item.category}</div>
                         ${distanceHtml}
                     </div>
                     <div class="card-body">
-                        <h3 class="card-title">${item.title}</h3>
+                        <h3 class="card-title" style="cursor: pointer;" onclick="window.openDetailsModal('${item.id}')">${item.title}</h3>
                         <p class="card-desc">${item.description || 'No description provided.'}</p>
+                        <p class="card-address" style="color: #8b93a1; font-size: 0.85rem; margin-top: 5px;">
+                            📍 ${item.seller?.address || 'Location unavailable'}
+                        </p>
                         
                         <div class="card-lender-info">
                             <div class="lender-avatar">${initial}</div>
@@ -266,6 +314,7 @@ document.addEventListener("DOMContentLoaded", () => {
         // Modal Close Buttons
         document.getElementById("close-booking-modal").addEventListener("click", () => bookingModal.classList.remove("show"));
         document.getElementById("close-pro-modal").addEventListener("click", () => proModal.classList.remove("show"));
+        document.getElementById("close-details-modal").addEventListener("click", () => document.getElementById("product-details-modal").classList.remove("show"));
         
         // Close modals on outside click
         document.querySelectorAll(".modal-backdrop").forEach(backdrop => {
@@ -382,6 +431,51 @@ document.addEventListener("DOMContentLoaded", () => {
     // ========================================
     
     // Make functions globally accessible for inline onclick handlers
+    window.openDetailsModal = function(listingId) {
+        const listing = allListings.find(l => l.id === listingId);
+        if (!listing) return;
+
+        const isPro = checkProStatus();
+        const contactDisplay = isPro 
+            ? (listing.seller?.phone || 'Contact Available')
+            : 'Unlock Contact (Pro)';
+        const contactClass = isPro ? 'text-green-500' : 'text-blue-400 cursor-pointer unlock-trigger';
+        const initial = listing.seller?.name?.charAt(0).toUpperCase() || 'S';
+
+        const content = `
+            <img src="${listing.images?.[0] || 'https://via.placeholder.com/400x300'}" alt="${listing.title}" style="width:100%; height: 250px; object-fit:cover; border-radius: 8px; margin-bottom: 16px;">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom: 12px;">
+                <h2 style="font-size: 1.25rem; font-weight: 700;">${listing.title}</h2>
+                <div style="background:var(--blue); color:#fff; padding:4px 8px; border-radius:4px; font-size:0.75rem; font-weight:600;">${listing.category}</div>
+            </div>
+            <p style="font-size: 1.1rem; font-weight: 700; color: #fff; margin-bottom: 16px;">₹${listing.price.toLocaleString('en-IN')}<span style="color: #8b93a1; font-size: 0.9rem; font-weight: 500;">/${listing.period}</span></p>
+            <p style="color: #8b93a1; font-size: 0.95rem; line-height: 1.5; margin-bottom: 20px;">${listing.description || 'No description provided.'}</p>
+            
+            <p style="color: #8b93a1; font-size: 0.95rem; margin-bottom: 20px;">📍 ${listing.seller?.address || 'Location unavailable'}</p>
+            
+            <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); padding: 16px; border-radius: 8px; display:flex; align-items:center; gap: 12px; margin-bottom: 20px;">
+                <div style="width: 40px; height: 40px; background: #3b82f6; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; color: #fff;">${initial}</div>
+                <div>
+                    <h5 style="margin:0; font-size: 0.95rem;">${listing.seller?.name || 'Verified Owner'}</h5>
+                    <p style="margin:4px 0 0; font-size:0.85rem;" class="${contactClass}">${contactDisplay}</p>
+                </div>
+            </div>
+            
+            <button class="btn-primary-full" onclick="document.getElementById('product-details-modal').classList.remove('show'); window.openBookingModal('${listing.id}');">Book Now</button>
+        `;
+
+        document.getElementById("details-modal-content").innerHTML = content;
+        
+        // Re-attach unlock-trigger logic for modal
+        document.querySelectorAll('#details-modal-content .unlock-trigger').forEach(el => {
+            el.addEventListener('click', () => {
+                document.getElementById('pro-modal').classList.add('show');
+            });
+        });
+
+        document.getElementById("product-details-modal").classList.add("show");
+    };
+
     window.openBookingModal = function(listingId) {
         const listing = allListings.find(l => l.id === listingId);
         if (!listing) return;
@@ -484,7 +578,29 @@ document.addEventListener("DOMContentLoaded", () => {
     function checkProStatus() {
         try {
             const user = JSON.parse(localStorage.getItem('current_user'));
-            return user?.isPro === true || user?.isPremium === true;
+            if (!user) return false;
+            if (user.isPremium || user.isPro) {
+                if (user.premiumExpiryDate) {
+                    const expiry = new Date(user.premiumExpiryDate);
+                    const now = new Date();
+                    if (now > expiry) {
+                        user.isPremium = false;
+                        user.isPro = false;
+                        localStorage.setItem('current_user', JSON.stringify(user));
+                        let allUsers = JSON.parse(localStorage.getItem('user')) || [];
+                        const userIndex = allUsers.findIndex(u => u.useremail === user.useremail);
+                        if (userIndex !== -1) {
+                            allUsers[userIndex].isPremium = false;
+                            allUsers[userIndex].isPro = false;
+                            localStorage.setItem('user', JSON.stringify(allUsers));
+                        }
+                        showToast("Your Premium subscription has expired. Phone numbers are hidden.", "error");
+                        return false;
+                    }
+                }
+                return true;
+            }
+            return false;
         } catch(e) {
             return false;
         }

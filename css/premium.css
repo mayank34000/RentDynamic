@@ -156,3 +156,47 @@ body {
 .back-link:hover {
     color: #fff;
 }
+
+/* ========================================
+   LIGHT THEME OVERRIDES
+======================================== */
+
+body.light-theme {
+    background-color: #f0f2f5;
+    background-image: radial-gradient(circle at 50% 50%, rgba(37, 99, 235, 0.1) 0%, transparent 60%);
+    color: #111827;
+}
+
+body.light-theme .premium-header p {
+    color: #4b5563;
+}
+
+body.light-theme .pricing-card {
+    background: rgba(255, 255, 255, 0.95);
+    border-color: rgba(0, 0, 0, 0.1);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.05), 0 0 60px rgba(37, 99, 235, 0.05);
+}
+
+body.light-theme .pricing-card h2 {
+    color: #111827;
+}
+
+body.light-theme .price {
+    color: #111827;
+}
+
+body.light-theme .price span {
+    color: #6b7280;
+}
+
+body.light-theme .benefits li {
+    color: #4b5563;
+}
+
+body.light-theme .back-link {
+    color: #6b7280;
+}
+
+body.light-theme .back-link:hover {
+    color: #111827;
+}

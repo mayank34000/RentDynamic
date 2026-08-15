@@ -174,18 +174,99 @@ document.addEventListener("DOMContentLoaded", () => {
                             <div class="order-meta">
                                 Dates: <span>${dateStr} (${item.duration} days)</span>
                             </div>
+                            ${item.status === 'Active' ? `<div class="order-meta" style="color: #ef4444; font-weight: 600;" id="countdown-${item.id}">Time Left: Calculating...</div>` : ''}
                             <div class="order-status-badge ${statusClass}">${item.status}</div>
                         </div>
                     </div>
                     
-                    <div class="order-actions">
+                    <div class="order-actions" style="display:flex; flex-direction:column; gap:8px; align-items:flex-end;">
                         <div class="order-price">₹${item.grandTotal.toLocaleString('en-IN')}</div>
+                        ${item.status === 'Approved' ? `<button class="btn-primary" style="padding: 6px 12px; font-size: 13px;" onclick="window.initiatePayment('${item.id}')">Pay Now</button>` : ''}
                         <button class="btn-receipt" onclick="window.openReceiptModal('${item.id}')">View Receipt</button>
                     </div>
                 </div>
             `;
         }).join('');
     }
+
+    // ========================================
+    // COUNTDOWN LOGIC FOR ACTIVE RENTALS
+    // ========================================
+    setInterval(() => {
+        allBookings.forEach(item => {
+            if (item.status === 'Active' && item.endDate) {
+                const el = document.getElementById(`countdown-${item.id}`);
+                if (el) {
+                    const end = new Date(item.endDate);
+                    end.setHours(23, 59, 59, 999);
+                    const now = new Date();
+                    const diff = end - now;
+
+                    if (diff <= 0) {
+                        el.textContent = "Rental Ended";
+                        el.style.color = "#ef4444";
+                        
+                        // Automatically complete it
+                        item.status = 'Completed';
+                        localStorage.setItem('rentflow_bookings', JSON.stringify(allBookings));
+                        calculateStats();
+                        renderOrders();
+                    } else {
+                        const d = Math.floor(diff / (1000 * 60 * 60 * 24));
+                        const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                        const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                        const s = Math.floor((diff % (1000 * 60)) / 1000);
+                        el.textContent = `Time Left: ${d}d ${h}h ${m}m ${s}s`;
+                    }
+                }
+            }
+        });
+    }, 1000);
+
+    // ========================================
+    // RAZORPAY PAYMENT LOGIC
+    // ========================================
+    window.initiatePayment = function(bookingId) {
+        const booking = allBookings.find(b => b.id === bookingId);
+        if (!booking) return;
+
+        const options = {
+            "key": "rzp_test_TPWlCTZ9mczHSa", 
+            "amount": booking.grandTotal * 100, // in paise
+            "currency": "INR",   
+            "name": "RentFlow",
+            "description": "Payment for " + booking.itemTitle,
+            "handler": function (response) {
+                console.log("Successful Payment ID:", response.razorpay_payment_id);
+                
+                // Update status to Active
+                booking.status = 'Active';
+                localStorage.setItem('rentflow_bookings', JSON.stringify(allBookings));
+                
+                alert('Payment Successful! Rental is now Active.');
+                calculateStats();
+                renderOrders();
+            },
+            "prefill": {
+                "name": "User", 
+                "email": "user@example.com",
+                "contact": "9999999999" 
+            },
+            "theme": {
+                "color": "#2563eb" 
+            }
+        };
+
+        try {
+            const rzp = new Razorpay(options);
+            rzp.on('payment.failed', function (response){
+                alert("Payment Failed: " + response.error.description);
+            });
+            rzp.open();
+        } catch (error) {
+            alert("Failed to load payment gateway.");
+        }
+    };
 
     // ========================================
     // 6. EVENT DELEGATION

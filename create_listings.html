@@ -212,6 +212,21 @@
 
             </div>
 
+            <section class="dashboard-section" style="margin-top: 40px;" id="pending-requests-section">
+                <div class="dashboard-header">
+                    <div>
+                        <h2 class="dashboard-title">Pending Requests</h2>
+                        <p style="font-size: 14px; color: var(--text-secondary);">Manage incoming booking requests for your items.</p>
+                    </div>
+                    <div style="font-size: 14px; color: var(--text-primary); padding: 8px 16px; border-radius: 8px; border: 1px solid var(--border);">
+                        Pending: <span id="pending-requests-count">0</span>
+                    </div>
+                </div>
+                <div class="listings-grid" id="pending-requests-grid">
+                    <!-- Dynamically populated via JS -->
+                </div>
+            </section>
+
             <section class="dashboard-section">
                 <div class="dashboard-header">
                     <div>

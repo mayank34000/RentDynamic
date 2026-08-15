@@ -64,6 +64,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     updateLivePreviewAndCalculator();
     renderMyListingsDashboard();
+    renderPendingRequests();
 
     function updateLivePreviewAndCalculator() {
         const title = titleInput.value.trim() || 'Your Product Name';
@@ -292,6 +293,7 @@ document.addEventListener('DOMContentLoaded', () => {
         renderImagePreviews();
         updateLivePreviewAndCalculator();
         renderMyListingsDashboard();
+        renderPendingRequests();
 
         triggerSuccessModal();
     }
@@ -391,6 +393,90 @@ document.addEventListener('DOMContentLoaded', () => {
             listings = listings.filter(l => l.id !== id);
             localStorage.setItem('RentFlow_listings', JSON.stringify(listings));
             renderMyListingsDashboard();
+        }
+    };
+
+    function renderPendingRequests() {
+        const grid = document.getElementById('pending-requests-grid');
+        const countSpan = document.getElementById('pending-requests-count');
+        if (!grid) return;
+
+        let listings = getStoredListings();
+        const currentUser = JSON.parse(localStorage.getItem('current_user'));
+        const userEmail = currentUser ? currentUser.useremail : '';
+        
+        const myListingIds = listings.filter(item => {
+            const sellerEmail = (item.seller && item.seller.email) ? item.seller.email : 'admin@rentflow.com';
+            return sellerEmail === userEmail;
+        }).map(l => l.id);
+
+        let bookings = [];
+        try {
+            bookings = JSON.parse(localStorage.getItem('rentflow_bookings')) || [];
+        } catch(e) {}
+
+        const pendingReqs = bookings.filter(b => b.status === 'Pending' && myListingIds.includes(b.listingId));
+
+        if (countSpan) countSpan.textContent = pendingReqs.length;
+
+        if (pendingReqs.length === 0) {
+            grid.innerHTML = `
+                <div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: var(--text-muted);">
+                    <p style="font-size: 16px;">No pending requests at the moment.</p>
+                </div>
+            `;
+            return;
+        }
+
+        grid.innerHTML = pendingReqs.map(req => `
+            <div class="listing-card-dash" style="border: 1px solid #eab308;">
+                <div class="dash-img-wrap">
+                    <img src="${req.itemImage}" alt="${req.itemTitle}" />
+                    <span class="dash-badge-status" style="background: #ca8a04;">Pending</span>
+                </div>
+                <div class="dash-content">
+                    <h4 class="dash-title">${req.itemTitle}</h4>
+                    <div style="font-size: 14px; font-weight: 700; color: var(--text-primary); margin-bottom: 8px;">
+                        Dates: ${req.startDate} to ${req.endDate} (${req.duration} days)
+                    </div>
+                    <div class="dash-meta-stats">
+                        <span>Rate: ₹${req.rate}/day</span>
+                        <span>Total: ₹${req.grandTotal}</span>
+                    </div>
+                    <div class="dash-actions" style="margin-top: 10px;">
+                        <button type="button" class="btn-sm" style="background: #10b981; color: white; border: none;" onclick="approveRequest('${req.id}')">Approve</button>
+                        <button type="button" class="btn-sm btn-sm-danger" onclick="rejectRequest('${req.id}')">Reject</button>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    window.approveRequest = function(reqId) {
+        let bookings = [];
+        try {
+            bookings = JSON.parse(localStorage.getItem('rentflow_bookings')) || [];
+        } catch(e) {}
+        const bIndex = bookings.findIndex(b => b.id === reqId);
+        if (bIndex !== -1) {
+            bookings[bIndex].status = 'Approved';
+            localStorage.setItem('rentflow_bookings', JSON.stringify(bookings));
+            renderPendingRequests();
+            alert('Request Approved! The buyer can now make the payment.');
+        }
+    };
+
+    window.rejectRequest = function(reqId) {
+        if (!confirm('Are you sure you want to reject this request?')) return;
+        let bookings = [];
+        try {
+            bookings = JSON.parse(localStorage.getItem('rentflow_bookings')) || [];
+        } catch(e) {}
+        const bIndex = bookings.findIndex(b => b.id === reqId);
+        if (bIndex !== -1) {
+            bookings[bIndex].status = 'Cancelled';
+            localStorage.setItem('rentflow_bookings', JSON.stringify(bookings));
+            renderPendingRequests();
         }
     };
 

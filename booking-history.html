@@ -1,6 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <script>
+        if (localStorage.getItem('isLoggedIn') !== 'true') {
+            window.location.href = 'login.html';
+        }
+    </script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>RentFlow — My Rentals</title>
@@ -133,6 +138,38 @@
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="js/booking-history.js"></script>
-<script src="js/navbar-scroll.js"></script>
+                        <footer class="site-footer">
+            <div class="footer-inner">
+                <div class="footer-brand">
+                    <div class="logo">Rent<span>Flow</span></div>
+                    <p>Smart dynamic rental platform.</p>
+                </div>
+                <div class="footer-links">
+                    <div class="footer-col">
+                        <p class="footer-col-title">Platform</p>
+                        <a href="index.html">Home</a>
+                        <a href="booking.html">Explore Rentals</a>
+                        <a href="create_listings.html">Post Listing</a>
+                        <a href="premium.html">Pricing</a>
+                    </div>
+                    <div class="footer-col">
+                        <p class="footer-col-title">User</p>
+                        <a href="profile.html">Profile</a>
+                        <a href="booking-history.html">My Rentals</a>
+                                                                    </div>
+                    <div class="footer-col">
+                        <p class="footer-col-title">Company</p>
+                        <a href="about.html">About Us</a>
+                        <a href="contact.html">Contact & FAQ</a>
+                        <a href="feedback.html">Feedback</a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>©2026 RentFlow. All rights reserved.</p>
+                <p class="footer-tech">Built by Team RentFlow· Secured by Razorpay</p>
+            </div>
+        </footer>
+    <script src="js/navbar-scroll.js"></script>
 </body>
 </html>

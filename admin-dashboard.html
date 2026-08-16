@@ -1,6 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <script>
+        if (localStorage.getItem('isLoggedIn') !== 'true') {
+            window.location.href = 'login.html';
+        }
+    </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RentFlow | Admin Dashboard</title>
@@ -33,7 +38,7 @@
 
         <ul class="navbar-links" id="navLinks">
             <li><a href="admin-dashboard.html" class="active">Dashboard</a></li>
-            <li><a href="analytics.html">Analytics</a></li>
+            <li></li>
             <li><a href="feedback.html">Feedback</a></li>
             <li><a href="profile.html">Profile</a></li>
             <li><a href="login.html" class="logout-link">Logout</a></li>
@@ -289,6 +294,6 @@
     <script src="js/storage.js"></script>
     <!-- Dashboard JS -->
     <script src="js/admin-dashboard.js"></script>
-<script src="js/navbar-scroll.js"></script>
+    <script src="js/navbar-scroll.js"></script>
 </body>
 </html>

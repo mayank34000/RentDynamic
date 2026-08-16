@@ -47,18 +47,7 @@ body {
     padding: 28px 32px;
 }
 
-.logo {
-    font-family: 'Manrope', sans-serif;
-    font-size: 26px;
-    font-weight: 800;
-    letter-spacing: -1px;
-    color: #B0AEAD;
-    text-decoration: none;
-}
 
-.logo span {
-    color: #ffffff;
-}
 
 .nav-links {
     display: flex;
@@ -346,12 +335,7 @@ body {
     transform: translateY(-2px);
 }
 
-.site-footer {
-    text-align: center;
-    font-size: 12px;
-    color: #444c60;
-    padding-top: 10px;
-}
+
 
 /* ========================================
    LIGHT THEME OVERRIDES
@@ -370,13 +354,7 @@ body.light-theme .overlay {
     background: rgba(255, 255, 255, 0.85);
 }
 
-body.light-theme .logo {
-    color: #6b7280;
-}
 
-body.light-theme .logo span {
-    color: #111827;
-}
 
 body.light-theme .nav-links a {
     color: #4b5563;
@@ -462,9 +440,7 @@ body.light-theme .btn-secondary:hover {
     border-color: rgba(0, 0, 0, 0.2);
 }
 
-body.light-theme .site-footer {
-    color: #6b7280;
-}
+
 
 @media (max-width: 900px) {
     .team-grid {

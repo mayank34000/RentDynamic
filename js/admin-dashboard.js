@@ -1,5 +1,5 @@
 /* ============================================================
-   RentIQ – Admin Dashboard JavaScript (Platform Moderator)
+   RentFlow – Admin Dashboard JavaScript (Platform Moderator)
    Uses shared storage.js for all data access.
    ============================================================ */
 
@@ -31,12 +31,16 @@ function renderKPIs() {
     const listings = getListings();
     const bookings = getBookings();
     const revenue = calculateTotalRevenue(bookings);
+    const platformFee = calculatePlatformFeeRevenue(listings);
+    const premiumUsers = getPremiumUsers(users);
 
     const kpiUsers = document.getElementById('kpiUsers');
     const kpiSellers = document.getElementById('kpiSellers');
     const kpiListings = document.getElementById('kpiListings');
     const kpiBookings = document.getElementById('kpiBookings');
     const kpiRevenue = document.getElementById('kpiRevenue');
+    const kpiPlatformFee = document.getElementById('kpiPlatformFee');
+    const kpiPremium = document.getElementById('kpiPremium');
 
     if (kpiUsers) kpiUsers.textContent = users.length;
     if (kpiSellers) {
@@ -46,6 +50,8 @@ function renderKPIs() {
     if (kpiListings) kpiListings.textContent = listings.length;
     if (kpiBookings) kpiBookings.textContent = bookings.length;
     if (kpiRevenue) kpiRevenue.textContent = formatCurrency(revenue);
+    if (kpiPlatformFee) kpiPlatformFee.textContent = formatCurrency(platformFee);
+    if (kpiPremium) kpiPremium.textContent = premiumUsers.length;
 }
 
 // ─── RENDER FUNCTIONS ────────────────────────────────────────
@@ -68,7 +74,8 @@ function renderListings() {
 
     // Filter
     let filtered = allListings.filter(listing => {
-        const matchesSearch = listing.name.toLowerCase().includes(searchQuery) || listing.id.toLowerCase().includes(searchQuery);
+        const title = listing.title || listing.name || '';
+        const matchesSearch = title.toLowerCase().includes(searchQuery) || listing.id.toLowerCase().includes(searchQuery);
         const matchesCategory = categoryFilter === 'All' || listing.category === categoryFilter;
         const matchesStatus = statusFilter === 'All' || listing.status === statusFilter;
         return matchesSearch && matchesCategory && matchesStatus;
@@ -76,10 +83,14 @@ function renderListings() {
 
     // Sort
     filtered.sort((a, b) => {
-        if (sortVal === 'newest') return new Date(b.date) - new Date(a.date);
-        if (sortVal === 'oldest') return new Date(a.date) - new Date(b.date);
-        if (sortVal === 'price-asc') return a.basePrice - b.basePrice;
-        if (sortVal === 'price-desc') return b.basePrice - a.basePrice;
+        const dateA = a.date || a.createdAt || 0;
+        const dateB = b.date || b.createdAt || 0;
+        const priceA = a.price || a.basePrice || 0;
+        const priceB = b.price || b.basePrice || 0;
+        if (sortVal === 'newest') return new Date(dateB) - new Date(dateA);
+        if (sortVal === 'oldest') return new Date(dateA) - new Date(dateB);
+        if (sortVal === 'price-asc') return priceA - priceB;
+        if (sortVal === 'price-desc') return priceB - priceA;
         return 0;
     });
 
@@ -107,11 +118,14 @@ function renderListings() {
             
             actionsHtml += `<button class="action-btn btn-remove-text" onclick="requestRemoveListing('${listing.id}')" style="color: #f87171;">Remove</button>`;
 
+            const title = listing.title || listing.name || 'Unknown';
+            const price = listing.price || listing.basePrice || 0;
+
             html += `
                 <tr>
-                    <td><strong>${listing.name}</strong><br><small style="color:#9ca3af">${listing.id}</small></td>
-                    <td>${listing.category}</td>
-                    <td>₹${listing.basePrice.toLocaleString('en-IN')}</td>
+                    <td><strong>${title}</strong><br><small style="color:#9ca3af">${listing.id}</small></td>
+                    <td>${listing.category || 'Other'}</td>
+                    <td>₹${price.toLocaleString('en-IN')}</td>
                     <td><span class="badge ${statusClass}">${listing.status.toUpperCase()}</span></td>
                     <td>${actionsHtml}</td>
                 </tr>
@@ -134,17 +148,22 @@ function renderBookings() {
         if (booking.status === 'Confirmed') statusClass = 'badge-low';
         if (booking.status === 'Cancelled') statusClass = 'badge-orange';
         
+        const bookingId = booking.bookingId || booking.id;
+        const listingTitle = booking.itemTitle || booking.listing;
+        const dates = (booking.startDate && booking.endDate) ? `${booking.startDate} – ${booking.endDate}` : booking.dates;
+        const amount = booking.grandTotal || booking.amount || 0;
+
         html += `
             <tr>
-                <td><strong>${booking.id}</strong></td>
-                <td>${booking.listing}</td>
-                <td>${booking.dates}</td>
-                <td>₹${booking.amount.toLocaleString('en-IN')}</td>
+                <td><strong>${bookingId}</strong></td>
+                <td>${listingTitle}</td>
+                <td>${dates}</td>
+                <td>₹${amount.toLocaleString('en-IN')}</td>
                 <td><span class="badge ${statusClass}">${booking.status}</span></td>
                 <td>
-                    <button class="action-btn" onclick="alert('Viewing booking: ${booking.id}')">View</button>
-                    ${booking.status === 'Pending' || booking.status === 'Confirmed' ? `<button class="action-btn" style="color: #f87171;" onclick="alert('Cancelling booking: ${booking.id}')">Cancel Booking</button>` : ''}
-                    ${booking.status === 'Cancelled' ? `<button class="action-btn" onclick="alert('Reviewing issue for ${booking.id}')">Review Issue</button>` : ''}
+                    <button class="action-btn" onclick="alert('Viewing booking: ${bookingId}')">View</button>
+                    ${booking.status === 'Pending' || booking.status === 'Confirmed' ? `<button class="action-btn" style="color: #f87171;" onclick="alert('Cancelling booking: ${bookingId}')">Cancel Booking</button>` : ''}
+                    ${booking.status === 'Cancelled' ? `<button class="action-btn" onclick="alert('Reviewing issue for ${bookingId}')">Review Issue</button>` : ''}
                 </td>
             </tr>
         `;
@@ -226,8 +245,34 @@ function renderActivity() {
 
     list.innerHTML = html;
 }
+function renderPremiumUsers() {
+    const list = document.getElementById('premiumList');
+    if (!list) return;
 
+    const allUsers = getUsers();
+    const premiumUsers = getPremiumUsers(allUsers);
+    let html = '';
 
+    if (premiumUsers.length === 0) {
+        html = '<tr><td colspan="5" style="text-align:center; padding:20px;">No premium users found.</td></tr>';
+    } else {
+        premiumUsers.forEach(u => {
+            const purchaseDate = new Date(u.premiumPurchaseDate).toLocaleDateString('en-IN');
+            const expiryDate = new Date(u.premiumExpiryDate).toLocaleDateString('en-IN');
+            html += `
+                <tr>
+                    <td><strong>${u.username || 'Unknown'}</strong></td>
+                    <td>${u.useremail}</td>
+                    <td><span class="badge badge-low">Premium Active</span></td>
+                    <td>${purchaseDate}</td>
+                    <td>${expiryDate}</td>
+                </tr>
+            `;
+        });
+    }
+
+    list.innerHTML = html;
+}
 // ─── ACTIONS & MODALS ────────────────────────────────────────
 
 function viewListing(id) {
@@ -245,8 +290,8 @@ function toggleListing(id, newStatus) {
     if (listing) {
         listing.status = newStatus;
         saveListings(allListings);
-        renderListings();
-        renderKPIs();
+        dispatchStorageUpdate(STORAGE_KEYS.LISTINGS);
+        refreshAll();
         showToast(`Listing ${id} is now ${listing.status}.`);
     }
 }
@@ -272,8 +317,8 @@ function confirmRemoveListing() {
         const allListings = getListings();
         const updated = allListings.filter(l => l.id !== listingToRemove);
         saveListings(updated);
-        renderListings();
-        renderKPIs();
+        dispatchStorageUpdate(STORAGE_KEYS.LISTINGS);
+        refreshAll();
         showToast(`Listing ${listingToRemove} successfully removed from the platform.`);
     }
     closeRemoveModal();
@@ -284,8 +329,8 @@ function removeAdminFeedback(id) {
         let allFeedback = getFeedback();
         allFeedback = allFeedback.filter(fb => fb.id !== id);
         saveFeedback(allFeedback);
-        renderFeedbackAndReports();
-        renderKPIs();
+        dispatchStorageUpdate(STORAGE_KEYS.FEEDBACK);
+        refreshAll();
         showToast('Feedback removed successfully.');
     }
 }
@@ -344,20 +389,36 @@ function attachModalListeners() {
 function initMobileMenu() {
     const toggle = document.getElementById('menuToggle');
     const links  = document.getElementById('navLinks');
+    const navbar = document.getElementById('navbar');
 
     if (!toggle || !links) return;
 
+    const closeMenu = () => {
+        links.classList.remove('open');
+        toggle.classList.remove('open');
+        toggle.setAttribute('aria-expanded', 'false');
+    };
+
     toggle.addEventListener('click', () => {
-        links.classList.toggle('open');
-        toggle.textContent = links.classList.contains('open') ? '✕' : '☰';
+        const isOpen = links.classList.toggle('open');
+        toggle.classList.toggle('open', isOpen);
+        toggle.setAttribute('aria-expanded', String(isOpen));
     });
 
     links.querySelectorAll('a').forEach(link => {
         link.addEventListener('click', () => {
-            links.classList.remove('open');
-            toggle.textContent = '☰';
+            closeMenu();
         });
     });
+
+    if (navbar) {
+        const syncScrolledState = () => {
+            navbar.classList.toggle('scrolled', window.scrollY > 50);
+        };
+
+        syncScrolledState();
+        window.addEventListener('scroll', syncScrolledState, { passive: true });
+    }
 }
 
 /** Re-render all data-driven sections */
@@ -365,6 +426,7 @@ function refreshAll() {
     renderKPIs();
     renderListings();
     renderBookings();
+    renderPremiumUsers();
     renderFeedbackAndReports();
 }
 
@@ -384,6 +446,11 @@ document.addEventListener('DOMContentLoaded', () => {
             e.key === STORAGE_KEYS.BOOKINGS || e.key === STORAGE_KEYS.FEEDBACK) {
             refreshAll();
         }
+    });
+
+    // Listen for custom same-tab updates
+    window.addEventListener('rentiq_storage_update', (e) => {
+        refreshAll();
     });
     
     // Attach events

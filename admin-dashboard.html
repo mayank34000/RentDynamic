@@ -1,10 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <script>
+        if (localStorage.getItem('isLoggedIn') !== 'true') {
+            window.location.href = 'login.html';
+        }
+    </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard – RentIQ</title>
-    <meta name="description" content="RentIQ admin control center — monitor rental KPIs and platform operations.">
+    <title>RentFlow | Admin Dashboard</title>
+    <meta name="description" content="RentFlow admin control center for rental KPIs and platform operations.">
 
     <!-- Fonts (same as login/signup) -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
@@ -13,21 +18,27 @@
     <link rel="stylesheet" href="css/admin-dashboard.css">
 </head>
 <body>
+    <script src="js/theme.js"></script>
 
     <!-- Background Video -->
     <video class="bg-video" autoplay muted loop playsinline>
         <source src="assets/video.mp4" type="video/mp4">
     </video>
+    <div class="overlay"></div>
 
     <!-- ===================== NAVBAR ===================== -->
     <nav class="navbar" id="navbar">
-        <a href="admin-dashboard.html" class="navbar-brand">RentIQ</a>
+        <a href="admin-dashboard.html" class="navbar-brand" aria-label="RentFlow Admin Dashboard">
+            <span class="brand-rent">Rent</span><span class="brand-flow">Flow</span>
+        </a>
 
-        <button class="menu-toggle" id="menuToggle" aria-label="Toggle menu">☰</button>
+        <button class="menu-toggle" id="menuToggle" aria-label="Toggle menu" aria-expanded="false">
+            <span></span><span></span><span></span>
+        </button>
 
         <ul class="navbar-links" id="navLinks">
             <li><a href="admin-dashboard.html" class="active">Dashboard</a></li>
-            <li><a href="analytics.html">Analytics</a></li>
+            <li></li>
             <li><a href="feedback.html">Feedback</a></li>
             <li><a href="profile.html">Profile</a></li>
             <li><a href="login.html" class="logout-link">Logout</a></li>
@@ -59,6 +70,12 @@
             </article>
 
             <article class="glass-card kpi-card">
+                <div class="kpi-icon">⭐</div>
+                <div class="kpi-value" id="kpiPremium">-</div>
+                <div class="kpi-label">Premium Users</div>
+            </article>
+
+            <article class="glass-card kpi-card">
                 <div class="kpi-icon">📋</div>
                 <div class="kpi-value" id="kpiListings">-</div>
                 <div class="kpi-label">Total Listings</div>
@@ -74,6 +91,12 @@
                 <div class="kpi-icon">💰</div>
                 <div class="kpi-value" id="kpiRevenue">-</div>
                 <div class="kpi-label">Total Revenue</div>
+            </article>
+
+            <article class="glass-card kpi-card" style="border: 1px solid rgba(251, 191, 36, 0.3); background: rgba(251, 191, 36, 0.05);">
+                <div class="kpi-icon" style="color: #fbbf24;">📈</div>
+                <div class="kpi-value" id="kpiPlatformFee" style="color: #fbbf24;">-</div>
+                <div class="kpi-label" style="color: rgba(255,255,255,0.8);">Platform Fee Revenue</div>
             </article>
         </section>
 
@@ -100,6 +123,13 @@
                     <div class="management-info">
                         <h3>Feedback & Reports</h3>
                         <p>Review platform feedback and reports.</p>
+                    </div>
+                </a>
+                <a href="#premium-users-section" class="glass-card management-card">
+                    <div class="management-icon">⭐</div>
+                    <div class="management-info">
+                        <h3>Premium Users</h3>
+                        <p>View active premium subscribers.</p>
                     </div>
                 </a>
                 <a href="analytics.html" class="glass-card management-card">
@@ -180,7 +210,28 @@
                                 <th>Actions</th>
                             </tr>
                         </thead>
-                        <tbody id="bookingList">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============ PREMIUM USERS ============ -->
+        <section id="premium-users-section" class="premium-section" aria-label="Premium users">
+            <h2 class="section-title">Premium Users</h2>
+            <div class="glass-card table-card">
+                <div class="table-responsive">
+                    <table class="platform-table" id="premiumTable">
+                        <thead>
+                            <tr>
+                                <th>Username</th>
+                                <th>Email</th>
+                                <th>Status</th>
+                                <th>Purchase Date</th>
+                                <th>Expiry Date</th>
+                            </tr>
+                        </thead>
+                        <tbody id="premiumList">
                             <!-- Populated by JS -->
                         </tbody>
                     </table>
@@ -243,5 +294,6 @@
     <script src="js/storage.js"></script>
     <!-- Dashboard JS -->
     <script src="js/admin-dashboard.js"></script>
+    <script src="js/navbar-scroll.js"></script>
 </body>
 </html>

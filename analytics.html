@@ -1,10 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <script>
+        if (localStorage.getItem('isLoggedIn') !== 'true') {
+            window.location.href = 'login.html';
+        }
+    </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Analytics – RentIQ</title>
-    <meta name="description" content="RentIQ Platform Analytics — Monitor performance and user interactions.">
+    <title>RentFlow | Analytics</title>
+    <meta name="description" content="RentFlow platform analytics for performance and user interactions.">
 
     <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
@@ -14,17 +19,23 @@
     <link rel="stylesheet" href="css/analytics.css">
 </head>
 <body>
+    <script src="js/theme.js"></script>
 
     <!-- Background Video -->
     <video class="bg-video" autoplay muted loop playsinline>
         <source src="assets/video.mp4" type="video/mp4">
     </video>
+    <div class="overlay"></div>
 
     <!-- ===================== NAVBAR ===================== -->
     <nav class="navbar" id="navbar">
-        <a href="admin-dashboard.html" class="navbar-brand">RentIQ</a>
+        <a href="admin-dashboard.html" class="navbar-brand" aria-label="RentFlow Admin Dashboard">
+            <span class="brand-rent">Rent</span><span class="brand-flow">Flow</span>
+        </a>
 
-        <button class="menu-toggle" id="menuToggle" aria-label="Toggle menu">☰</button>
+        <button class="menu-toggle" id="menuToggle" aria-label="Toggle menu" aria-expanded="false">
+            <span></span><span></span><span></span>
+        </button>
 
         <ul class="navbar-links" id="navLinks">
             <li><a href="admin-dashboard.html">Dashboard</a></li>
@@ -41,7 +52,7 @@
         <!-- Page Header -->
         <header class="page-header">
             <h1>Analytics</h1>
-            <p>Monitor platform performance and understand how users are interacting with RentIQ.</p>
+            <p>Monitor platform performance and understand how users are interacting with RentFlow.</p>
         </header>
 
         <!-- ============ KPI OVERVIEW ============ -->
@@ -59,6 +70,12 @@
             </article>
 
             <article class="glass-card kpi-card">
+                <div class="kpi-icon">✅</div>
+                <div class="kpi-value" id="statActiveListings">-</div>
+                <div class="kpi-label">Active Listings</div>
+            </article>
+
+            <article class="glass-card kpi-card">
                 <div class="kpi-icon">📦</div>
                 <div class="kpi-value" id="statBookings">-</div>
                 <div class="kpi-label">Total Bookings</div>
@@ -68,6 +85,18 @@
                 <div class="kpi-icon">💰</div>
                 <div class="kpi-value" id="statRevenue">-</div>
                 <div class="kpi-label">Total Revenue</div>
+            </article>
+
+            <article class="glass-card kpi-card" style="border: 1px solid rgba(251,191,36,0.3); background: rgba(251,191,36,0.05);">
+                <div class="kpi-icon" style="color:#fbbf24; background: rgba(251,191,36,0.12);">📈</div>
+                <div class="kpi-value" id="statPlatformFee" style="color:#fbbf24;">-</div>
+                <div class="kpi-label" style="color:rgba(255,255,255,0.8);">Platform Fee Revenue</div>
+            </article>
+
+            <article class="glass-card kpi-card">
+                <div class="kpi-icon">⭐</div>
+                <div class="kpi-value" id="statPremium">-</div>
+                <div class="kpi-label">Premium Users</div>
             </article>
         </section>
 
@@ -160,5 +189,6 @@
     <script src="js/storage.js"></script>
     <!-- Analytics JS -->
     <script src="js/analytics.js"></script>
+    <script src="js/navbar-scroll.js"></script>
 </body>
 </html>

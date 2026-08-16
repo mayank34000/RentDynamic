@@ -1,5 +1,12 @@
 document.addEventListener('DOMContentLoaded', () => {
 
+    // Redirect if not logged in
+    const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+    if (!isLoggedIn) {
+        window.location.href = "login.html";
+        return;
+    }
+
     let uploadedImages = [];
     let editingListingId = null;
 
@@ -57,6 +64,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     updateLivePreviewAndCalculator();
     renderMyListingsDashboard();
+    renderPendingRequests();
+    renderCompletedSettlements();
 
     function updateLivePreviewAndCalculator() {
         const title = titleInput.value.trim() || 'Your Product Name';
@@ -230,7 +239,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     seller: {
                         name: sellerName,
                         phone: sellerPhone,
-                        city: sellerCity
+                        city: sellerCity,
+                        email: JSON.parse(localStorage.getItem('current_user'))?.useremail || 'aryanharit14@gmail.com'
                     },
                     images: imagesList,
                     securityDeposit,
@@ -252,7 +262,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 seller: {
                     name: sellerName,
                     phone: sellerPhone,
-                    city: sellerCity
+                    city: sellerCity,
+                    email: JSON.parse(localStorage.getItem('current_user'))?.useremail || 'aryanharit14@gmail.com'
                 },
                 images: imagesList,
                 securityDeposit,
@@ -283,6 +294,7 @@ document.addEventListener('DOMContentLoaded', () => {
         renderImagePreviews();
         updateLivePreviewAndCalculator();
         renderMyListingsDashboard();
+        renderPendingRequests();
 
         triggerSuccessModal();
     }
@@ -292,7 +304,16 @@ document.addEventListener('DOMContentLoaded', () => {
         const countSpan = document.getElementById('total-listings-count');
         if (!grid) return;
 
-        const listings = getStoredListings();
+        let listings = getStoredListings();
+        
+        const currentUser = JSON.parse(localStorage.getItem('current_user'));
+        const userEmail = currentUser ? currentUser.useremail : '';
+        
+        listings = listings.filter(item => {
+            const sellerEmail = (item.seller && item.seller.email) ? item.seller.email : 'aryanharit14@gmail.com';
+            return sellerEmail === userEmail;
+        });
+
         if (countSpan) countSpan.textContent = listings.length;
 
         if (listings.length === 0) {
@@ -376,18 +397,305 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
+    function renderPendingRequests() {
+        const grid = document.getElementById('pending-requests-grid');
+        const countSpan = document.getElementById('pending-requests-count');
+        if (!grid) return;
+
+        let listings = getStoredListings();
+        const currentUser = JSON.parse(localStorage.getItem('current_user'));
+        const userEmail = currentUser ? currentUser.useremail : '';
+        
+        const myListingIds = listings.filter(item => {
+            const sellerEmail = (item.seller && item.seller.email) ? item.seller.email : 'aryanharit14@gmail.com';
+            return sellerEmail === userEmail;
+        }).map(l => l.id);
+
+        let bookings = [];
+        try {
+            bookings = JSON.parse(localStorage.getItem('rentflow_bookings')) || [];
+        } catch(e) {}
+
+        const pendingReqs = bookings.filter(b => b.status === 'Pending' && myListingIds.includes(b.listingId));
+
+        if (countSpan) countSpan.textContent = pendingReqs.length;
+
+        if (pendingReqs.length === 0) {
+            grid.innerHTML = `
+                <div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: var(--text-muted);">
+                    <p style="font-size: 16px;">No pending requests at the moment.</p>
+                </div>
+            `;
+            return;
+        }
+
+        grid.innerHTML = pendingReqs.map(req => `
+            <div class="listing-card-dash" style="border: 1px solid #eab308;">
+                <div class="dash-img-wrap">
+                    <img src="${req.itemImage}" alt="${req.itemTitle}" />
+                    <span class="dash-badge-status" style="background: #ca8a04;">Pending</span>
+                </div>
+                <div class="dash-content">
+                    <h4 class="dash-title">${req.itemTitle}</h4>
+                    <div style="font-size: 14px; font-weight: 700; color: var(--text-primary); margin-bottom: 8px;">
+                        Dates: ${req.startDate} to ${req.endDate} (${req.duration} days)
+                    </div>
+                    <div class="dash-meta-stats">
+                        <span>Rate: ₹${req.rate}/day</span>
+                        <span>Total: ₹${req.grandTotal}</span>
+                    </div>
+                    <div class="dash-actions" style="margin-top: 10px;">
+                        <button type="button" class="btn-sm" style="background: #10b981; color: white; border: none;" onclick="approveRequest('${req.id}')">Approve</button>
+                        <button type="button" class="btn-sm btn-sm-danger" onclick="rejectRequest('${req.id}')">Reject</button>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    window.approveRequest = function(reqId) {
+        let bookings = [];
+        try {
+            bookings = JSON.parse(localStorage.getItem('rentflow_bookings')) || [];
+        } catch(e) {}
+        const bIndex = bookings.findIndex(b => b.id === reqId);
+        if (bIndex !== -1) {
+            bookings[bIndex].status = 'Approved';
+            localStorage.setItem('rentflow_bookings', JSON.stringify(bookings));
+            renderPendingRequests();
+            alert('Request Approved! The buyer can now make the payment.');
+        }
+    };
+
+    window.rejectRequest = function(reqId) {
+        if (!confirm('Are you sure you want to reject this request?')) return;
+        let bookings = [];
+        try {
+            bookings = JSON.parse(localStorage.getItem('rentflow_bookings')) || [];
+        } catch(e) {}
+        const bIndex = bookings.findIndex(b => b.id === reqId);
+        if (bIndex !== -1) {
+            bookings[bIndex].status = 'Cancelled';
+            localStorage.setItem('rentflow_bookings', JSON.stringify(bookings));
+            renderPendingRequests();
+            renderCompletedSettlements();
+        }
+    };
+
+    function renderCompletedSettlements() {
+        const grid = document.getElementById('completed-settlements-grid');
+        const countSpan = document.getElementById('completed-settlements-count');
+        if (!grid) return;
+
+        let listings = getStoredListings();
+        const currentUser = JSON.parse(localStorage.getItem('current_user'));
+        const userEmail = currentUser ? currentUser.useremail : '';
+        
+        // Find user owned listing IDs
+        const myListingIds = listings.filter(item => {
+            const sellerEmail = (item.seller && item.seller.email) ? item.seller.email : 'aryanharit14@gmail.com';
+            return sellerEmail === userEmail;
+        }).map(l => l.id);
+
+        let bookings = [];
+        try {
+            bookings = JSON.parse(localStorage.getItem('rentflow_bookings')) || [];
+        } catch(e) {}
+
+        // Filter bookings of status 'Completed' (which means period ended and needs settlement)
+        const completedBookings = bookings.filter(b => b.status === 'Completed' && myListingIds.includes(b.listingId));
+
+        if (countSpan) countSpan.textContent = completedBookings.length;
+
+        if (completedBookings.length === 0) {
+            grid.innerHTML = `
+                <div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: var(--text-muted);">
+                    <p style="font-size: 16px;">No completed rentals pending settlement.</p>
+                </div>
+            `;
+            return;
+        }
+
+        grid.innerHTML = completedBookings.map(req => `
+            <div class="listing-card-dash" style="border: 1px solid #10b981;">
+                <div class="dash-img-wrap">
+                    <img src="${req.itemImage}" alt="${req.itemTitle}" />
+                    <span class="dash-badge-status" style="background: #10b981;">Completed</span>
+                </div>
+                <div class="dash-content">
+                    <h4 class="dash-title">${req.itemTitle}</h4>
+                    <div style="font-size: 14px; font-weight: 700; color: var(--text-primary); margin-bottom: 8px;">
+                        Renter: ${req.renterEmail || 'Guest'}
+                    </div>
+                    <div class="dash-meta-stats">
+                        <span>Deposit: ₹${req.deposit}</span>
+                        <span>Rent: ₹${req.subtotal}</span>
+                    </div>
+                    <div class="dash-actions" style="margin-top: 10px;">
+                        <button type="button" class="btn-sm" style="background: #10b981; color: white; border: none; width: 100%; font-weight: 700;" onclick="settleRentalReturn('${req.id}', true)">Item Returned (Refund Deposit & Pay Out)</button>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    window.settleRentalReturn = function(bookingId, isReturned) {
+        if (!confirm('Confirm return and process payments? This will refund security deposit to buyer and credit payout to your wallet.')) return;
+        
+        let bookings = [];
+        try {
+            bookings = JSON.parse(localStorage.getItem('rentflow_bookings')) || [];
+        } catch(e) {}
+        
+        const bIndex = bookings.findIndex(b => b.id === bookingId);
+        if (bIndex === -1) return;
+        const booking = bookings[bIndex];
+
+        if (isReturned) {
+            const buyerEmail = booking.renterEmail || 'guest@example.com';
+            const securityAmount = booking.deposit;
+            
+            // Refund security deposit to buyer's wallet
+            updateWalletBalance(buyerEmail, securityAmount);
+            
+            // Save transaction for buyer
+            let buyerTx = [];
+            try {
+                buyerTx = JSON.parse(localStorage.getItem(`wallet_tx_${buyerEmail}`)) || [];
+            } catch(e) {}
+            buyerTx.push({
+                type: 'Credit',
+                amount: securityAmount,
+                desc: `Refund: Security Deposit (${booking.itemTitle})`,
+                date: new Date().toLocaleDateString('en-IN')
+            });
+            localStorage.setItem(`wallet_tx_${buyerEmail}`, JSON.stringify(buyerTx));
+
+            // Get seller email
+            const currentUser = JSON.parse(localStorage.getItem('current_user'));
+            const sellerEmail = currentUser ? currentUser.useremail : 'aryanharit14@gmail.com';
+            
+            // Transfer rental payment (minus 2% commission) to seller's wallet
+            const rentAmount = booking.subtotal;
+            const commission = Math.round(rentAmount * 0.02);
+            const sellerEarnings = rentAmount - commission;
+            
+            updateWalletBalance(sellerEmail, sellerEarnings);
+            
+            // Save transaction for seller
+            let sellerTx = [];
+            try {
+                sellerTx = JSON.parse(localStorage.getItem(`wallet_tx_${sellerEmail}`)) || [];
+            } catch(e) {}
+            sellerTx.push({
+                type: 'Credit',
+                amount: sellerEarnings,
+                desc: `Rent Earning: ${booking.itemTitle} (2% commission cut)`,
+                date: new Date().toLocaleDateString('en-IN')
+            });
+            localStorage.setItem(`wallet_tx_${sellerEmail}`, JSON.stringify(sellerTx));
+
+            // Update booking status to 'Returned'
+            bookings[bIndex].status = 'Returned';
+            localStorage.setItem('rentflow_bookings', JSON.stringify(bookings));
+            
+            alert(`Settle Successful!\n- Security Deposit of ₹${securityAmount} refunded to buyer (${buyerEmail}).\n- Rent payout of ₹${sellerEarnings} (after 2% commission of ₹${commission}) transferred to your wallet.`);
+            
+            // Re-render dashboards
+            renderCompletedSettlements();
+        }
+    };
+
     function initSellerDetails() {
         const savedSeller = localStorage.getItem('RentFlow_sellerProfile');
+        let profile = null;
         if (savedSeller) {
             try {
-                const profile = JSON.parse(savedSeller);
-                if (sellerNameInput && profile.name) sellerNameInput.value = profile.name;
-                if (sellerPhoneInput && profile.phone) sellerPhoneInput.value = profile.phone;
-                if (sellerCityInput && profile.city) sellerCityInput.value = profile.city;
+                profile = JSON.parse(savedSeller);
             } catch (e) {
                 console.error('Error loading seller profile', e);
             }
         }
+        
+        // Fallback to logged-in user details if no custom seller profile has been saved
+        if (!profile || !profile.name) {
+            const currentUser = JSON.parse(localStorage.getItem('current_user'));
+            if (currentUser) {
+                profile = {
+                    name: currentUser.name || currentUser.username || '',
+                    phone: currentUser.userphone || '',
+                    city: currentUser.address || ''
+                };
+            }
+        }
+
+        if (profile) {
+            if (sellerNameInput && profile.name) sellerNameInput.value = profile.name;
+            if (sellerPhoneInput && profile.phone) sellerPhoneInput.value = profile.phone;
+            if (sellerCityInput && profile.city) sellerCityInput.value = profile.city;
+        }
+    }
+
+    // Set up API Product Sync functionality
+    const apiSyncBtn = document.getElementById('api-sync-btn');
+    if (apiSyncBtn) {
+        apiSyncBtn.addEventListener('click', async () => {
+            const originalHTML = apiSyncBtn.innerHTML;
+            apiSyncBtn.disabled = true;
+            apiSyncBtn.innerHTML = `
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="animation: spin 1s linear infinite;"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+                <span>Syncing API...</span>
+            `;
+            
+            // Add style for spinning animation inline to avoid editing index.css unnecessarily
+            if (!document.getElementById('api-spin-style')) {
+                const style = document.createElement('style');
+                style.id = 'api-spin-style';
+                style.innerHTML = `@keyframes spin { to { transform: rotate(360deg); } }`;
+                document.head.appendChild(style);
+            }
+
+            try {
+                const response = await fetch('js/products.json');
+                if (!response.ok) {
+                    throw new Error('API request failed');
+                }
+                const apiListings = await response.json();
+                
+                let existingListings = getStoredListings();
+                const existingIds = new Set(existingListings.map(item => item.id));
+                const newItems = apiListings.filter(item => !existingIds.has(item.id));
+                
+                if (newItems.length > 0) {
+                    // Prepend new listings
+                    existingListings = [...newItems, ...existingListings];
+                    localStorage.setItem('RentFlow_listings', JSON.stringify(existingListings));
+                    
+                    renderMyListingsDashboard();
+                    updateLivePreviewAndCalculator();
+                    alert(`Successfully fetched and added ${newItems.length} products from the central inventory API!`);
+                } else {
+                    alert('All central API products are already synchronized with your local listings.');
+                }
+                
+                apiSyncBtn.innerHTML = `
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                    <span>Synced!</span>
+                `;
+                apiSyncBtn.style.background = 'linear-gradient(135deg, #10b981, #059669)';
+                
+                setTimeout(() => {
+                    apiSyncBtn.innerHTML = originalHTML;
+                    apiSyncBtn.style.background = '';
+                    apiSyncBtn.disabled = false;
+                }, 3000);
+            } catch (error) {
+                console.error('API Sync Error:', error);
+                alert('Error syncing products from local API server: ' + error.message);
+                apiSyncBtn.innerHTML = originalHTML;
+                apiSyncBtn.disabled = false;
+            }
+        });
     }
 
     function getStoredListings() {

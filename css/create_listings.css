@@ -587,3 +587,168 @@
     justify-content: center;
     margin: 0 auto 16px;
 }
+
+/* ========================================
+   LIGHT THEME OVERRIDES
+======================================== */
+
+body.light-theme {
+    background-color: #f0f2f5;
+    color: #111827;
+}
+
+body.light-theme .page-title {
+    color: #111827;
+}
+
+body.light-theme .page-subtitle {
+    color: #4b5563;
+}
+
+body.light-theme .glass-panel {
+    background: rgba(255, 255, 255, 0.92);
+    border-color: rgba(0, 0, 0, 0.1);
+}
+
+body.light-theme .panel-heading {
+    border-color: rgba(0, 0, 0, 0.1);
+    color: #111827;
+}
+
+body.light-theme .form-group label {
+    color: #4b5563;
+}
+
+body.light-theme .form-input,
+body.light-theme .form-select,
+body.light-theme .form-textarea {
+    background: #ffffff;
+    border-color: rgba(0, 0, 0, 0.1);
+    color: #111827;
+}
+
+body.light-theme .form-input:focus,
+body.light-theme .form-select:focus,
+body.light-theme .form-textarea:focus {
+    background: #ffffff;
+    border-color: #3a5bd9;
+}
+
+body.light-theme .dropzone-container {
+    background: rgba(0, 0, 0, 0.02);
+    border-color: rgba(0, 0, 0, 0.1);
+}
+
+body.light-theme .dropzone-container:hover,
+body.light-theme .dropzone-container.drag-over {
+    background: rgba(37, 99, 235, 0.06);
+    border-color: #3a5bd9;
+}
+
+body.light-theme .dropzone-hint {
+    color: #6b7280;
+}
+
+body.light-theme .image-preview-thumb {
+    background: rgba(0, 0, 0, 0.05);
+    border-color: rgba(0, 0, 0, 0.1);
+}
+
+body.light-theme .pricing-breakdown-card {
+    background: rgba(0, 0, 0, 0.02);
+    border-color: rgba(0, 0, 0, 0.1);
+}
+
+body.light-theme .price-row {
+    color: #4b5563;
+}
+
+body.light-theme .price-row.total-payout {
+    border-color: rgba(0, 0, 0, 0.1);
+    color: #111827;
+}
+
+body.light-theme .preview-card {
+    background: rgba(255, 255, 255, 0.95);
+    border-color: rgba(0, 0, 0, 0.1);
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.1);
+}
+
+body.light-theme .preview-title {
+    color: #111827;
+}
+
+body.light-theme .preview-desc {
+    color: #4b5563;
+}
+
+body.light-theme .preview-category-chip {
+    background: rgba(255, 255, 255, 0.9);
+    border-color: rgba(0, 0, 0, 0.1);
+    color: #111827;
+}
+
+body.light-theme .preview-seller-info {
+    background: rgba(0, 0, 0, 0.02);
+}
+
+body.light-theme .preview-seller-name {
+    color: #111827;
+}
+
+body.light-theme .preview-seller-sub {
+    color: #6b7280;
+}
+
+body.light-theme .preview-pricing-line {
+    border-color: rgba(0, 0, 0, 0.1);
+}
+
+body.light-theme .preview-price-display {
+    color: #111827;
+}
+
+body.light-theme .preview-price-period {
+    color: #4b5563;
+}
+
+body.light-theme .dashboard-title {
+    color: #111827;
+}
+
+body.light-theme .listing-card-dash {
+    background: rgba(255, 255, 255, 0.92);
+    border-color: rgba(0, 0, 0, 0.1);
+}
+
+body.light-theme .dash-title {
+    color: #111827;
+}
+
+body.light-theme .dash-meta-stats {
+    color: #6b7280;
+}
+
+body.light-theme .dash-actions {
+    border-color: rgba(0, 0, 0, 0.1);
+}
+
+body.light-theme .btn-sm {
+    background: rgba(0, 0, 0, 0.05);
+    border-color: rgba(0, 0, 0, 0.1);
+    color: #111827;
+}
+
+body.light-theme .btn-sm:hover {
+    background: rgba(0, 0, 0, 0.1);
+}
+
+body.light-theme .modal-overlay {
+    background: rgba(255, 255, 255, 0.6);
+}
+
+body.light-theme .success-modal-card {
+    background: rgba(255, 255, 255, 0.95);
+    border-color: rgba(0, 0, 0, 0.1);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.1);
+}

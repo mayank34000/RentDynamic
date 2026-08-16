@@ -38,31 +38,34 @@
             <input type="password" id="password" placeholder="Enter your password" required>
         </div>
 
-        <div >
+        <!-- <div >
             <input type="checkbox" id="terms" name="terms" required />
             <label for="terms" class="terms-label">
             I agree to the <a href="#" class="link" >Terms &amp; Conditions</a>
             </label>
             <span id="terms-error" class="error-msg"></span>
-        </div>
+        </div> -->
 
-         <button type="submit" id="signup-submit" class="btn primary-btn" onclick="handleLogin()" style="background-color: #1b2540; color: white;">Log In</button>
+         <button
+    type="button"
+    id="signup-submit"
+    class="btn primary-btn"
+    onclick="handleLogin()"
+    style="background-color: #1b2540; color: white;"
+>
+    Log In
+</button>
 
-        <div class="divider"><span>OR</span></div>
+<div class="divider">
+    <span>OR</span>
+</div>
 
-         <button type="button" id="google-btn" class="btn social-btn google-btn" style="background-color: white;"><img src="assets/google.png"alt="Google"class="social-icon">
-            Continue with Google
-        </button>
-        <!-- <button type="button" id="facebook-btn" class="btn social-btn facebook-btn" style="background-color: white;"><img src="assets/facebook.png"alt="Facebook"class="social-icon">
-            Continue with Facebook
-        </button> -->
-        <p class="login-link">
+<div id="google-btn" class="google-login-container"></div>
 
-            Don't have an account? <a href="signup.html" class="link">Sign Up</a>
-
-            <!-- Already have an account? <a href="signup.html" class="link">Sign Up</a> -->
-
-        </p>
+<p class="login-link">
+    Don't have an account?
+    <a href="signup.html" class="link">Sign Up</a>
+</p>
 
     </div>
 
@@ -76,3 +79,4 @@
 </html>
 
 <script src="js/login.js"></script>
+<script src="https://accounts.google.com/gsi/client" async defer></script>

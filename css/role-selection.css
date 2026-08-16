@@ -1,0 +1,1237 @@
+/* =========================================
+   RESET
+========================================= */
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+
+:root {
+
+    --bg-deep: #050a18;
+    --bg-dark-blue: #0a1228;
+
+    --bg-card: rgba(10, 18, 38, 0.82);
+    --bg-card-hover: rgba(16, 28, 56, 0.92);
+
+    --border: rgba(255, 255, 255, 0.08);
+
+    --text-primary: #ffffff;
+    --text-secondary: #94a3b8;
+    --text-muted: #64748b;
+
+    --accent-blue: #2563eb;
+    --accent-blue-bright: #3b82f6;
+    --accent-blue-light: #60a5fa;
+    --accent-dark-blue: #1e3a8a;
+
+    --accent-lime-light: #d9f99d;
+
+    --font-body: 'Inter', sans-serif;
+    --font-display: 'Manrope', sans-serif;
+
+    --transition: 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+
+/* =========================================
+   BODY
+========================================= */
+
+html {
+    min-height: 100%;
+}
+
+
+body {
+    min-height: 100vh;
+
+    font-family: var(--font-body);
+
+    background:
+        radial-gradient(
+            circle at 50% 20%,
+            rgba(37, 99, 235, 0.10),
+            transparent 40%
+        ),
+        var(--bg-deep);
+
+    color: var(--text-primary);
+
+    overflow-x: hidden;
+
+    -webkit-font-smoothing: antialiased;
+}
+
+
+/* =========================================
+   BACKGROUND EFFECTS
+========================================= */
+
+.background-effects {
+    position: fixed;
+
+    inset: 0;
+
+    overflow: hidden;
+
+    pointer-events: none;
+
+    z-index: -3;
+}
+
+
+.glow {
+    position: absolute;
+
+    border-radius: 50%;
+
+    filter: blur(100px);
+
+    opacity: 0.18;
+
+    animation: floatingGlow 8s ease-in-out infinite;
+}
+
+
+.glow-one {
+
+    width: 400px;
+    height: 400px;
+
+    background: #2563eb;
+
+    top: -180px;
+    left: -120px;
+}
+
+
+.glow-two {
+
+    width: 350px;
+    height: 350px;
+
+    background: #3b82f6;
+
+    right: -150px;
+    top: 35%;
+
+    animation-delay: -3s;
+}
+
+
+.glow-three {
+
+    width: 300px;
+    height: 300px;
+
+    background: #1e3a8a;
+
+    bottom: -150px;
+    left: 40%;
+
+    animation-delay: -5s;
+}
+
+
+@keyframes floatingGlow {
+
+    0%,
+    100% {
+        transform: translate(0, 0);
+    }
+
+    50% {
+        transform: translate(25px, -20px);
+    }
+}
+
+
+/* =========================================
+   GRID
+========================================= */
+
+.grid-overlay {
+
+    position: fixed;
+
+    inset: 0;
+
+    z-index: -2;
+
+    pointer-events: none;
+
+    opacity: 0.20;
+
+    background-image:
+        linear-gradient(
+            rgba(255, 255, 255, 0.025) 1px,
+            transparent 1px
+        ),
+        linear-gradient(
+            90deg,
+            rgba(255, 255, 255, 0.025) 1px,
+            transparent 1px
+        );
+
+    background-size: 60px 60px;
+
+    mask-image:
+        linear-gradient(
+            to bottom,
+            black,
+            transparent 90%
+        );
+}
+
+
+/* =========================================
+   HEADER
+========================================= */
+
+.site-header {
+
+    width: 100%;
+
+    max-width: 1250px;
+
+    margin: auto;
+
+    padding: 26px 40px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+}
+
+
+.logo {
+
+    font-family: var(--font-display);
+
+    font-size: 25px;
+
+    font-weight: 800;
+
+    color: white;
+
+    text-decoration: none;
+
+    letter-spacing: -1px;
+}
+
+
+.logo span {
+
+    color: var(--accent-blue-bright);
+}
+
+
+.back-btn {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 8px;
+
+    padding: 9px 15px;
+
+    border-radius: 10px;
+
+    color: var(--text-secondary);
+
+    text-decoration: none;
+
+    font-size: 14px;
+
+    font-weight: 600;
+
+    border: 1px solid transparent;
+
+    transition: var(--transition);
+}
+
+
+.back-btn span {
+
+    font-size: 18px;
+
+    transition: transform var(--transition);
+}
+
+
+.back-btn:hover {
+
+    color: white;
+
+    background: rgba(255,255,255,0.05);
+
+    border-color: var(--border);
+}
+
+
+.back-btn:hover span {
+
+    transform: translateX(-4px);
+}
+
+
+/* =========================================
+   MAIN
+========================================= */
+
+.role-page {
+
+    min-height: calc(100vh - 80px);
+
+    display: flex;
+
+    justify-content: center;
+
+    align-items: center;
+
+    padding: 50px 24px 80px;
+}
+
+
+.role-container {
+
+    width: 100%;
+
+    max-width: 1000px;
+
+    text-align: center;
+}
+
+
+/* =========================================
+   BADGE
+========================================= */
+
+.role-badge {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 9px;
+
+    padding: 8px 16px;
+
+    margin-bottom: 24px;
+
+    border-radius: 100px;
+
+    background: rgba(37, 99, 235, 0.10);
+
+    border: 1px solid rgba(59, 130, 246, 0.25);
+
+    color: #93c5fd;
+
+    font-size: 11px;
+
+    font-weight: 800;
+
+    letter-spacing: 2px;
+
+    animation: fadeDown 0.7s ease both;
+}
+
+
+.badge-dot {
+
+    width: 7px;
+
+    height: 7px;
+
+    border-radius: 50%;
+
+    background: var(--accent-lime-light);
+
+    box-shadow:
+        0 0 0 4px rgba(217,249,157,0.10),
+        0 0 12px rgba(217,249,157,0.6);
+
+    animation: pulseDot 2s infinite;
+}
+
+
+@keyframes pulseDot {
+
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.2);
+    }
+}
+
+
+/* =========================================
+   TITLE
+========================================= */
+
+.role-title {
+
+    font-family: var(--font-display);
+
+    font-size: clamp(38px, 6vw, 64px);
+
+    font-weight: 800;
+
+    line-height: 1.08;
+
+    letter-spacing: -2px;
+
+    margin-bottom: 20px;
+
+    animation: fadeDown 0.8s 0.1s ease both;
+}
+
+
+.role-title span {
+
+    display: block;
+
+    color: var(--accent-blue-bright);
+
+    text-shadow:
+        0 0 35px rgba(59,130,246,0.25);
+}
+
+
+.role-subtitle {
+
+    max-width: 590px;
+
+    margin: 0 auto 50px;
+
+    color: var(--text-secondary);
+
+    font-size: 16px;
+
+    line-height: 1.7;
+
+    animation: fadeDown 0.8s 0.2s ease both;
+}
+
+
+@keyframes fadeDown {
+
+    from {
+        opacity: 0;
+        transform: translateY(-18px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+
+/* =========================================
+   ROLE CARDS
+========================================= */
+
+.role-cards {
+
+    display: grid;
+
+    grid-template-columns: repeat(2, 1fr);
+
+    gap: 24px;
+
+    width: 100%;
+}
+
+
+/* =========================================
+   ROLE CARD
+========================================= */
+
+.role-card {
+
+    position: relative;
+
+    overflow: hidden;
+
+    text-align: left;
+
+    padding: 34px;
+
+    min-height: 470px;
+
+    display: flex;
+
+    flex-direction: column;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(16,28,56,0.78),
+            rgba(8,14,30,0.88)
+        );
+
+    backdrop-filter: blur(22px);
+
+    -webkit-backdrop-filter: blur(22px);
+
+    border: 1px solid rgba(255,255,255,0.09);
+
+    border-radius: 26px;
+
+    transition:
+        transform var(--transition),
+        border-color var(--transition),
+        box-shadow var(--transition),
+        background var(--transition);
+
+    animation: cardReveal 0.8s ease both;
+}
+
+
+.role-card:nth-child(2) {
+
+    animation-delay: 0.15s;
+}
+
+
+@keyframes cardReveal {
+
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+
+.role-card::before {
+
+    content: '';
+
+    position: absolute;
+
+    top: 0;
+
+    left: 32px;
+
+    right: 32px;
+
+    height: 2px;
+
+    border-radius: 0 0 5px 5px;
+
+    background:
+        linear-gradient(
+            90deg,
+            var(--accent-blue-bright),
+            transparent
+        );
+
+    opacity: 0.5;
+
+    transition: 0.3s ease;
+}
+
+
+.role-card:hover {
+
+    transform: translateY(-8px);
+
+    background: var(--bg-card-hover);
+
+    border-color: rgba(59,130,246,0.45);
+
+    box-shadow:
+        0 25px 60px rgba(0,0,0,0.45),
+        0 0 45px rgba(37,99,235,0.13);
+}
+
+
+.role-card:hover::before {
+
+    opacity: 1;
+
+    height: 3px;
+}
+
+
+/* =========================================
+   CARD GLOW
+========================================= */
+
+.card-glow {
+
+    position: absolute;
+
+    width: 220px;
+
+    height: 220px;
+
+    top: -120px;
+
+    right: -100px;
+
+    border-radius: 50%;
+
+    background:
+        radial-gradient(
+            circle,
+            rgba(59,130,246,0.20),
+            transparent 70%
+        );
+
+    pointer-events: none;
+
+    transition: 0.5s ease;
+}
+
+
+.role-card:hover .card-glow {
+
+    transform: scale(1.5);
+
+    opacity: 1.4;
+}
+
+
+/* =========================================
+   POPULAR BADGE
+========================================= */
+
+.popular-badge {
+
+    position: absolute;
+
+    top: 22px;
+
+    right: 22px;
+
+    padding: 5px 10px;
+
+    border-radius: 7px;
+
+    background: rgba(59,130,246,0.12);
+
+    border: 1px solid rgba(59,130,246,0.3);
+
+    color: var(--accent-blue-light);
+
+    font-size: 9px;
+
+    font-weight: 800;
+
+    letter-spacing: 1.2px;
+}
+
+
+/* =========================================
+   ICON
+========================================= */
+
+.role-icon {
+
+    width: 70px;
+
+    height: 70px;
+
+    border-radius: 19px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    margin-bottom: 27px;
+
+    transition:
+        transform var(--transition),
+        background var(--transition);
+}
+
+
+.role-icon svg {
+
+    width: 34px;
+
+    height: 34px;
+}
+
+
+.customer-icon {
+
+    color: var(--accent-blue-bright);
+
+    background: rgba(59,130,246,0.11);
+
+    border: 1px solid rgba(59,130,246,0.28);
+}
+
+
+.renter-icon {
+
+    color: var(--accent-lime-light);
+
+    background: rgba(217,249,157,0.08);
+
+    border: 1px solid rgba(217,249,157,0.22);
+}
+
+
+.role-card:hover .role-icon {
+
+    transform: translateY(-3px) scale(1.06);
+}
+
+
+/* =========================================
+   CONTENT
+========================================= */
+
+.role-label {
+
+    color: var(--accent-blue-light);
+
+    font-size: 11px;
+
+    font-weight: 800;
+
+    letter-spacing: 2px;
+
+    margin-bottom: 9px;
+}
+
+
+.role-card h2 {
+
+    font-family: var(--font-display);
+
+    font-size: 28px;
+
+    font-weight: 800;
+
+    letter-spacing: -0.7px;
+
+    margin-bottom: 12px;
+}
+
+
+.role-content p {
+
+    color: var(--text-secondary);
+
+    font-size: 14px;
+
+    line-height: 1.7;
+
+    max-width: 390px;
+
+    margin-bottom: 25px;
+}
+
+
+/* =========================================
+   FEATURES
+========================================= */
+
+.role-features {
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 11px;
+}
+
+
+.role-features div {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 10px;
+
+    color: #cbd5e1;
+
+    font-size: 13px;
+
+    font-weight: 500;
+}
+
+
+.check {
+
+    width: 20px;
+
+    height: 20px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border-radius: 50%;
+
+    background: rgba(59,130,246,0.12);
+
+    border: 1px solid rgba(59,130,246,0.25);
+
+    color: var(--accent-blue-light);
+
+    font-size: 11px;
+
+    font-weight: 800;
+}
+
+
+/* =========================================
+   BUTTON
+========================================= */
+
+.role-button {
+
+    margin-top: auto;
+
+    width: 100%;
+
+    height: 53px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 10px;
+
+    border-radius: 13px;
+
+    border: 1px solid rgba(255,255,255,0.14);
+
+    background: rgba(255,255,255,0.06);
+
+    color: white;
+
+    font-family: var(--font-body);
+
+    font-size: 14px;
+
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition: var(--transition);
+}
+
+
+.role-button:hover {
+
+    background: rgba(255,255,255,0.11);
+
+    border-color: rgba(59,130,246,0.5);
+
+    transform: translateY(-2px);
+}
+
+
+.role-button.primary {
+
+    background: white;
+
+    color: #0a1228;
+
+    border-color: white;
+
+    box-shadow:
+        0 8px 30px rgba(255,255,255,0.08);
+}
+
+
+.role-button.primary:hover {
+
+    background: #f1f5f9;
+
+    box-shadow:
+        0 14px 40px rgba(255,255,255,0.16);
+}
+
+
+.arrow {
+
+    font-size: 18px;
+
+    transition: transform var(--transition);
+}
+
+
+.role-button:hover .arrow {
+
+    transform: translateX(5px);
+}
+
+
+/* =========================================
+   FOOTER
+========================================= */
+
+.role-footer {
+
+    margin-top: 30px;
+
+    display: flex;
+
+    justify-content: center;
+
+    align-items: center;
+
+    gap: 7px;
+
+    color: var(--text-muted);
+
+    font-size: 12px;
+}
+
+
+.role-footer button {
+
+    background: none;
+
+    border: none;
+
+    color: var(--accent-blue-light);
+
+    font-family: inherit;
+
+    font-size: inherit;
+
+    font-weight: 600;
+
+    cursor: pointer;
+}
+
+
+.role-footer button:hover {
+
+    color: white;
+
+    text-decoration: underline;
+}
+
+
+/* =========================================
+   MODAL
+========================================= */
+
+.modal-overlay {
+
+    position: fixed;
+
+    inset: 0;
+
+    display: none;
+
+    align-items: center;
+
+    justify-content: center;
+
+    padding: 20px;
+
+    background: rgba(5,10,24,0.82);
+
+    backdrop-filter: blur(12px);
+
+    z-index: 1000;
+}
+
+
+.modal-overlay.active {
+
+    display: flex;
+
+    animation: fadeIn 0.25s ease;
+}
+
+
+.help-modal {
+
+    position: relative;
+
+    max-width: 430px;
+
+    width: 100%;
+
+    padding: 38px 32px;
+
+    text-align: center;
+
+    background: rgba(10,18,38,0.98);
+
+    border: 1px solid rgba(59,130,246,0.4);
+
+    border-radius: 23px;
+
+    box-shadow:
+        0 30px 80px rgba(0,0,0,0.6),
+        0 0 40px rgba(37,99,235,0.12);
+
+    animation: modalUp 0.3s ease;
+}
+
+
+.modal-close {
+
+    position: absolute;
+
+    top: 14px;
+
+    right: 14px;
+
+    width: 34px;
+
+    height: 34px;
+
+    border-radius: 9px;
+
+    border: 1px solid rgba(255,255,255,0.1);
+
+    background: rgba(255,255,255,0.05);
+
+    color: var(--text-secondary);
+
+    font-size: 22px;
+
+    cursor: pointer;
+}
+
+
+.modal-close:hover {
+
+    color: white;
+
+    background: rgba(255,255,255,0.1);
+}
+
+
+.modal-icon {
+
+    width: 58px;
+
+    height: 58px;
+
+    margin: 0 auto 18px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border-radius: 17px;
+
+    background: rgba(59,130,246,0.12);
+
+    border: 1px solid rgba(59,130,246,0.3);
+
+    color: var(--accent-blue-light);
+
+    font-size: 25px;
+
+    font-weight: 800;
+}
+
+
+.help-modal h2 {
+
+    font-family: var(--font-display);
+
+    font-size: 22px;
+
+    margin-bottom: 18px;
+}
+
+
+.help-modal p {
+
+    color: var(--text-secondary);
+
+    font-size: 14px;
+
+    line-height: 1.7;
+
+    margin-bottom: 12px;
+}
+
+
+.help-modal strong {
+
+    color: white;
+}
+
+
+@keyframes fadeIn {
+
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+
+@keyframes modalUp {
+
+    from {
+        opacity: 0;
+        transform: translateY(25px) scale(0.96);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+
+/* =========================================
+   SELECTED STATE
+========================================= */
+
+.role-card.selected {
+
+    border-color: var(--accent-blue-bright);
+
+    box-shadow:
+        0 0 0 2px rgba(59,130,246,0.12),
+        0 25px 70px rgba(37,99,235,0.25);
+}
+
+
+.role-card.selected::after {
+
+    content: '';
+
+    position: absolute;
+
+    inset: 0;
+
+    border-radius: 26px;
+
+    border: 1px solid rgba(96,165,250,0.35);
+
+    pointer-events: none;
+
+    animation: selectedPulse 1s ease;
+}
+
+
+@keyframes selectedPulse {
+
+    0% {
+        opacity: 0;
+    }
+
+    50% {
+        opacity: 1;
+    }
+
+    100% {
+        opacity: 0;
+    }
+}
+
+
+/* =========================================
+   RESPONSIVE
+========================================= */
+
+@media (max-width: 800px) {
+
+    .role-page {
+
+        padding-top: 35px;
+    }
+
+    .role-cards {
+
+        grid-template-columns: 1fr;
+
+        max-width: 520px;
+
+        margin: auto;
+    }
+
+    .role-card {
+
+        min-height: 430px;
+    }
+}
+
+
+@media (max-width: 550px) {
+
+    .site-header {
+
+        padding: 20px 20px;
+    }
+
+    .role-page {
+
+        padding: 35px 18px 60px;
+    }
+
+    .role-title {
+
+        font-size: 38px;
+
+        letter-spacing: -1.5px;
+    }
+
+    .role-subtitle {
+
+        font-size: 14px;
+
+        margin-bottom: 35px;
+    }
+
+    .role-card {
+
+        padding: 27px;
+
+        min-height: 420px;
+
+        border-radius: 22px;
+    }
+
+    .role-card h2 {
+
+        font-size: 25px;
+    }
+
+    .role-footer {
+
+        flex-direction: column;
+
+        gap: 5px;
+    }
+}

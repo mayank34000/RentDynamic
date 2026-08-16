@@ -35,10 +35,14 @@ let handleLogin = () => {
 
         alert("Login Successful");
 
+        const urlParams = new URLSearchParams(window.location.search);
+        const redirect = urlParams.get('redirect');
 
-        // window.location.href = "index.html";
-
-        window.location.href = "booking.html";
+        if (redirect) {
+            window.location.href = redirect;
+        } else {
+            window.location.href = "booking.html";
+        }
 
 
     } else {

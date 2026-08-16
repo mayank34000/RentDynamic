@@ -1,15 +1,19 @@
 document.addEventListener('DOMContentLoaded', () => {
+    const isLoggedIn = localStorage.getItem('isLoggedIn');
+    if (!isLoggedIn || isLoggedIn !== 'true') {
+        window.location.href = 'login.html?redirect=premium.html';
+        return;
+    }
+
     const upgradeBtn = document.getElementById('upgrade-btn');
 
     upgradeBtn.addEventListener('click', (e) => {
         e.preventDefault();
         
         const options = {
-            // Matches the Key ID in your Python script perfectly
             "key": "rzp_test_TPWlCTZ9mczHSa", 
             "amount": "30000",   
             "currency": "INR",   
-            "order_id": "order_TPyMBl4675P2dU", 
             "name": "RentFlow",
             "description": "Premium Pass - 1 Month Access",
             "handler": function (response) {
@@ -19,10 +23,23 @@ document.addEventListener('DOMContentLoaded', () => {
                 let allUsers = JSON.parse(localStorage.getItem('user')) || [];
 
                 if (currentUser) {
-                    // 1. Calculate purchase and expiry dates
                     const today = new Date();
-                    const expiryDate = new Date();
-                    expiryDate.setMonth(today.getMonth() + 1); // Adds exactly 1 month
+                    let expiryDate = new Date();
+
+                    if (currentUser.isPremium && currentUser.premiumExpiryDate) {
+                        const currentExpiry = new Date(currentUser.premiumExpiryDate);
+                        if (currentExpiry > today) {
+                            // Start from the current expiry date if it hasn't passed
+                            expiryDate = currentExpiry;
+                        } else {
+                            expiryDate = today;
+                        }
+                    } else {
+                        expiryDate = today;
+                    }
+
+                    // Add 30 days
+                    expiryDate.setDate(expiryDate.getDate() + 30);
 
                     // 2. Update current user object
                     currentUser.isPremium = true;

@@ -143,7 +143,7 @@ let handleSubmit = () => {
 
         userpassword: password.value,
 
-        role: null
+        role: "customer"
 
     };
 
@@ -230,31 +230,17 @@ let handleSubmit = () => {
 
 
     // ==================================================
-    // SAVE PENDING USER EMAIL
-    // ==================================================
-    //
-    // This helps the role-selection/login workflow
-    // identify which account was just created.
-    // ==================================================
-
-    localStorage.setItem(
-        "pendingUserEmail",
-        user.useremail
-    );
-
-
-    // ==================================================
     // ACCOUNT CREATED
     // ==================================================
 
-    alert("Account created successfully!");
+    alert("Account created successfully! Please log in.");
 
 
     // ==================================================
-    // GO TO ROLE SELECTION
+    // GO TO LOGIN
     // ==================================================
 
-    window.location.href = "role-selection.html";
+    window.location.href = "login.html";
 
 };
 
@@ -312,7 +298,7 @@ function handleGoogleLogin(response) {
 
         userpassword: "",
 
-        role: null,
+        role: "customer",
 
         googleId: payload.sub,
 
@@ -368,7 +354,7 @@ function handleGoogleLogin(response) {
          */
 
         googleUser.role =
-            users[index].role || null;
+            users[index].role || "customer";
 
 
         users[index] = {
@@ -454,62 +440,12 @@ function handleGoogleLogin(response) {
     // ==================================================
     // GOOGLE USER ROLE LOGIC
     // ==================================================
-    //
-    // Existing Google user with a role:
-    //      Go directly to their page.
-    //
-    // New Google user / no role:
-    //      Go to role selection.
-    //
-    // ==================================================
 
-    if (
-        finalUser.role === "customer" ||
-        finalUser.role === "renter"
-    ) {
+    localStorage.setItem("userRole", finalUser.role);
 
-        /*
-         * Existing user already has a role.
-         * Keep localStorage synchronized.
-         */
+    // Existing role can continue normally
 
-        localStorage.setItem(
-            "userRole",
-            finalUser.role
-        );
-
-
-        // Existing role can continue normally
-
-        window.location.href = "index.html";
-
-    }
-
-    else {
-
-        /*
-         * New Google account has no role.
-         *
-         * Remove any old role from the browser
-         * and send the user to role selection.
-         */
-
-        localStorage.removeItem("userRole");
-
-
-        // Save email so role selection knows
-        // which account needs its role updated.
-
-        localStorage.setItem(
-            "pendingUserEmail",
-            finalUser.useremail
-        );
-
-
-        window.location.href =
-            "role-selection.html";
-
-    }
+    window.location.href = "index.html";
 
 }
 

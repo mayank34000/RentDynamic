@@ -33,10 +33,7 @@ function handleLogin(event) {
   }
 
   if (user.role !== "customer" && user.role !== "renter") {
-    localStorage.setItem("pendingUserEmail", user.useremail);
-    alert("Please select your account role first.");
-    window.location.href = "role-selection.html";
-    return;
+    user.role = "customer";
   }
 
   saveSession(user, user.role);
@@ -72,12 +69,7 @@ function handleGoogleLogin(response) {
   localStorage.setItem("user", JSON.stringify(users));
 
   if (user.role !== "customer" && user.role !== "renter") {
-    localStorage.setItem("pendingUserEmail", user.useremail);
-    localStorage.removeItem("userRole");
-    saveSession(user, null, /*skipRole=*/ true);
-    alert("Please select your account role first.");
-    window.location.href = "role-selection.html";
-    return;
+    user.role = "customer";
   }
 
   saveSession(user, user.role);
@@ -136,14 +128,13 @@ function saveSession(user, role, skipRole = false) {
   localStorage.setItem("current_user", JSON.stringify(user));
   localStorage.setItem("isLoggedIn", "true");
   if (!skipRole && role) localStorage.setItem("userRole", role);
-  if (user.profileImage) localStorage.setItem("profileImage", user.profileImage);
+  if (user.profileImage) {
+    localStorage.setItem("profileImage", user.profileImage);
+  } else {
+    localStorage.removeItem("profileImage");
+  }
 }
 
 function redirectByRole(role) {
-  if (role === "customer") window.location.href = "create_listings.html";
-  else if (role === "renter") window.location.href = "booking.html";
-  else {
-    console.error("Invalid user role:", role);
-    window.location.href = "role-selection.html";
-  }
+  window.location.href = "index.html";
 }

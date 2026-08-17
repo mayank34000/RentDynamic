@@ -1,8 +1,8 @@
-// ============ LOGOUT ============
 let handlelogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("current_user");
     localStorage.removeItem("isLoggedIn");
+    localStorage.removeItem("profileImage");
     // userRole kept intentionally — reloaded on next login
     window.location.href = "login.html";
 };
@@ -267,6 +267,19 @@ function loadProfile() {
     const profileEmail = document.getElementById("profileEmail");
     if (profileName) profileName.textContent = user.username || "";
     if (profileEmail) profileEmail.textContent = user.useremail || "";
+
+    const premiumStatus = document.getElementById("premiumStatus");
+    const premiumExpiryDateStr = document.getElementById("premiumExpiryDateStr");
+    if (premiumStatus && user.isPremium && user.premiumExpiryDate) {
+        const expiryDate = new Date(user.premiumExpiryDate);
+        if (expiryDate > new Date()) {
+            premiumStatus.style.display = "block";
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            if (premiumExpiryDateStr) {
+                premiumExpiryDateStr.textContent = expiryDate.toLocaleDateString(undefined, options);
+            }
+        }
+    }
 }
 
 document.addEventListener("DOMContentLoaded", loadProfile);

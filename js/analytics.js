@@ -426,6 +426,27 @@ function refreshAll() {
 // ─── INITIALISE ─────────────────────────────────────────────
 
 document.addEventListener('DOMContentLoaded', () => {
+    // SECURITY CHECK: Only allow admins
+    const isLoggedIn = localStorage.getItem('isLoggedIn');
+    const currentUserRaw = localStorage.getItem('current_user');
+    let isAdmin = false;
+    
+    if (isLoggedIn === 'true' && currentUserRaw) {
+        try {
+            const currentUser = JSON.parse(currentUserRaw);
+            if (currentUser.useremail === "admin@rentflow.com" || currentUser.role === "admin") {
+                isAdmin = true;
+            }
+        } catch (e) {
+            console.error("Error parsing current_user:", e);
+        }
+    }
+    
+    if (!isAdmin) {
+        window.location.href = "login.html";
+        return;
+    }
+
     refreshAll();
     initMobileMenu();
 

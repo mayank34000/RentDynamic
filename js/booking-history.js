@@ -354,90 +354,169 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // Download Receipt (PDF)
         document.getElementById("btn-download-receipt").addEventListener("click", () => {
-            const element = document.getElementById("receipt-content");
-            const modalCard = element.closest(".modal-card");
-            const itemName = document.getElementById("receipt-item").textContent.replace(/[^a-z0-9]/gi, '_').toLowerCase();
-
-            // --- Apply a temporary light/print theme so the PDF isn't all-black ---
-            const printStyles = document.createElement("style");
-            printStyles.id = "pdf-print-override";
-            printStyles.textContent = `
-                #receipt-content {
-                    background: #ffffff !important;
-                    color: #1a1a1a !important;
-                    padding: 32px !important;
-                    border-radius: 0 !important;
-                    width: 500px !important;
-                    min-width: 500px !important;
-                }
-                #receipt-content .modal-title {
-                    color: #111827 !important;
-                }
-                #receipt-content .receipt-item-name {
-                    color: #111827 !important;
-                }
-                #receipt-content .receipt-lender {
-                    color: #4b5563 !important;
-                }
-                #receipt-content .receipt-row {
-                    color: #374151 !important;
-                    flex-wrap: nowrap !important;
-                    overflow: visible !important;
-                }
-                #receipt-content .receipt-row span {
-                    white-space: nowrap !important;
-                    overflow: visible !important;
-                    flex-shrink: 0 !important;
-                }
-                #receipt-content .receipt-row.total-row {
-                    color: #111827 !important;
-                    border-top-color: #d1d5db !important;
-                }
-                #receipt-content .receipt-header {
-                    border-bottom-color: #d1d5db !important;
-                }
-                #receipt-content .receipt-breakdown {
-                    margin-bottom: 16px !important;
-                }
-            `;
-            document.head.appendChild(printStyles);
-
-            // --- Temporarily expand the modal so amounts don't get clipped ---
-            const origMaxWidth = modalCard.style.maxWidth;
-            const origWidth = modalCard.style.width;
-            modalCard.style.maxWidth = "600px";
-            modalCard.style.width = "600px";
-
-            const opt = {
-                margin:       10,
-                filename:     `rentflow_receipt_${itemName}.pdf`,
-                image:        { type: 'jpeg', quality: 0.98 },
-                html2canvas:  { scale: 2, backgroundColor: '#ffffff', useCORS: true, width: 500 },
-                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
-            };
-
             const btn = document.getElementById("btn-download-receipt");
             const originalText = btn.textContent;
             btn.textContent = "Generating PDF...";
             btn.disabled = true;
 
-            html2pdf().set(opt).from(element).save().then(() => {
-                btn.textContent = originalText;
-                btn.disabled = false;
-                // Remove temporary print styles and restore modal size
-                printStyles.remove();
-                modalCard.style.maxWidth = origMaxWidth;
-                modalCard.style.width = origWidth;
-            }).catch(err => {
+            try {
+                // Read live values from receipt modal
+                const itemName  = document.getElementById("receipt-item").textContent;
+                const lender    = document.getElementById("receipt-lender").textContent;
+                const dates     = document.getElementById("receipt-dates").textContent;
+                const rate      = document.getElementById("receipt-rate").textContent;
+                const duration  = document.getElementById("receipt-duration").textContent;
+                const subtotal  = document.getElementById("receipt-subtotal").textContent;
+                const deposit   = document.getElementById("receipt-deposit").textContent;
+                const total     = document.getElementById("receipt-total").textContent;
+                const now       = new Date();
+                const generatedOn = now.toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })
+                                  + ', ' + now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+
+                // jsPDF Helvetica doesn't support ₹ unicode — convert to "Rs."
+                const toRs = (val) => val.replace(/₹/g, 'Rs. ').trim();
+
+                // Access jsPDF — try multiple bundle exposure patterns
+                const jsPDFLib = (window.jspdf && window.jspdf.jsPDF)
+                    || window.jsPDF
+                    || (window.jspdf);
+                if (!jsPDFLib) throw new Error('jsPDF not loaded');
+                const doc = new jsPDFLib({ unit: 'mm', format: 'a4', orientation: 'portrait' });
+
+                const W = 210;   // A4 width mm
+                const lm = 18;   // left margin
+                const rm = W - 18; // right margin
+                let y = 18;
+
+                // ── Header bar ────────────────────────────────────────
+                doc.setFillColor(26, 26, 46);
+                doc.rect(0, 0, W, 28, 'F');
+
+                // Logo: "Rent" white
+                doc.setFont('helvetica', 'bold');
+                doc.setFontSize(18);
+                doc.setTextColor(255, 255, 255);
+                doc.text('Rent', lm, 17);
+
+                // Logo: "Flow" blue
+                doc.setTextColor(58, 91, 217);
+                const rentW = doc.getTextWidth('Rent');
+                doc.text('Flow', lm + rentW, 17);
+
+                // Tagline
+                doc.setFont('helvetica', 'normal');
+                doc.setFontSize(7.5);
+                doc.setTextColor(160, 170, 190);
+                doc.text('Smart Dynamic Rental Platform', lm, 23);
+
+                // Title right side
+                doc.setFont('helvetica', 'bold');
+                doc.setFontSize(13);
+                doc.setTextColor(255, 255, 255);
+                doc.text('Rental Receipt', rm, 15, { align: 'right' });
+
+                doc.setFont('helvetica', 'normal');
+                doc.setFontSize(7.5);
+                doc.setTextColor(160, 170, 190);
+                doc.text('Generated: ' + generatedOn, rm, 22, { align: 'right' });
+
+                y = 40;
+
+                // ── Item card ─────────────────────────────────────────
+                doc.setFillColor(248, 250, 255);
+                doc.roundedRect(lm, y, rm - lm, 28, 3, 3, 'F');
+                // blue left bar
+                doc.setFillColor(58, 91, 217);
+                doc.rect(lm, y, 3, 28, 'F');
+
+                doc.setFont('helvetica', 'bold');
+                doc.setFontSize(12);
+                doc.setTextColor(17, 24, 39);
+                doc.text(itemName, lm + 8, y + 9);
+
+                doc.setFont('helvetica', 'normal');
+                doc.setFontSize(9);
+                doc.setTextColor(75, 85, 99);
+                doc.text(lender, lm + 8, y + 16);
+                doc.text(dates,  lm + 8, y + 22);
+
+                y += 36;
+
+                // ── Section title ─────────────────────────────────────
+                doc.setFont('helvetica', 'bold');
+                doc.setFontSize(8);
+                doc.setTextColor(107, 114, 128);
+                doc.text('PRICE BREAKDOWN', lm, y);
+                y += 5;
+
+                // divider
+                doc.setDrawColor(229, 231, 235);
+                doc.setLineWidth(0.3);
+                doc.line(lm, y, rm, y);
+                y += 6;
+
+                // helper: draw a row
+                const row = (label, value, bold, valueColor) => {
+                    doc.setFont('helvetica', bold ? 'bold' : 'normal');
+                    doc.setFontSize(10);
+                    doc.setTextColor(55, 65, 81);
+                    doc.text(label, lm, y);
+                    if (valueColor) doc.setTextColor(...valueColor);
+                    else doc.setTextColor(17, 24, 39);
+                    doc.setFont('helvetica', bold ? 'bold' : 'normal');
+                    doc.text(value, rm, y, { align: 'right' });
+                    y += 7;
+                    // row separator
+                    if (!bold) {
+                        doc.setDrawColor(243, 244, 246);
+                        doc.setLineWidth(0.2);
+                        doc.line(lm, y - 1, rm, y - 1);
+                    }
+                };
+
+                row(`Base Rate (${toRs(rate)}/day) x ${duration} days`, toRs(subtotal));
+                row('Security Deposit (Refundable)', toRs(deposit));
+                row('Platform Fee', 'Rs. 0  (Free)', false, [16, 185, 129]);
+
+                // Grand total divider
+                doc.setDrawColor(209, 213, 219);
+                doc.setLineWidth(0.5);
+                doc.line(lm, y, rm, y);
+                y += 6;
+
+                doc.setFont('helvetica', 'bold');
+                doc.setFontSize(12);
+                doc.setTextColor(17, 24, 39);
+                doc.text('Grand Total', lm, y);
+                doc.setTextColor(58, 91, 217);
+                doc.text(toRs(total), rm, y, { align: 'right' });
+                y += 16;
+
+                // ── Footer ────────────────────────────────────────────
+                doc.setDrawColor(229, 231, 235);
+                doc.setLineWidth(0.3);
+                doc.line(lm, y, rm, y);
+                y += 7;
+
+                doc.setFont('helvetica', 'normal');
+                doc.setFontSize(8);
+                doc.setTextColor(156, 163, 175);
+                doc.text('Thank you for renting with RentFlow — Smart Dynamic Rental Platform', W / 2, y, { align: 'center' });
+                y += 5;
+                doc.setFontSize(7);
+                doc.setTextColor(200, 205, 215);
+                doc.text('Payments secured by Razorpay  •  © 2026 RentFlow. All rights reserved.', W / 2, y, { align: 'center' });
+
+                const fileNameSlug = itemName.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+                doc.save(`rentflow_receipt_${fileNameSlug}.pdf`);
+
+            } catch (err) {
                 console.error("PDF generation error:", err);
+                alert("Failed to generate PDF. Make sure the page is fully loaded.");
+            } finally {
                 btn.textContent = originalText;
                 btn.disabled = false;
-                // Clean up even on error
-                printStyles.remove();
-                modalCard.style.maxWidth = origMaxWidth;
-                modalCard.style.width = origWidth;
-                alert("Failed to generate PDF.");
-            });
+            }
         });
     }
 

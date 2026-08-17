@@ -303,7 +303,7 @@ function handleGoogleLogin(response) {
         googleId: payload.sub,
 
         profileImage:
-            payload.picture || "assets/google.png",
+            payload.picture || "../assets/google.png",
 
         loginMethod: "google"
 
@@ -422,7 +422,7 @@ function handleGoogleLogin(response) {
         "profileImage",
 
         finalUser.profileImage ||
-        "assets/google.png"
+        "../assets/google.png"
 
     );
 

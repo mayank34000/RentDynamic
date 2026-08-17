@@ -63,7 +63,7 @@ function handleGoogleLogin(response) {
   Object.assign(user, {
     username: payload.name,
     googleId: payload.sub,
-    profileImage: payload.picture || "assets/google.png",
+    profileImage: payload.picture || "../assets/google.png",
     loginMethod: "google",
   });
   localStorage.setItem("user", JSON.stringify(users));

@@ -285,7 +285,7 @@ function loadProfile() {
 document.addEventListener("DOMContentLoaded", loadProfile);
 
 // ============ PROFILE IMAGE ============
-const DEFAULT_PROFILE_IMAGE = "assets/profile.png";
+const DEFAULT_PROFILE_IMAGE = "../assets/profile.png";
 
 function loadProfileImage() {
     const profileImage = document.getElementById("profileImage");

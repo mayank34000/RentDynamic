@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', () => {
             
             const nameToDisplay = currentUser.name || currentUser.username || 'User';
             const firstName = nameToDisplay.split(' ')[0];
-            const savedImage = localStorage.getItem('profileImage') || 'assets/profile.png';
+            const savedImage = localStorage.getItem('profileImage') || '../assets/profile.png';
             
             const premiumText = currentUser.isPremium ? "Extend Premium" : "Get Premium";
             

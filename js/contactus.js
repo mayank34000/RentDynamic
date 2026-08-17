@@ -20,7 +20,7 @@ document.addEventListener("DOMContentLoaded", () => {
             try { user = JSON.parse(localStorage.getItem("current_user")) || user; } catch(e) {}
             const nameToDisplay = user.name || user.username || user.userfname || 'User';
             const firstName = nameToDisplay.split(' ')[0];
-            const savedImage = localStorage.getItem('profileImage') || 'assets/profile.png';
+            const savedImage = localStorage.getItem('profileImage') || '../assets/profile.png';
             
             authContainer.style.display = 'flex';
             authContainer.style.alignItems = 'center';

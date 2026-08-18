@@ -15,8 +15,8 @@ function handleLogin(event) {
 
   // --- Admin login ---
   if (email === ADMIN_EMAIL.toLowerCase() && password === ADMIN_PASSWORD) {
-    const adminUser = { useremail: ADMIN_EMAIL, username: "Administrator" };
-    saveSession(adminUser);
+    const adminUser = { useremail: ADMIN_EMAIL, role: "admin", username: "Administrator" };
+    saveSession(adminUser, "admin");
     window.location.href = "admin-dashboard.html";
     return;
   }
@@ -24,13 +24,20 @@ function handleLogin(event) {
   // --- Regular user login ---
   const users = getUsers();
   const user = users.find(
-    (u) => u.useremail?.toLowerCase() === email && u.userpassword === password
+    u => u.useremail?.toLowerCase() === email && u.userpassword === password
   );
 
-  if (!user) return alert("Invalid email or password.");
+  if (!user) {
+    alert("Invalid email or password.");
+    return;
+  }
 
-  saveSession(user);
-  window.location.href = "index.html";
+  if (user.role !== "customer" && user.role !== "renter") {
+    user.role = "customer";
+  }
+
+  saveSession(user, user.role);
+  redirectByRole(user.role);
 }
 
 // ======================================================
@@ -44,37 +51,39 @@ function handleGoogleLogin(response) {
 
   const users = getUsers();
   const index = users.findIndex(
-    (u) => u.useremail?.toLowerCase() === payload.email.toLowerCase()
+    u => u.useremail?.toLowerCase() === payload.email.toLowerCase()
   );
 
   if (index === -1) {
-    return alert("No account found with this Google account. Please sign up first.");
+    alert("No account found with this Google account. Please sign up first.");
+    return;
   }
 
   const user = users[index];
   Object.assign(user, {
     username: payload.name,
     googleId: payload.sub,
-    profileImage: payload.picture || "assets/google.png",
-    loginMethod: "google"
+    profileImage: payload.picture || "../assets/google.png",
+    loginMethod: "google",
   });
   localStorage.setItem("user", JSON.stringify(users));
 
-  saveSession(user);
-  window.location.href = "index.html";
+  if (user.role !== "customer" && user.role !== "renter") {
+    user.role = "customer";
+  }
+
+  saveSession(user, user.role);
+  redirectByRole(user.role);
 }
 
 function parseJwt(token) {
   try {
     const base64 = token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/");
-    return JSON.parse(
-      decodeURIComponent(
-        atob(base64)
-          .split("")
-          .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
-          .join("")
-      )
-    );
+    return JSON.parse(decodeURIComponent(
+      atob(base64).split("").map(c =>
+        "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2)
+      ).join("")
+    ));
   } catch (error) {
     console.error("JWT error:", error);
     return null;
@@ -90,7 +99,7 @@ window.onload = function () {
     client_id: GOOGLE_CLIENT_ID,
     callback: handleGoogleLogin,
     auto_select: false,
-    cancel_on_tap_outside: true
+    cancel_on_tap_outside: true,
   });
   google.accounts.id.renderButton(document.getElementById("google-btn"), {
     type: "standard",
@@ -98,7 +107,7 @@ window.onload = function () {
     size: "large",
     text: "continue_with",
     shape: "rectangular",
-    width: 350
+    width: 350,
   });
 };
 
@@ -115,8 +124,17 @@ function getUsers() {
   }
 }
 
-function saveSession(user) {
+function saveSession(user, role, skipRole = false) {
   localStorage.setItem("current_user", JSON.stringify(user));
   localStorage.setItem("isLoggedIn", "true");
-  if (user.profileImage) localStorage.setItem("profileImage", user.profileImage);
+  if (!skipRole && role) localStorage.setItem("userRole", role);
+  if (user.profileImage) {
+    localStorage.setItem("profileImage", user.profileImage);
+  } else {
+    localStorage.removeItem("profileImage");
+  }
+}
+
+function redirectByRole(role) {
+  window.location.href = "index.html";
 }

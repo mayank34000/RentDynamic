@@ -1,571 +1,238 @@
-// ======================================================
-// NORMAL SIGNUP
-// ======================================================
+// ================= NORMAL SIGNUP =================
 
 let handleSubmit = () => {
+  let name = document.getElementById("username");
+  let email = document.getElementById("email");
+  let phone = document.getElementById("phone");
+  let password = document.getElementById("password");
+  let confirm_password = document.getElementById("confirm_password");
+  let terms = document.getElementById("terms");
 
-    // ==================================================
-    // GET FORM VALUES
-    // ==================================================
+  if (name.value.trim().length < 3) { alert("Username must be at least 3 characters long!"); return; }
+  if (name.value.trim().length > 30) { alert("Username cannot be more than 30 characters!"); return; }
 
-    let name = document.getElementById("username");
-    let email = document.getElementById("email");
-    let phone = document.getElementById("phone");
-    let password = document.getElementById("password");
-    let confirm_password = document.getElementById("confirm_password");
-    let terms = document.getElementById("terms");
+  let emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailPattern.test(email.value.trim())) { alert("Please enter a valid email address!"); return; }
 
+  let phonePattern = /^[0-9]{10}$/;
+  if (!phonePattern.test(phone.value.trim())) { alert("Please enter a valid phone number!"); return; }
 
-    // ==================================================
-    // USERNAME VALIDATION
-    // ==================================================
+  if (password.value.length < 8) { alert("Password must be at least 8 characters long!"); return; }
+  if (password.value.length > 50) { alert("Password cannot be more than 50 characters!"); return; }
 
-    if (name.value.trim().length < 3) {
-        alert("Username must be at least 3 characters long!");
-        return;
+  let upperCase = /[A-Z]/, lowerCase = /[a-z]/, number = /[0-9]/;
+  let specialCharacter = /[!@#$%^&*(),.?":{}|<>_\-+=/\\[\]~`]/;
+
+  if (!upperCase.test(password.value)) { alert("Password must contain at least one uppercase letter!"); return; }
+  if (!lowerCase.test(password.value)) { alert("Password must contain at least one lowercase letter!"); return; }
+  if (!number.test(password.value)) { alert("Password must contain at least one number!"); return; }
+  if (!specialCharacter.test(password.value)) { alert("Password must contain at least one special character!"); return; }
+
+  if (password.value !== confirm_password.value) { alert("Passwords do not match!"); return; }
+  if (!terms.checked) { alert("Please accept the Terms & Conditions!"); return; }
+
+  // Role is chosen later on role-selection.html
+  let user = {
+    username: name.value.trim(),
+    useremail: email.value.trim(),
+    userphone: phone.value.trim(),
+    userpassword: password.value,
+    role: "customer"
+  };
+
+  let get_user = localStorage.getItem("user");
+  let user_array = [];
+
+  if (get_user) {
+    try {
+      user_array = JSON.parse(get_user);
+      if (!Array.isArray(user_array)) user_array = [];
+    } catch (error) {
+      console.error("Error reading users from localStorage:", error);
+      user_array = [];
     }
+  }
 
-    if (name.value.trim().length > 30) {
-        alert("Username cannot be more than 30 characters!");
-        return;
-    }
+  let isPresent = user_array.some(
+    u => u.useremail && u.useremail.toLowerCase() === email.value.trim().toLowerCase()
+  );
 
+  if (isPresent) { alert("User already exists!"); return; }
 
-    // ==================================================
-    // EMAIL VALIDATION
-    // ==================================================
+  user_array.push(user);
+  localStorage.setItem("user", JSON.stringify(user_array));
 
-    let emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  // Don't carry over a role from a previous account in this browser
+  localStorage.removeItem("userRole");
 
-    if (!emailPattern.test(email.value.trim())) {
-        alert("Please enter a valid email address!");
-        return;
-    }
-
-
-    // ==================================================
-    // PHONE VALIDATION
-    // ==================================================
-
-    let phonePattern = /^[0-9]{10}$/;
-
-    if (!phonePattern.test(phone.value.trim())) {
-        alert("Please enter a valid phone number!");
-        return;
-    }
-
-
-    // ==================================================
-    // PASSWORD VALIDATION
-    // ==================================================
-
-    if (password.value.length < 8) {
-        alert("Password must be at least 8 characters long!");
-        return;
-    }
-
-    if (password.value.length > 50) {
-        alert("Password cannot be more than 50 characters!");
-        return;
-    }
-
-
-    let upperCase = /[A-Z]/;
-    let lowerCase = /[a-z]/;
-    let number = /[0-9]/;
-
-    let specialCharacter =
-        /[!@#$%^&*(),.?":{}|<>_\-+=/\\[\]~`]/;
-
-
-    if (!upperCase.test(password.value)) {
-        alert("Password must contain at least one uppercase letter!");
-        return;
-    }
-
-    if (!lowerCase.test(password.value)) {
-        alert("Password must contain at least one lowercase letter!");
-        return;
-    }
-
-    if (!number.test(password.value)) {
-        alert("Password must contain at least one number!");
-        return;
-    }
-
-    if (!specialCharacter.test(password.value)) {
-        alert("Password must contain at least one special character!");
-        return;
-    }
-
-
-    // ==================================================
-    // CONFIRM PASSWORD
-    // ==================================================
-
-    if (password.value !== confirm_password.value) {
-        alert("Passwords do not match!");
-        return;
-    }
-
-
-    // ==================================================
-    // TERMS & CONDITIONS
-    // ==================================================
-
-    if (!terms.checked) {
-        alert("Please accept the Terms & Conditions!");
-        return;
-    }
-
-
-    // ==================================================
-    // CREATE NORMAL USER
-    // ==================================================
-    //
-    // IMPORTANT:
-    // Role is NOT selected here.
-    //
-    // The user will select Customer/Renter on
-    // role-selection.html.
-    //
-    // role: null means the account does not have
-    // a selected role yet.
-    // ==================================================
-
-    let user = {
-
-        username: name.value.trim(),
-
-        useremail: email.value.trim(),
-
-        userphone: phone.value.trim(),
-
-        userpassword: password.value,
-
-        role: "customer"
-
-    };
-
-
-    // ==================================================
-    // GET EXISTING USERS
-    // ==================================================
-
-    let get_user = localStorage.getItem("user");
-
-    let user_array = [];
-
-
-    if (get_user) {
-
-        try {
-
-            user_array = JSON.parse(get_user);
-
-            // Make sure it is actually an array
-            if (!Array.isArray(user_array)) {
-                user_array = [];
-            }
-
-        } catch (error) {
-
-            console.error(
-                "Error reading users from localStorage:",
-                error
-            );
-
-            user_array = [];
-        }
-    }
-
-
-    // ==================================================
-    // CHECK IF EMAIL ALREADY EXISTS
-    // ==================================================
-
-    let isPresent = user_array.some(
-
-        existingUser =>
-
-            existingUser.useremail &&
-
-            existingUser.useremail.toLowerCase() ===
-            email.value.trim().toLowerCase()
-
-    );
-
-
-    if (isPresent) {
-
-        alert("User already exists!");
-
-        return;
-    }
-
-
-    // ==================================================
-    // SAVE USER
-    // ==================================================
-
-    user_array.push(user);
-
-
-    localStorage.setItem(
-        "user",
-        JSON.stringify(user_array)
-    );
-
-
-    // ==================================================
-    // CLEAR OLD ROLE
-    // ==================================================
-    //
-    // If another account previously selected a role
-    // in this browser, don't accidentally use that
-    // role for the new account.
-    // ==================================================
-
-    localStorage.removeItem("userRole");
-
-
-    // ==================================================
-    // ACCOUNT CREATED
-    // ==================================================
-
-    alert("Account created successfully! Please log in.");
-
-
-    // ==================================================
-    // GO TO LOGIN
-    // ==================================================
-
-    window.location.href = "login.html";
-
+  alert("Account created successfully! Please log in.");
+  window.location.href = "login.html";
 };
 
 
+// ================= GOOGLE SIGN-IN =================
 
-// ======================================================
-// GOOGLE SIGN-IN
-// ======================================================
-
-// Your Google OAuth Client ID
-
-const GOOGLE_CLIENT_ID =
-    "354423086263-a5p6thqr2udjam895sotpa701180cpp3.apps.googleusercontent.com";
-
-
-
-// ======================================================
-// GOOGLE LOGIN CALLBACK
-// ======================================================
+const GOOGLE_CLIENT_ID = "354423086263-a5p6thqr2udjam895sotpa701180cpp3.apps.googleusercontent.com";
 
 function handleGoogleLogin(response) {
-
-    const payload = parseJwt(response.credential);
-
-
-    // ==================================================
-    // CHECK GOOGLE RESPONSE
-    // ==================================================
-
-    if (!payload) {
-
-        alert("Google login failed!");
-
-        return;
-    }
-
-
-    // ==================================================
-    // CREATE GOOGLE USER
-    // ==================================================
-    //
-    // Role is intentionally null.
-    //
-    // Google users must also go through the role
-    // selection page.
-    // ==================================================
-
-    const googleUser = {
-
-        username: payload.name,
-
-        useremail: payload.email,
-
-        userphone: "",
-
-        userpassword: "",
-
-        role: "customer",
-
-        googleId: payload.sub,
-
-        profileImage:
-            payload.picture || "../assets/google.png",
-
-        loginMethod: "google"
-
-    };
-
-
-    // ==================================================
-    // GET EXISTING USERS
-    // ==================================================
-
-    let users =
-        JSON.parse(localStorage.getItem("user")) || [];
-
-
-    // ==================================================
-    // CHECK IF GOOGLE USER ALREADY EXISTS
-    // ==================================================
-
-    const index = users.findIndex(
-
-        user =>
-
-            user.useremail?.toLowerCase() ===
-            googleUser.useremail.toLowerCase()
-
-    );
-
-
-    // ==================================================
-    // EXISTING GOOGLE USER
-    // ==================================================
-
-    if (index !== -1) {
-
-        // Keep existing phone number
-
-        googleUser.userphone =
-            users[index].userphone || "";
-
-
-        /*
-         * IMPORTANT
-         *
-         * Do not overwrite an already selected role
-         * with null.
-         *
-         * If the user already has a role, preserve it.
-         */
-
-        googleUser.role =
-            users[index].role || "customer";
-
-
-        users[index] = {
-
-            ...users[index],
-
-            ...googleUser
-
-        };
-
-    }
-
-
-    // ==================================================
-    // NEW GOOGLE USER
-    // ==================================================
-
-    else {
-
-        users.push(googleUser);
-
-    }
-
-
-    // ==================================================
-    // SAVE USERS
-    // ==================================================
-
-    localStorage.setItem(
-        "user",
-        JSON.stringify(users)
-    );
-
-
-    // ==================================================
-    // GET FINAL USER DATA
-    // ==================================================
-
-    const finalUser =
-
-        index !== -1
-            ? users[index]
-            : googleUser;
-
-
-    // ==================================================
-    // SAVE CURRENT USER
-    // ==================================================
-
-    localStorage.setItem(
-
-        "current_user",
-
-        JSON.stringify(finalUser)
-
-    );
-
-
-    // ==================================================
-    // SAVE PROFILE IMAGE
-    // ==================================================
-
-    localStorage.setItem(
-
-        "profileImage",
-
-        finalUser.profileImage ||
-        "../assets/google.png"
-
-    );
-
-
-    // ==================================================
-    // LOGIN STATUS
-    // ==================================================
-
-    localStorage.setItem(
-        "isLoggedIn",
-        "true"
-    );
-
-
-    // ==================================================
-    // GOOGLE USER ROLE LOGIC
-    // ==================================================
-
-    localStorage.setItem("userRole", finalUser.role);
-
-    // Existing role can continue normally
-
-    window.location.href = "index.html";
-
+  const payload = parseJwt(response.credential);
+  if (!payload) { alert("Google login failed!"); return; }
+
+  const googleUser = {
+    username: payload.name,
+    useremail: payload.email,
+    userphone: "",
+    userpassword: "",
+    role: "customer",
+    googleId: payload.sub,
+    profileImage: payload.picture || "../assets/google.png",
+    loginMethod: "google"
+  };
+
+  let users = JSON.parse(localStorage.getItem("user")) || [];
+  const index = users.findIndex(u => u.useremail?.toLowerCase() === googleUser.useremail.toLowerCase());
+
+  if (index !== -1) {
+    googleUser.userphone = users[index].userphone || "";
+    // Don't overwrite an already-selected role
+    googleUser.role = users[index].role || "customer";
+    users[index] = { ...users[index], ...googleUser };
+  } else {
+    users.push(googleUser);
+  }
+
+  localStorage.setItem("user", JSON.stringify(users));
+
+  const finalUser = index !== -1 ? users[index] : googleUser;
+
+  localStorage.setItem("current_user", JSON.stringify(finalUser));
+  localStorage.setItem("profileImage", finalUser.profileImage || "../assets/google.png");
+  localStorage.setItem("isLoggedIn", "true");
+  localStorage.setItem("userRole", finalUser.role);
+
+  window.location.href = "index.html";
 }
-
-
-
-// ======================================================
-// JWT DECODER
-// ======================================================
 
 function parseJwt(token) {
-
-    try {
-
-        const base64 = token
-            .split(".")[1]
-            .replace(/-/g, "+")
-            .replace(/_/g, "/");
-
-
-        return JSON.parse(
-
-            decodeURIComponent(
-
-                atob(base64)
-                    .split("")
-                    .map(c =>
-
-                        "%" +
-                        ("00" +
-                            c.charCodeAt(0)
-                            .toString(16))
-                            .slice(-2)
-
-                    )
-                    .join("")
-
-            )
-
-        );
-
-    }
-
-    catch (error) {
-
-        console.error(
-            "JWT error:",
-            error
-        );
-
-        return null;
-
-    }
-
+  try {
+    const base64 = token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/");
+    return JSON.parse(
+      decodeURIComponent(
+        atob(base64).split("").map(c => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2)).join("")
+      )
+    );
+  } catch (error) {
+    console.error("JWT error:", error);
+    return null;
+  }
 }
 
-
-
-// ======================================================
-// GOOGLE SIGN-IN INITIALIZATION
-// ======================================================
-
 window.onload = function () {
+  if (typeof google === "undefined" || !google.accounts?.id) {
+    console.error("Google Identity Services not loaded.");
+    return;
+  }
 
-    if (
+  google.accounts.id.initialize({
+    client_id: GOOGLE_CLIENT_ID,
+    callback: handleGoogleLogin,
+    auto_select: false,
+    cancel_on_tap_outside: true
+  });
 
-        typeof google === "undefined" ||
+  google.accounts.id.renderButton(document.getElementById("google-btn"), {
+    type: "standard",
+    theme: "outline",
+    size: "large",
+    text: "continue_with",
+    shape: "rectangular",
+    width: 350
+  });
+};
 
-        !google.accounts?.id
 
-    ) {
+// ================= TERMS & CONDITIONS MODAL =================
 
-        console.error(
-            "Google Identity Services not loaded."
-        );
+document.addEventListener("DOMContentLoaded", function () {
+  const backdrop = document.getElementById("modalBackdrop");
+  const openBtn = document.getElementById("openModal");
+  const closeBtn = document.getElementById("closeModal");
+  const closeBtn2 = document.getElementById("closeModalBtn");
+  const body = document.getElementById("modalBody");
+  const jumpLinks = Array.from(document.querySelectorAll("#modalJump a"));
+  const agreeCheck = document.getElementById("agreeCheck");
+  const acceptBtn = document.getElementById("acceptBtn");
 
-        return;
+  if (!backdrop || !openBtn || !closeBtn || !closeBtn2 || !body || !agreeCheck || !acceptBtn) {
+    console.warn("RentFlow Terms Modal: Required element missing.");
+    return;
+  }
+
+  function openModal(event) {
+    if (event) event.preventDefault();
+    backdrop.classList.add("open");
+    document.body.style.overflow = "hidden";
+    body.scrollTop = 0;
+    jumpLinks.forEach(link => link.classList.remove("active"));
+    if (jumpLinks.length > 0) jumpLinks[0].classList.add("active");
+  }
+
+  function closeModal() {
+    backdrop.classList.remove("open");
+    document.body.style.overflow = "";
+  }
+
+  openBtn.addEventListener("click", openModal);
+  closeBtn.addEventListener("click", closeModal);
+  closeBtn2.addEventListener("click", closeModal);
+
+  backdrop.addEventListener("click", event => {
+    if (event.target === backdrop) closeModal();
+  });
+
+  document.addEventListener("keydown", event => {
+    if (event.key === "Escape" && backdrop.classList.contains("open")) closeModal();
+  });
+
+  jumpLinks.forEach(link => {
+    link.addEventListener("click", event => {
+      event.preventDefault();
+      const target = document.querySelector(link.getAttribute("href"));
+      if (target) target.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  });
+
+  const blocks = jumpLinks.map(link => document.querySelector(link.getAttribute("href"))).filter(Boolean);
+
+  body.addEventListener("scroll", function () {
+    if (!blocks.length) return;
+
+    let current = blocks[0];
+    for (const block of blocks) {
+      if (block.offsetTop - body.offsetTop <= body.scrollTop + 40) current = block;
     }
 
+    jumpLinks.forEach(link => link.classList.remove("active"));
+    const activeLink = jumpLinks.find(link => link.getAttribute("href") === "#" + current.id);
+    if (activeLink) {
+      activeLink.classList.add("active");
+      activeLink.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
+    }
+  });
 
-    // ==================================================
-    // INITIALIZE GOOGLE
-    // ==================================================
+  agreeCheck.addEventListener("change", () => {
+    acceptBtn.disabled = !agreeCheck.checked;
+  });
 
-    google.accounts.id.initialize({
+  acceptBtn.addEventListener("click", () => {
+    if (!agreeCheck.checked) return;
 
-        client_id: GOOGLE_CLIENT_ID,
+    const termsCheckbox = document.getElementById("terms");
+    if (termsCheckbox) {
+      termsCheckbox.checked = true;
+      termsCheckbox.dispatchEvent(new Event("change", { bubbles: true }));
+    }
 
-        callback: handleGoogleLogin,
-
-        auto_select: false,
-
-        cancel_on_tap_outside: true
-
-    });
-
-
-    // ==================================================
-    // RENDER GOOGLE BUTTON
-    // ==================================================
-
-    google.accounts.id.renderButton(
-
-        document.getElementById("google-btn"),
-
-        {
-
-            type: "standard",
-
-            theme: "outline",
-
-            size: "large",
-
-            text: "continue_with",
-
-            shape: "rectangular",
-
-            width: 350
-
-        }
-
-    );
-
-};
+    closeModal();
+  });
+});

@@ -656,7 +656,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             try {
-                const response = await fetch('js/products.json');
+                const response = await fetch('../js/products.json');
                 if (!response.ok) {
                     throw new Error('API request failed');
                 }

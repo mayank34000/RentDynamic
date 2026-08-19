@@ -5,20 +5,325 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <title>RentFlow- Sign Up</title>
+    <title>RentFlow - Sign Up</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 
-    <link rel="stylesheet" href="../css/signup.css" />
-
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
-          rel="stylesheet" />
-
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap"
-          rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
 
     <!-- Google Identity Services -->
     <script src="https://accounts.google.com/gsi/client" async defer></script>
+
+<style>
+* { box-sizing: border-box; }
+
+#container {
+    position: relative;
+    z-index: 5;
+    width: 100%;
+    max-width: 430px;
+    padding: 32px 34px;
+    background: rgba(18, 23, 43, 0.72);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: 22px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
+    text-align: left;
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    min-height: 100vh;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 48px 16px 80px;
+    text-align: center;
+    position: relative;
+    overflow-x: hidden;
+}
+body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background: rgba(5, 8, 18, 0.72);
+    z-index: -2;
+    pointer-events: none;
+}
+
+.logo {
+    font-family: 'Manrope', sans-serif;
+    font-size: 27px;
+    font-weight: 800;
+    letter-spacing: -1px;
+    color: #B0AEAD;
+}
+
+.social-icon { width: 20px; height: 20px; object-fit: contain; }
+
+.title {
+    font-family: 'Manrope', sans-serif;
+    font-size: 32px;
+    font-weight: 800;
+    color: #B0AEAD;
+    letter-spacing: -1.2px;
+    margin: 10px 0 6px;
+}
+
+.subtitle {
+    font-family: 'Manrope', sans-serif;
+    font-size: 13px;
+    color: #777777;
+    margin: 0 0 28px;
+}
+
+.input-field { width: 100%; margin-bottom: 18px; text-align: left; }
+.input-field label {
+    display: block;
+    font-size: 13px;
+    font-weight: 700;
+    color: #B0AEAD;
+    margin-bottom: 7px;
+    text-align: left;
+    position: relative;
+    z-index: 5;
+}
+.input-field input {
+    width: 100%;
+    height: 44px;
+    padding: 0 12px;
+    border: 1px solid #dfe3ea;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.85);
+    font-family: inherit;
+    font-size: 14px;
+    color: #1b2540;
+    outline: none;
+    transition: 0.2s ease;
+}
+.input-field input::placeholder { color: #8b93a1; }
+.input-field input:focus { border: 2px solid #1b2540; background: #ffffff; }
+
+#terms {
+  width: 16px;
+  height: 16px;
+  accent-color: #1b2540;
+  cursor: pointer;
+  margin: 0;
+}
+.terms-label { font-size: 13px; color: #cfd3e0; margin: 0; }
+.terms-label .link { color: #6c8cff; text-decoration: none; font-weight: 500; cursor: pointer; background: none; border: none; padding: 0; font: inherit; }
+.terms-label .link:hover { text-decoration: underline; }
+
+.error-msg { display: block; width: 100%; min-height: 14px; font-size: 11px; color: #e2483d; }
+
+.btn {
+    width: 100%;
+    border: none;
+    border-radius: 14px;
+    padding: 15px 16px;
+    font-size: 16px;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    transition: transform 0.15s ease, background 0.15s ease;
+}
+.primary-btn { background: #12172B; color: #FFFFFF; letter-spacing: 0.1px; box-shadow: none; }
+.primary-btn:hover { background: #18203D; color: #FFFFFF; transform: translateY(-1px); }
+
+.divider { display: flex; align-items: center; text-align: center; color: #a4aabb; font-size: 12px; margin: 20px 0; }
+.divider::before, .divider::after { content: ""; flex: 1; height: 1px; background: rgba(255,255,255,0.14); }
+.divider span { padding: 0 12px; white-space: nowrap; }
+
+.social-btn {
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  width: 100%;
+  background: #ffffff; border: 1px solid #e5e7ef; color: #1b2540;
+  margin-bottom: 12px; text-align: center;
+  border-radius: 14px; padding: 13px 16px; font-size: 15px; font-weight: 600; cursor: pointer;
+}
+.social-btn:hover { background: #f7f8fb; }
+.social-icon { width: 18px; height: 18px; object-fit: contain; }
+
+.login-link { text-align: center; font-size: 13px; color: #8891a5; margin-top: 6px; }
+.login-link .link { color: #6c8cff; font-weight: 600; text-decoration: none; }
+.login-link .link:hover { text-decoration: underline; }
+
+@media (max-width: 576px) {
+    body { padding: 30px 12px 40px; }
+    .logo { font-size: 22px; }
+    .title { font-size: 24px; margin-bottom: 20px; }
+    #container { width: 100%; max-width: 100%; padding: 24px 18px; border-radius: 16px; }
+    .social-btn { width: 100%; }
+    .primary-btn { width: 100%; }
+    .terms-label { font-size: 12px; }
+    .login-link { font-size: 12px; }
+}
+
+.bg-video {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    object-fit: cover;
+    z-index: -2;
+}
+
+/* ================================
+   TERMS & CONDITIONS MODAL
+   (matches the glass / dark-navy signup aesthetic)
+================================ */
+:root {
+    --tc-glass-bg: rgba(18, 23, 43, 0.90);
+    --tc-border: rgba(255, 255, 255, 0.14);
+    --tc-text: #e6e7ee;
+    --tc-text-muted: #9aa0b4;
+    --tc-accent: #6c8cff;
+    --tc-navy: #12172B;
+}
+
+.tc-backdrop {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(5, 8, 18, 0.78);
+    backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+    z-index: 999;
+    align-items: center; justify-content: center;
+    padding: 24px;
+}
+.tc-backdrop.open { display: flex; animation: tcFadeIn 0.2s ease; }
+
+.tc-modal {
+    width: 100%; max-width: 620px;
+    max-height: 86vh;
+    background: var(--tc-glass-bg);
+    border: 1px solid var(--tc-border);
+    border-radius: 22px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    display: flex; flex-direction: column;
+    overflow: hidden;
+    text-align: left;
+    animation: tcSlideUp 0.25s ease;
+}
+
+@keyframes tcFadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes tcSlideUp { from { opacity: 0; transform: translateY(20px) scale(0.97); } to { opacity: 1; transform: translateY(0) scale(1); } }
+
+.tc-header {
+    flex: none;
+    padding: 26px 30px 16px;
+    border-bottom: 1px solid var(--tc-border);
+    position: relative;
+}
+.tc-header h2 {
+    font-family: 'Manrope', sans-serif;
+    font-size: 22px; font-weight: 800;
+    color: var(--tc-text);
+    letter-spacing: -0.5px;
+    margin-bottom: 6px;
+}
+.tc-header .tc-meta { font-size: 12px; color: var(--tc-text-muted); font-weight: 600; }
+.tc-header .tc-meta strong { color: #c7cade; }
+
+.tc-close {
+    position: absolute; top: 20px; right: 22px;
+    width: 32px; height: 32px; border-radius: 9px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: var(--tc-text-muted);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+.tc-close:hover { background: rgba(255,255,255,0.12); color: #fff; }
+
+.tc-jump {
+    flex: none;
+    display: flex; gap: 7px; overflow-x: auto;
+    padding: 13px 30px;
+    border-bottom: 1px solid var(--tc-border);
+}
+.tc-jump::-webkit-scrollbar { height: 4px; }
+.tc-jump::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.14); border-radius: 4px; }
+.tc-jump a {
+    flex: none;
+    font-size: 11.5px; font-weight: 700;
+    color: var(--tc-text-muted);
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--tc-border);
+    padding: 6px 11px; border-radius: 100px;
+    text-decoration: none;
+    transition: all 0.15s ease;
+}
+.tc-jump a:hover, .tc-jump a.active {
+    color: #fff;
+    background: rgba(108, 140, 255, 0.22);
+    border-color: rgba(108, 140, 255, 0.45);
+}
+
+.tc-body { flex: 1; overflow-y: auto; padding: 22px 30px 6px; }
+.tc-body::-webkit-scrollbar { width: 6px; }
+.tc-body::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.14); border-radius: 4px; }
+
+.tc-block { padding-bottom: 20px; margin-bottom: 20px; border-bottom: 1px solid var(--tc-border); scroll-margin-top: 10px; }
+.tc-block:last-child { border-bottom: none; margin-bottom: 4px; }
+.tc-block h3 {
+    display: flex; align-items: baseline; gap: 9px;
+    font-family: 'Manrope', sans-serif;
+    font-size: 14.5px; font-weight: 800;
+    color: var(--tc-text);
+    margin-bottom: 9px;
+}
+.tc-block h3 .tc-num { font-size: 11.5px; font-weight: 800; color: var(--tc-accent); }
+.tc-block p { font-size: 13px; color: var(--tc-text-muted); line-height: 1.7; margin-bottom: 9px; }
+.tc-block p:last-child { margin-bottom: 0; }
+.tc-block ul { margin: 5px 0 9px 18px; }
+.tc-block li { font-size: 13px; color: var(--tc-text-muted); line-height: 1.6; margin-bottom: 5px; }
+.tc-block strong { color: #d6d9e6; font-weight: 700; }
+.tc-block a { color: var(--tc-accent); }
+
+.tc-notice {
+    background: rgba(108, 140, 255, 0.08);
+    border: 1px solid rgba(108, 140, 255, 0.25);
+    border-radius: 12px;
+    padding: 11px 15px;
+    font-size: 11.5px;
+    color: var(--tc-text-muted);
+    line-height: 1.6;
+    margin-bottom: 18px;
+}
+.tc-notice strong { color: #c7cade; }
+
+.tc-footer {
+    flex: none;
+    padding: 16px 30px 22px;
+    border-top: 1px solid var(--tc-border);
+    display: flex; align-items: center; justify-content: flex-end; gap: 10px;
+}
+.tc-btn-secondary {
+    padding: 10px 18px;
+    background: rgba(255,255,255,0.06); color: var(--tc-text);
+    font-family: inherit; font-size: 13px; font-weight: 600;
+    border-radius: 10px; border: 1px solid rgba(255,255,255,0.14);
+    cursor: pointer; transition: all 0.15s ease;
+}
+.tc-btn-secondary:hover { background: rgba(255,255,255,0.11); }
+.tc-btn-primary {
+    padding: 10px 20px;
+    background: #fff; color: var(--tc-navy);
+    font-family: inherit; font-size: 13px; font-weight: 700;
+    border-radius: 10px; border: none; cursor: pointer;
+    transition: all 0.15s ease;
+}
+.tc-btn-primary:hover { background: #eef0f8; transform: translateY(-1px); }
+
+@media (max-width: 560px) {
+    .tc-modal { max-height: 92vh; border-radius: 18px; }
+    .tc-header, .tc-jump, .tc-body, .tc-footer { padding-left: 20px; padding-right: 20px; }
+}
+</style>
 
 </head>
 
@@ -51,93 +356,52 @@
         <!-- FULL NAME -->
         <div class="input-field">
             <label>Full Name</label>
-
-            <input
-                type="text"
-                id="username"
-                placeholder="Enter your username"
-                required
-            >
+            <input type="text" id="username" placeholder="Enter your username" required>
         </div>
 
 
         <!-- EMAIL -->
         <div class="input-field">
             <label>Email Address</label>
-
-            <input
-                type="email"
-                id="email"
-                placeholder="Enter your email address"
-                required
-            >
+            <input type="email" id="email" placeholder="Enter your email address" required>
         </div>
 
 
         <!-- PHONE -->
         <div class="input-field">
             <label>Phone Number</label>
-
-            <input
-                type="tel"
-                id="phone"
-                placeholder="Enter your phone number"
-                required
-            >
+            <input type="tel" id="phone" placeholder="Enter your phone number" required>
         </div>
 
 
         <!-- PASSWORD -->
         <div class="input-field">
             <label>Password</label>
-
-            <input
-                type="password"
-                id="password"
-                placeholder="Enter your password"
-                required
-            >
+            <input type="password" id="password" placeholder="Enter your password" required>
         </div>
 
 
         <!-- CONFIRM PASSWORD -->
         <div class="input-field">
             <label>Confirm Password</label>
-
-            <input
-                type="password"
-                id="confirm_password"
-                placeholder="Confirm your password"
-                required
-            >
+            <input type="password" id="confirm_password" placeholder="Confirm your password" required>
         </div>
 
 
         <!-- TERMS -->
-        <div>
-            <input
-                type="checkbox"
-                id="terms"
-                name="terms"
-                required
-            />
+        <div style="display:flex; align-items:flex-start; gap:8px;">
+            <input type="checkbox" id="terms" name="terms" required style="margin-top:3px;" />
 
             <label for="terms" class="terms-label">
                 I agree to the
-                <a href="#" class="link">Terms &amp; Conditions</a>
+                <button type="button" class="link" id="openTermsLink">Terms &amp; Conditions</button>
             </label>
-
-            <span id="terms-error" class="error-msg"></span>
         </div>
+        <span id="terms-error" class="error-msg"></span>
 
 
         <!-- NORMAL SIGNUP -->
-        <button
-            type="button"
-            id="signup-submit"
-            class="btn primary-btn"
-            onclick="handleSubmit()"
-        >
+        <button type="button" id="signup-submit" class="btn primary-btn" onclick="handleSubmit()" style="margin-top:14px;">
             Sign Up
         </button>
 
@@ -148,10 +412,10 @@
 
 
         <!-- GOOGLE SIGN-IN -->
-        <div
-            id="google-btn"
-            class="google-login-container"
-        ></div>
+        <button type="button" class="btn social-btn" id="google-btn">
+            <img class="social-icon" src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google">
+            Continue with Google
+        </button>
 
 
         <p class="login-link">
@@ -162,7 +426,270 @@
     </div>
 
 
-    <script src="../js/signup.js"></script>
+    <!-- ================= TERMS & CONDITIONS MODAL ================= -->
+    <div class="tc-backdrop" id="tcBackdrop">
+      <div class="tc-modal" role="dialog" aria-modal="true" aria-labelledby="tcTitle">
+
+        <div class="tc-header">
+          <h2 id="tcTitle">Terms &amp; Conditions</h2>
+          <div class="tc-meta">Effective <strong>August 19, 2026</strong> &nbsp;·&nbsp; Version <strong>1.0</strong></div>
+          <button class="tc-close" id="tcClose" aria-label="Close">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          </button>
+        </div>
+
+        <nav class="tc-jump" id="tcJump">
+          <a href="#t1">01 Intro</a>
+          <a href="#t2">02 Eligibility</a>
+          <a href="#t3">03 Accounts</a>
+          <a href="#t4">04 Roles</a>
+          <a href="#t5">05 Listings</a>
+          <a href="#t6">06 Booking</a>
+          <a href="#t7">07 Payments</a>
+          <a href="#t8">08 Cancellation</a>
+          <a href="#t9">09 Renter</a>
+          <a href="#t10">10 Owner</a>
+          <a href="#t11">11 Prohibited</a>
+          <a href="#t12">12 Reviews</a>
+          <a href="#t13">13 Privacy</a>
+          <a href="#t14">14 IP</a>
+          <a href="#t15">15 Third-Party</a>
+          <a href="#t16">16 Availability</a>
+          <a href="#t17">17 Disclaimer</a>
+          <a href="#t18">18 Liability</a>
+          <a href="#t19">19 Termination</a>
+          <a href="#t20">20 Changes</a>
+          <a href="#t21">21 Law</a>
+          <a href="#t22">22 Contact</a>
+        </nav>
+
+        <div class="tc-body" id="tcBody">
+
+
+          <div class="tc-block" id="t1">
+            <h3><span class="tc-num">01</span>Introduction</h3>
+            <p>These Terms &amp; Conditions ("Terms") govern access to and use of RentFlow's website, mobile applications, and related services (the "Platform"), operated by RentFlow Inc.</p>
+            <p>By creating an account, browsing listings, or otherwise using the Platform, you agree to be bound by these Terms and our Privacy Policy.</p>
+            <p>RentFlow connects Renters with Property Owners. RentFlow provides the technology for that connection — it is not a landlord, tenant, broker, or party to any lease formed through the Platform.</p>
+          </div>
+
+          <div class="tc-block" id="t2">
+            <h3><span class="tc-num">02</span>Eligibility</h3>
+            <ul>
+              <li>Be at least 18 years old and able to form a binding contract;</li>
+              <li>Provide accurate, current, and complete registration information; and</li>
+              <li>Not be barred from using the Platform under applicable law.</li>
+            </ul>
+            <p>RentFlow may request proof of identity or eligibility at any time.</p>
+          </div>
+
+          <div class="tc-block" id="t3">
+            <h3><span class="tc-num">03</span>User Accounts</h3>
+            <p>You're responsible for your login credentials and all activity under your account.</p>
+            <ul>
+              <li>One account per person; no sharing or transferring accounts.</li>
+              <li>Notify us promptly of unauthorized use.</li>
+              <li>We may verify identity, phone, email, or payment details.</li>
+            </ul>
+          </div>
+
+          <div class="tc-block" id="t4">
+            <h3><span class="tc-num">04</span>User Roles</h3>
+            <p><strong>Renters</strong> search for and book housing. <strong>Property Owners</strong> — including authorized managers — list items for rent. A single account may hold both roles, each with its own obligations (Sections 9 &amp; 10).</p>
+          </div>
+
+          <div class="tc-block" id="t5">
+            <h3><span class="tc-num">05</span>Property Listings</h3>
+            <p>Owners are solely responsible for listing accuracy — price, availability, photos, amenities, and lease terms — and must have the legal right to lease the property.</p>
+            <p>RentFlow may review, edit, suspend, or remove any listing that violates these Terms or housing law, at our discretion.</p>
+          </div>
+
+          <div class="tc-block" id="t6">
+            <h3><span class="tc-num">06</span>Rental &amp; Booking</h3>
+            <p>Renters submit requests; Owners accept, decline, or ask for more info. A confirmed booking forms a rental agreement directly between Renter and Owner — RentFlow is not a party to it and doesn't guarantee any booking will be honored or renewed.</p>
+          </div>
+
+          <div class="tc-block" id="t7">
+            <h3><span class="tc-num">07</span>Payments</h3>
+            <p>Rent, deposits, and service fees are processed through RentFlow's third-party payment processor.</p>
+            <ul>
+              <li>Service fee disclosed before checkout, in addition to rent.</li>
+              <li>Deposits held/disbursed per listing terms and local law.</li>
+              <li>Users are responsible for applicable taxes.</li>
+            </ul>
+          </div>
+
+          <div class="tc-block" id="t8">
+            <h3><span class="tc-num">08</span>Cancellation &amp; Refunds</h3>
+            <p>Cancellation terms are set by the Owner and shown on each listing before booking. RentFlow's service fee may be non-refundable except where required by law.</p>
+          </div>
+
+          <div class="tc-block" id="t9">
+            <h3><span class="tc-num">09</span>Renter Responsibilities</h3>
+            <ul>
+              <li>Pay rent, deposits, and fees on time;</li>
+              <li>Treat the property with care and respect;</li>
+              <li>Communicate honestly and report issues through the Platform.</li>
+            </ul>
+          </div>
+
+          <div class="tc-block" id="t10">
+            <h3><span class="tc-num">10</span>Owner Responsibilities</h3>
+            <ul>
+              <li>Provide accurate and up-to-date information about items or properties listed for rent;</li>
+              <li>Ensure that rented items or properties are safe, functional, and suitable for their intended use;</li>
+              <li>Comply with all applicable laws, regulations, and safety requirements related to the listed item or property;</li>
+              <li>Honor confirmed bookings and the agreed rental terms in good faith; and</li>
+              <li>Respect Renter privacy, property, and personal information throughout the rental period.</li>
+            </ul>
+          </div>
+
+          <div class="tc-block" id="t11">
+            <h3><span class="tc-num">11</span>Prohibited Activities</h3>
+            <ul>
+              <li>False, misleading, or discriminatory listings or messages;</li>
+              <li>Discrimination based on a protected characteristic;</li>
+              <li>Paying off-platform to dodge service fees;</li>
+              <li>Fraud, harassment, or other unlawful use;</li>
+              <li>Fake reviews or impersonation; or</li>
+              <li>Scraping or interfering with the Platform.</li>
+            </ul>
+          </div>
+
+          <div class="tc-block" id="t12">
+            <h3><span class="tc-num">12</span>Reviews &amp; User Content</h3>
+            <p>Content you post must be honest and free of unlawful or defamatory material. You grant RentFlow a license to host and display it; we may remove content that violates these Terms.</p>
+          </div>
+
+          <div class="tc-block" id="t13">
+            <h3><span class="tc-num">13</span>Privacy</h3>
+            <p>Our Privacy Policy, incorporated by reference, describes how we collect and use personal information, including sharing booking details between Renters and Owners.</p>
+          </div>
+
+          <div class="tc-block" id="t14">
+            <h3><span class="tc-num">14</span>Intellectual Property</h3>
+            <p>RentFlow's name, logo, and platform technology are our property. You get a limited license to use the Platform; you retain ownership of your own content.</p>
+          </div>
+
+          <div class="tc-block" id="t15">
+            <h3><span class="tc-num">15</span>Third-Party Services</h3>
+            <p>Payment processors, verification providers, and mapping tools are governed by their own terms — RentFlow isn't responsible for their acts or availability.</p>
+          </div>
+
+          <div class="tc-block" id="t16">
+            <h3><span class="tc-num">16</span>Service Availability</h3>
+            <p>We aim to keep the Platform reliable but don't guarantee uninterrupted access; we may pause service for maintenance or change features at any time.</p>
+          </div>
+
+          <div class="tc-block" id="t17">
+            <h3><span class="tc-num">17</span>Disclaimer</h3>
+            <p>The Platform is provided "as is," without warranties. RentFlow doesn't warrant listing accuracy or user conduct, and isn't a licensed broker unless stated otherwise.</p>
+          </div>
+
+          <div class="tc-block" id="t18">
+            <h3><span class="tc-num">18</span>Limitation of Liability</h3>
+            <p>To the extent permitted by law, RentFlow isn't liable for indirect or consequential damages. Total liability is capped at fees you paid RentFlow in the prior 12 months, or [amount].</p>
+          </div>
+
+          <div class="tc-block" id="t19">
+            <h3><span class="tc-num">19</span>Suspension &amp; Termination</h3>
+            <p>We may suspend or close accounts for violations, fraud risk, or inactivity. Key sections — Payments, IP, Disclaimer, Liability, Governing Law — survive termination.</p>
+          </div>
+
+          <div class="tc-block" id="t20">
+            <h3><span class="tc-num">20</span>Changes to Terms</h3>
+            <p>We may update these Terms; material changes are communicated at least [14] days in advance. Continued use means you accept the revised Terms.</p>
+          </div>
+
+          <div class="tc-block" id="t21">
+            <h3><span class="tc-num">21</span>Governing Law &amp; Disputes</h3>
+            <p>These Terms shall be governed by and construed in accordance with the laws of India. Any dispute arising out of or relating to these Terms or the use of RentFlow shall first be addressed through good-faith negotiations between the parties. If the dispute cannot be resolved through negotiation, it shall be subject to the jurisdiction of the competent courts in India.
+</p>
+          </div>
+
+          <div class="tc-block" id="t22">
+            <h3><span class="tc-num">22</span>Contact Us</h3>
+            <p><strong>RentFlow Inc.</strong><br>Chitkara University<br>Email: <a href="mailto:support@rentflow.com">rentflow132@gmail.com</a><br>Phone: 98745xxxxx</p>
+          </div>
+
+        </div>
+
+        <div class="tc-footer">
+          <button class="tc-btn-secondary" id="tcCloseBtn">Close</button>
+
+        </div>
+
+      </div>
+    </div>
+
+
+    <script>
+      // ---- Terms & Conditions modal wiring ----
+      const tcBackdrop = document.getElementById('tcBackdrop');
+      const openTermsLink = document.getElementById('openTermsLink');
+      const tcClose = document.getElementById('tcClose');
+      const tcCloseBtn = document.getElementById('tcCloseBtn');
+      const tcAgreeBtn = document.getElementById('tcAgreeBtn');
+      const tcBody = document.getElementById('tcBody');
+      const tcJumpLinks = Array.from(document.querySelectorAll('#tcJump a'));
+      const termsCheckbox = document.getElementById('terms');
+
+      function openTerms() {
+        tcBackdrop.classList.add('open');
+        document.body.style.overflow = 'hidden';
+      }
+      function closeTerms() {
+        tcBackdrop.classList.remove('open');
+        document.body.style.overflow = '';
+      }
+
+      openTermsLink.addEventListener('click', (e) => { e.preventDefault(); openTerms(); });
+      tcClose.addEventListener('click', closeTerms);
+      tcCloseBtn.addEventListener('click', closeTerms);
+      tcBackdrop.addEventListener('click', (e) => { if (e.target === tcBackdrop) closeTerms(); });
+      document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && tcBackdrop.classList.contains('open')) closeTerms(); });
+
+      // "I Agree" checks the signup form's terms checkbox and closes the modal
+      tcAgreeBtn.addEventListener('click', () => {
+        termsCheckbox.checked = true;
+        closeTerms();
+      });
+
+      // jump-chip scrolling within the modal body
+      tcJumpLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+          e.preventDefault();
+          const target = document.querySelector(link.getAttribute('href'));
+          if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+      });
+
+      // highlight active chip while scrolling
+      const tcBlocks = tcJumpLinks.map(l => document.querySelector(l.getAttribute('href')));
+      tcBody.addEventListener('scroll', () => {
+        let current = tcBlocks[0];
+        for (const b of tcBlocks) {
+          if (b && b.offsetTop - tcBody.offsetTop <= tcBody.scrollTop + 40) current = b;
+        }
+        tcJumpLinks.forEach(l => l.classList.remove('active'));
+        const activeLink = tcJumpLinks.find(l => l.getAttribute('href') === '#' + current.id);
+        if (activeLink) {
+          activeLink.classList.add('active');
+          activeLink.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+        }
+      });
+
+      // ---- your existing signup logic ----
+      function handleSubmit() {
+        const termsError = document.getElementById('terms-error');
+        if (!termsCheckbox.checked) {
+          termsError.textContent = 'Please agree to the Terms & Conditions to continue.';
+          return;
+        }
+        termsError.textContent = '';
+        // TODO: hook up actual signup submission logic here
+      }
+    </script>
 
 </body>
 </html>

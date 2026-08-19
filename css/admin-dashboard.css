@@ -467,6 +467,13 @@ body {
     color: var(--accent-blue-light);
 }
 
+.badge-blocked {
+    background: rgba(239, 68, 68, 0.12);
+    border-color: rgba(239, 68, 68, 0.3);
+    color: #f87171;
+}
+
+
 .table-card {
     padding: 0;
     overflow: hidden;
@@ -476,6 +483,78 @@ body {
     width: 100%;
     overflow-x: auto;
 }
+
+/* Dedicated internal vertical scrollbar for Listing Management across Admin & Analytics */
+.listing-management-container,
+.listings-table-container {
+    max-height: 460px;
+    overflow-y: auto;
+    position: relative;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.15) rgba(255, 255, 255, 0.02);
+}
+
+/* Sticky Table Header inside listing management scroll containers */
+.listing-management-container .platform-table thead th,
+.listings-table-container .platform-table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: #0a1228;
+    box-shadow: 0 1px 0 var(--border);
+}
+
+/* Subtle, professional custom scrollbar styling */
+.listing-management-container::-webkit-scrollbar,
+.listings-table-container::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+.listing-management-container::-webkit-scrollbar-track,
+.listings-table-container::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 4px;
+}
+
+.listing-management-container::-webkit-scrollbar-thumb,
+.listings-table-container::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 4px;
+}
+
+.listing-management-container::-webkit-scrollbar-thumb:hover,
+.listings-table-container::-webkit-scrollbar-thumb:hover {
+    background: rgba(59, 130, 246, 0.4);
+}
+
+/* Light theme overrides for sticky header and scrollbar */
+body.light-theme .listing-management-container .platform-table thead th,
+body.light-theme .listings-table-container .platform-table thead th {
+    background: #f8fafc;
+    box-shadow: 0 1px 0 rgba(0, 0, 0, 0.1);
+}
+
+body.light-theme .listing-management-container::-webkit-scrollbar-track,
+body.light-theme .listings-table-container::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.03);
+}
+
+body.light-theme .listing-management-container::-webkit-scrollbar-thumb,
+body.light-theme .listings-table-container::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.2);
+}
+
+body.light-theme .listing-management-container::-webkit-scrollbar-thumb:hover,
+body.light-theme .listings-table-container::-webkit-scrollbar-thumb:hover {
+    background: rgba(59, 130, 246, 0.6);
+}
+
+body.light-theme .listing-management-container,
+body.light-theme .listings-table-container {
+    scrollbar-color: rgba(0, 0, 0, 0.2) rgba(0, 0, 0, 0.03);
+}
+
 
 .platform-table {
     width: 100%;

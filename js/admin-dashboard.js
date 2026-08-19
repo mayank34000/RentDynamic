@@ -102,6 +102,7 @@ function renderListings() {
         filtered.forEach(listing => {
             let statusClass = 'badge-normal';
             if (listing.status === 'Active') statusClass = 'badge-low'; // green
+            if (listing.status === 'Blocked') statusClass = 'badge-blocked';
             if (listing.status === 'Inactive' || listing.status === 'Pending') statusClass = 'badge-orange';
 
             // Build dynamic actions based on status
@@ -110,6 +111,9 @@ function renderListings() {
                                
             if (listing.status === 'Active') {
                 actionsHtml += `<button class="action-btn" onclick="toggleListing('${listing.id}', 'Disabled')">Disable</button>`;
+                actionsHtml += `<button class="action-btn btn-block-text" onclick="toggleListing('${listing.id}', 'Blocked')">Block</button>`;
+            } else if (listing.status === 'Blocked') {
+                actionsHtml += `<button class="action-btn" onclick="toggleListing('${listing.id}', 'Active')">Unblock</button>`;
             } else if (listing.status === 'Disabled' || listing.status === 'Inactive') {
                 actionsHtml += `<button class="action-btn" onclick="toggleListing('${listing.id}', 'Active')">Restore</button>`;
             } else if (listing.status === 'Pending') {
@@ -126,7 +130,7 @@ function renderListings() {
                     <td><strong>${title}</strong><br><small style="color:#9ca3af">${listing.id}</small></td>
                     <td>${listing.category || 'Other'}</td>
                     <td>₹${price.toLocaleString('en-IN')}</td>
-                    <td><span class="badge ${statusClass}">${listing.status.toUpperCase()}</span></td>
+                    <td><span class="badge ${statusClass}">${(listing.status || 'Unknown').toUpperCase()}</span></td>
                     <td>${actionsHtml}</td>
                 </tr>
             `;
@@ -254,11 +258,11 @@ function renderPremiumUsers() {
     let html = '';
 
     if (premiumUsers.length === 0) {
-        html = '<tr><td colspan="5" style="text-align:center; padding:20px;">No premium users found.</td></tr>';
+        html = '<tr><td colspan="6" style="text-align:center; padding:20px;">No premium users found.</td></tr>';
     } else {
         premiumUsers.forEach(u => {
-            const purchaseDate = new Date(u.premiumPurchaseDate).toLocaleDateString('en-IN');
-            const expiryDate = new Date(u.premiumExpiryDate).toLocaleDateString('en-IN');
+            const purchaseDate = u.premiumPurchaseDate ? new Date(u.premiumPurchaseDate).toLocaleDateString('en-IN') : '—';
+            const expiryDate = u.premiumExpiryDate ? new Date(u.premiumExpiryDate).toLocaleDateString('en-IN') : '—';
             html += `
                 <tr>
                     <td><strong>${u.username || 'Unknown'}</strong></td>
@@ -266,6 +270,7 @@ function renderPremiumUsers() {
                     <td><span class="badge badge-low">Premium Active</span></td>
                     <td>${purchaseDate}</td>
                     <td>${expiryDate}</td>
+                    <td><button class="action-btn" onclick="openAdminPremiumDetailModal('${u.useremail}')">View Details</button></td>
                 </tr>
             `;
         });
@@ -378,12 +383,74 @@ function attachFilterListeners() {
     if (sortSelect) sortSelect.addEventListener('change', renderListings);
 }
 
+function openAdminPremiumDetailModal(email) {
+    const allUsers = getUsers();
+    const user = allUsers.find(u => u.useremail === email);
+    if (!user) return;
+
+    const allBookings = getBookings();
+    const userBookings = allBookings.filter(b => 
+        b.renterEmail === user.useremail || b.renterName === user.username
+    );
+
+    const totalSpent = userBookings.reduce((sum, b) => {
+        const status = (b.status || '').toLowerCase();
+        if (status === 'confirmed' || status === 'completed') {
+            return sum + parseFloat(b.grandTotal || b.amount || 0);
+        }
+        return sum;
+    }, 0);
+
+    const purchaseDate = user.premiumPurchaseDate ? new Date(user.premiumPurchaseDate).toLocaleDateString('en-IN') : null;
+    const expiryDate = user.premiumExpiryDate ? new Date(user.premiumExpiryDate).toLocaleDateString('en-IN') : '—';
+    const registeredDate = user.createdAt ? new Date(user.createdAt).toLocaleDateString('en-IN') : null;
+
+    const row = (label, value) => `
+        <div style="display:flex; justify-content:space-between; align-items:center; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.06); font-size:14px;">
+            <span style="color:#9ca3af; font-weight:500;">${label}</span>
+            <span style="color:#f8fafc; font-weight:600;">${value}</span>
+        </div>
+    `;
+
+    let html = '';
+    html += row('Name', user.username || '—');
+    html += row('Email', user.useremail || '—');
+    if (user.userphone) html += row('Phone', user.userphone);
+    html += row('Role', user.role ? user.role.charAt(0).toUpperCase() + user.role.slice(1) : '—');
+    html += row('Membership', '<span class="badge badge-low">Premium Active</span>');
+    if (purchaseDate) html += row('Premium Since', purchaseDate);
+    html += row('Premium Expires', expiryDate);
+    if (registeredDate) html += row('Registered', registeredDate);
+    html += row('Total Bookings', userBookings.length);
+    html += row('Total Spent', `₹${totalSpent.toLocaleString('en-IN')}`);
+
+    const content = document.getElementById('adminPremiumDetailContent');
+    if (content) content.innerHTML = html;
+
+    const modal = document.getElementById('adminPremiumDetailModal');
+    if (modal) modal.classList.add('active');
+}
+
+function closeAdminPremiumDetailModal() {
+    const modal = document.getElementById('adminPremiumDetailModal');
+    if (modal) modal.classList.remove('active');
+}
+
 function attachModalListeners() {
     const cancelBtn = document.getElementById('cancelRemoveBtn');
     const confirmBtn = document.getElementById('confirmRemoveBtn');
+    const closePremiumBtn = document.getElementById('closeAdminPremiumDetailBtn');
 
     if (cancelBtn) cancelBtn.addEventListener('click', closeRemoveModal);
     if (confirmBtn) confirmBtn.addEventListener('click', confirmRemoveListing);
+    if (closePremiumBtn) closePremiumBtn.addEventListener('click', closeAdminPremiumDetailModal);
+
+    const premModal = document.getElementById('adminPremiumDetailModal');
+    if (premModal) {
+        premModal.addEventListener('click', (e) => {
+            if (e.target === premModal) closeAdminPremiumDetailModal();
+        });
+    }
 }
 
 function initMobileMenu() {

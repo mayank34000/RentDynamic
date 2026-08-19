@@ -165,6 +165,7 @@
                             <option value="Active">Active</option>
                             <option value="Pending">Pending</option>
                             <option value="Inactive">Inactive</option>
+                            <option value="Blocked">Blocked</option>
                         </select>
                         <select id="listingSort" class="control-select">
                             <option value="newest">Newest</option>
@@ -175,7 +176,7 @@
                     </div>
                 </div>
 
-                <div class="table-responsive">
+                <div class="listings-table-container table-responsive">
                     <table class="platform-table" id="listingTable">
                         <thead>
                             <tr>
@@ -229,6 +230,7 @@
                                 <th>Status</th>
                                 <th>Purchase Date</th>
                                 <th>Expiry Date</th>
+                                <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody id="premiumList">
@@ -283,6 +285,19 @@
             <div class="modal-actions">
                 <button class="btn-cancel" id="cancelRemoveBtn">Cancel</button>
                 <button class="btn-danger" id="confirmRemoveBtn">Remove Listing</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Premium User Details -->
+    <div class="modal-overlay" id="adminPremiumDetailModal">
+        <div class="modal-content glass-card" style="max-width: 480px;">
+            <h3>Premium User Details</h3>
+            <div id="adminPremiumDetailContent" style="margin: 16px 0;">
+                <!-- Populated by JS -->
+            </div>
+            <div class="modal-actions">
+                <button class="btn-cancel" id="closeAdminPremiumDetailBtn" style="width: 100%;">Close</button>
             </div>
         </div>
     </div>

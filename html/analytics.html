@@ -75,6 +75,12 @@
                 <div class="kpi-label">Active Listings</div>
             </article>
 
+            <article class="glass-card kpi-card" style="border: 1px solid rgba(239,68,68,0.25); background: rgba(239,68,68,0.04);">
+                <div class="kpi-icon" style="color:#f87171; background: rgba(239,68,68,0.1);">🚫</div>
+                <div class="kpi-value" id="statBlockedListings" style="color:#f87171;">-</div>
+                <div class="kpi-label">Blocked Listings</div>
+            </article>
+
             <article class="glass-card kpi-card">
                 <div class="kpi-icon">📦</div>
                 <div class="kpi-value" id="statBookings">-</div>
@@ -183,12 +189,116 @@
 
         </div>
 
+        <!-- ============ LISTING MANAGEMENT ============ -->
+        <section class="analytics-mgmt-section" aria-label="Listing Management">
+            <h2 class="section-title">Listing Management</h2>
+            <p class="section-subtitle" style="margin-bottom: 20px;">Edit or block individual listings from here. Blocked listings are hidden from Browse Rentals.</p>
+
+            <div class="glass-card table-card">
+                <div class="listing-management-container table-responsive">
+                    <table class="platform-table">
+                        <thead>
+                            <tr>
+                                <th>Listing</th>
+                                <th>Category</th>
+                                <th>Price</th>
+                                <th>Seller</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="analyticsListingMgmtBody">
+                            <!-- Populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============ BLOCKED LISTINGS ============ -->
+        <section class="analytics-mgmt-section" aria-label="Blocked Listings">
+            <h2 class="section-title">Blocked Listings</h2>
+            <p class="section-subtitle" style="margin-bottom: 20px;">These listings are not visible to renters and cannot be booked.</p>
+
+            <div id="blockedListingsContainer">
+                <!-- Populated by JS -->
+            </div>
+        </section>
+
+        <!-- ============ PREMIUM USERS ============ -->
+        <section class="analytics-mgmt-section" aria-label="Premium Users">
+            <h2 class="section-title">Premium Users</h2>
+            <p class="section-subtitle" style="margin-bottom: 20px;">Users with an active premium subscription.</p>
+
+            <div class="glass-card table-card">
+                <div class="table-responsive">
+                    <table class="platform-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Status</th>
+                                <th>Expiry Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="analyticsPremiumBody">
+                            <!-- Populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
     </main>
+
+    <!-- ===================== MODALS ===================== -->
+
+    <!-- Block Listing Confirmation -->
+    <div class="modal-overlay" id="blockListingModal">
+        <div class="modal-content glass-card">
+            <h3>Block this listing?</h3>
+            <p>Blocked listings will no longer be visible to renters and cannot be booked. The listing record will be retained.</p>
+            <div class="modal-actions">
+                <button class="btn-cancel" id="cancelBlockBtn">Cancel</button>
+                <button class="btn-danger" id="confirmBlockBtn">Block Listing</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Unblock Listing Confirmation -->
+    <div class="modal-overlay" id="unblockListingModal">
+        <div class="modal-content glass-card">
+            <h3>Unblock this listing?</h3>
+            <p>Users will be able to browse and book this listing again.</p>
+            <div class="modal-actions">
+                <button class="btn-cancel" id="cancelUnblockBtn">Cancel</button>
+                <button class="btn-danger" id="confirmUnblockBtn" style="background: var(--accent-blue-bright);">Unblock Listing</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Premium User Details -->
+    <div class="modal-overlay" id="premiumDetailModal">
+        <div class="modal-content glass-card" style="max-width: 480px;">
+            <h3>Premium User Details</h3>
+            <div id="premiumDetailContent" style="margin: 16px 0;">
+                <!-- Populated by JS -->
+            </div>
+            <div class="modal-actions">
+                <button class="btn-cancel" id="closePremiumDetailBtn" style="width: 100%;">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================== TOAST ===================== -->
+    <div id="toastContainer" class="toast-container"></div>
 
     <!-- Shared Storage & Data Helpers -->
     <script src="../js/storage.js"></script>
     <!-- Analytics JS -->
     <script src="../js/analytics.js"></script>
     <script src="../js/navbar-scroll.js"></script>
+
 </body>
 </html>

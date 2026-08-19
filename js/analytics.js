@@ -5,6 +5,10 @@
    getPremiumUsers, formatCurrency) lives in storage.js.
    ============================================================ */
 
+// State for pending block/unblock actions
+let _pendingBlockId = null;
+let _pendingUnblockId = null;
+
 // ─── KPI OVERVIEW ───────────────────────────────────────────
 
 function renderKPIs() {
@@ -12,20 +16,21 @@ function renderKPIs() {
     const listings = getListings();
     const bookings = getBookings();
     const revenue = calculateTotalRevenue(bookings);
-    // Use shared helper — same formula as Admin Dashboard
     const platformFee = calculatePlatformFeeRevenue(listings);
     const premiumUsers = getPremiumUsers(users);
     const activeListings = listings.filter(l => (l.status || '').toLowerCase() === 'active');
+    const blockedListings = listings.filter(l => (l.status || '').toLowerCase() === 'blocked');
 
     const el = id => document.getElementById(id);
 
-    if (el('statUsers'))         el('statUsers').textContent = users.length;
-    if (el('statListings'))      el('statListings').textContent = listings.length;
-    if (el('statActiveListings')) el('statActiveListings').textContent = activeListings.length;
-    if (el('statBookings'))      el('statBookings').textContent = bookings.length;
-    if (el('statRevenue'))       el('statRevenue').textContent = formatCurrency(revenue);
-    if (el('statPlatformFee'))   el('statPlatformFee').textContent = formatCurrency(platformFee);
-    if (el('statPremium'))       el('statPremium').textContent = premiumUsers.length;
+    if (el('statUsers'))           el('statUsers').textContent = users.length;
+    if (el('statListings'))        el('statListings').textContent = listings.length;
+    if (el('statActiveListings'))  el('statActiveListings').textContent = activeListings.length;
+    if (el('statBlockedListings')) el('statBlockedListings').textContent = blockedListings.length;
+    if (el('statBookings'))        el('statBookings').textContent = bookings.length;
+    if (el('statRevenue'))         el('statRevenue').textContent = formatCurrency(revenue);
+    if (el('statPlatformFee'))     el('statPlatformFee').textContent = formatCurrency(platformFee);
+    if (el('statPremium'))         el('statPremium').textContent = premiumUsers.length;
 }
 
 // ─── BOOKING ANALYTICS ──────────────────────────────────────
@@ -92,7 +97,6 @@ function renderRevenueAnalytics() {
     bookings.forEach(b => {
         const status = (b.status || '').toLowerCase();
         if (status === 'confirmed' || status === 'completed') {
-            // Support both old schema (amount) and new schema (grandTotal)
             const amount = parseFloat(b.grandTotal || b.amount || b.totalPrice || b.price || 0);
             totalRevenue += amount;
             validBookingsCount++;
@@ -100,8 +104,6 @@ function renderRevenueAnalytics() {
     });
 
     const avgBooking = validBookingsCount > 0 ? Math.round(totalRevenue / validBookingsCount) : 0;
-
-    // Platform fee uses shared helper — same as Admin Dashboard
     const listings = getListings();
     const platformFee = calculatePlatformFeeRevenue(listings);
 
@@ -146,12 +148,9 @@ function renderListingPerformance() {
         return;
     }
 
-    // Map all listings (not just active) for performance tracking
     const performance = {};
     listings.forEach(l => {
-        const id = l.id;
-        // Use real schema: title preferred over name, price preferred over basePrice
-        performance[id] = {
+        performance[l.id] = {
             name: l.title || l.name || 'Unknown Listing',
             category: l.category || 'Uncategorized',
             status: l.status || 'Unknown',
@@ -174,7 +173,6 @@ function renderListingPerformance() {
         }
     });
 
-    // Sort by revenue desc, then bookings desc — include all listings with activity
     const sorted = Object.values(performance)
         .filter(p => p.bookings > 0)
         .sort((a, b) => b.revenue - a.revenue || b.bookings - a.bookings)
@@ -203,7 +201,6 @@ function renderListingPerformance() {
             </tr>
         `;
     });
-
     tbody.innerHTML = html;
 }
 
@@ -272,7 +269,6 @@ function renderUserOverview() {
         if (roles[role] !== undefined) { roles[role]++; } else { roles[role] = 1; }
     });
 
-    // Also show Premium breakdown
     const premiumCount = getPremiumUsers(users).length;
 
     let html = `<div class="bar-chart">`;
@@ -286,7 +282,6 @@ function renderUserOverview() {
             </div>
         `;
     }
-    // Premium row
     const premiumPct = total > 0 ? Math.round((premiumCount / total) * 100) : 0;
     html += `
         <div class="bar-row">
@@ -358,7 +353,6 @@ function renderFeedbackAnalytics() {
 
     html += `</div></div>`;
 
-    // Category breakdown
     if (Object.keys(categoryCounts).length > 0) {
         html += `<div style="margin-top:24px;"><strong style="font-size:14px;color:#9ca3af;text-transform:uppercase;letter-spacing:0.5px;">By Category</strong><div class="bar-chart" style="margin-top:12px;">`;
         const catTotal = Object.values(categoryCounts).reduce((a, b) => a + b, 0);
@@ -376,6 +370,293 @@ function renderFeedbackAnalytics() {
     }
 
     container.innerHTML = html;
+}
+
+// ─── LISTING MANAGEMENT (Admin) ─────────────────────────────
+
+function renderListingManagement() {
+    const tbody = document.getElementById('analyticsListingMgmtBody');
+    if (!tbody) return;
+
+    const listings = getListings();
+
+    if (listings.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:20px; color:#9ca3af;">No listings found.</td></tr>`;
+        return;
+    }
+
+    let html = '';
+    listings.forEach(listing => {
+        const title = listing.title || listing.name || 'Unknown';
+        const price = listing.price || listing.basePrice || 0;
+        const status = listing.status || 'Unknown';
+        const sellerName = listing.seller?.name || '—';
+        const isBlocked = status.toLowerCase() === 'blocked';
+
+        let badgeClass = 'badge-normal';
+        if (status === 'Active') badgeClass = 'badge-low';
+        if (status === 'Blocked') badgeClass = 'badge-blocked';
+        if (status === 'Inactive' || status === 'Pending') badgeClass = 'badge-orange';
+
+        const blockBtn = isBlocked
+            ? `<button class="action-btn" onclick="openUnblockModal('${listing.id}')">Unblock</button>`
+            : `<button class="action-btn btn-block-text" onclick="openBlockModal('${listing.id}')">Block Listing</button>`;
+
+        html += `
+            <tr>
+                <td><strong>${title}</strong><br><small style="color:#9ca3af">${listing.id}</small></td>
+                <td>${listing.category || 'Other'}</td>
+                <td>₹${price.toLocaleString('en-IN')}</td>
+                <td>${sellerName}</td>
+                <td><span class="badge ${badgeClass}">${status.toUpperCase()}</span></td>
+                <td>
+                    <button class="action-btn" onclick="goEditListing('${listing.id}')">Edit Listing</button>
+                    ${blockBtn}
+                </td>
+            </tr>
+        `;
+    });
+
+    tbody.innerHTML = html;
+}
+
+// ─── BLOCKED LISTINGS SECTION ───────────────────────────────
+
+function renderBlockedListings() {
+    const container = document.getElementById('blockedListingsContainer');
+    if (!container) return;
+
+    const listings = getListings();
+    const blocked = listings.filter(l => (l.status || '').toLowerCase() === 'blocked');
+
+    if (blocked.length === 0) {
+        container.innerHTML = `
+            <div class="glass-card" style="padding: 32px; text-align: center; color: var(--text-secondary);">
+                <div style="font-size: 32px; opacity: 0.4; margin-bottom: 12px;">✅</div>
+                <p style="font-size: 15px;">No blocked listings at the moment.</p>
+            </div>
+        `;
+        return;
+    }
+
+    let html = `<div class="glass-card table-card"><div class="table-responsive"><table class="platform-table">
+        <thead>
+            <tr>
+                <th>Listing</th>
+                <th>Category</th>
+                <th>Seller / Host</th>
+                <th>Price</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>`;
+
+    blocked.forEach(listing => {
+        const title = listing.title || listing.name || 'Unknown';
+        const price = listing.price || listing.basePrice || 0;
+        const sellerName = listing.seller?.name || '—';
+
+        html += `
+            <tr>
+                <td><strong>${title}</strong><br><small style="color:#9ca3af">${listing.id}</small></td>
+                <td>${listing.category || 'Other'}</td>
+                <td>${sellerName}</td>
+                <td>₹${price.toLocaleString('en-IN')}${listing.period ? '/' + listing.period : ''}</td>
+                <td><span class="badge badge-blocked">BLOCKED</span></td>
+                <td>
+                    <button class="action-btn" onclick="goEditListing('${listing.id}')">Edit Listing</button>
+                    <button class="action-btn" onclick="openUnblockModal('${listing.id}')">Unblock</button>
+                </td>
+            </tr>
+        `;
+    });
+
+    html += `</tbody></table></div></div>`;
+    container.innerHTML = html;
+}
+
+// ─── PREMIUM USERS (Analytics) ──────────────────────────────
+
+function renderPremiumUsersAnalytics() {
+    const tbody = document.getElementById('analyticsPremiumBody');
+    if (!tbody) return;
+
+    const allUsers = getUsers();
+    const premiumUsers = getPremiumUsers(allUsers);
+
+    if (premiumUsers.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:20px; color:#9ca3af;">No premium users found.</td></tr>`;
+        return;
+    }
+
+    let html = '';
+    premiumUsers.forEach(u => {
+        const expiryDate = u.premiumExpiryDate
+            ? new Date(u.premiumExpiryDate).toLocaleDateString('en-IN')
+            : '—';
+
+        html += `
+            <tr>
+                <td><strong>${u.username || 'Unknown'}</strong></td>
+                <td>${u.useremail || '—'}</td>
+                <td><span class="badge badge-low">Premium Active</span></td>
+                <td>${expiryDate}</td>
+                <td>
+                    <button class="action-btn" onclick="openPremiumDetailModal('${u.useremail}')">View Details</button>
+                </td>
+            </tr>
+        `;
+    });
+
+    tbody.innerHTML = html;
+}
+
+// ─── BLOCK / UNBLOCK ACTIONS ────────────────────────────────
+
+function openBlockModal(id) {
+    _pendingBlockId = id;
+    const modal = document.getElementById('blockListingModal');
+    if (modal) modal.classList.add('active');
+}
+
+function closeBlockModal() {
+    _pendingBlockId = null;
+    const modal = document.getElementById('blockListingModal');
+    if (modal) modal.classList.remove('active');
+}
+
+function confirmBlock() {
+    if (!_pendingBlockId) return;
+    const allListings = getListings();
+    const listing = allListings.find(l => l.id === _pendingBlockId);
+    if (listing) {
+        if (listing.status !== 'Blocked') {
+            listing.previousStatus = listing.status;
+        }
+        listing.status = 'Blocked';
+        saveListings(allListings);
+        dispatchStorageUpdate(STORAGE_KEYS.LISTINGS);
+        refreshAll();
+        showToast(`"${listing.title || listing.id}" has been blocked.`);
+    }
+    closeBlockModal();
+}
+
+function openUnblockModal(id) {
+    _pendingUnblockId = id;
+    const modal = document.getElementById('unblockListingModal');
+    if (modal) modal.classList.add('active');
+}
+
+function closeUnblockModal() {
+    _pendingUnblockId = null;
+    const modal = document.getElementById('unblockListingModal');
+    if (modal) modal.classList.remove('active');
+}
+
+function confirmUnblock() {
+    if (!_pendingUnblockId) return;
+    const allListings = getListings();
+    const listing = allListings.find(l => l.id === _pendingUnblockId);
+    if (listing) {
+        const validStatuses = ['Active', 'Inactive', 'Pending', 'Disabled'];
+        const prev = listing.previousStatus;
+        listing.status = (prev && prev !== 'Blocked' && validStatuses.includes(prev)) ? prev : 'Active';
+        delete listing.previousStatus;
+        saveListings(allListings);
+        dispatchStorageUpdate(STORAGE_KEYS.LISTINGS);
+        refreshAll();
+        showToast(`"${listing.title || listing.id}" is now ${listing.status}.`);
+    }
+    closeUnblockModal();
+}
+
+// ─── EDIT LISTING ────────────────────────────────────────────
+
+function goEditListing(id) {
+    window.location.href = `edit-listing.html?id=${id}`;
+}
+
+// ─── PREMIUM USER DETAIL MODAL ───────────────────────────────
+
+function openPremiumDetailModal(email) {
+    const allUsers = getUsers();
+    const user = allUsers.find(u => u.useremail === email);
+    if (!user) return;
+
+    const allBookings = getBookings();
+    const userBookings = allBookings.filter(b =>
+        b.renterEmail === user.useremail || b.renterName === user.username
+    );
+
+    const totalSpent = userBookings.reduce((sum, b) => {
+        const status = (b.status || '').toLowerCase();
+        if (status === 'confirmed' || status === 'completed') {
+            return sum + parseFloat(b.grandTotal || b.amount || 0);
+        }
+        return sum;
+    }, 0);
+
+    const purchaseDate = user.premiumPurchaseDate
+        ? new Date(user.premiumPurchaseDate).toLocaleDateString('en-IN')
+        : null;
+    const expiryDate = user.premiumExpiryDate
+        ? new Date(user.premiumExpiryDate).toLocaleDateString('en-IN')
+        : '—';
+    const registeredDate = user.createdAt
+        ? new Date(user.createdAt).toLocaleDateString('en-IN')
+        : null;
+
+    const row = (label, value) => `
+        <div class="premium-detail-row">
+            <span class="premium-detail-label">${label}</span>
+            <span class="premium-detail-value">${value}</span>
+        </div>
+    `;
+
+    let html = '';
+    html += row('Name', user.username || '—');
+    html += row('Email', user.useremail || '—');
+    if (user.userphone) html += row('Phone', user.userphone);
+    html += row('Role', user.role ? user.role.charAt(0).toUpperCase() + user.role.slice(1) : '—');
+    html += row('Membership', '<span class="badge badge-low">Premium Active</span>');
+    if (purchaseDate) html += row('Premium Since', purchaseDate);
+    html += row('Premium Expires', expiryDate);
+    if (registeredDate) html += row('Registered', registeredDate);
+    html += row('Total Bookings', userBookings.length);
+    html += row('Total Spent', `₹${totalSpent.toLocaleString('en-IN')}`);
+
+    const content = document.getElementById('premiumDetailContent');
+    if (content) content.innerHTML = html;
+
+    const modal = document.getElementById('premiumDetailModal');
+    if (modal) modal.classList.add('active');
+}
+
+function closePremiumDetailModal() {
+    const modal = document.getElementById('premiumDetailModal');
+    if (modal) modal.classList.remove('active');
+}
+
+// ─── TOAST ──────────────────────────────────────────────────
+
+function showToast(message) {
+    const container = document.getElementById('toastContainer');
+    if (!container) return;
+
+    const toast = document.createElement('div');
+    toast.className = 'toast-message';
+    toast.textContent = message;
+    container.appendChild(toast);
+
+    setTimeout(() => toast.classList.add('show'), 10);
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => {
+            if (container.contains(toast)) container.removeChild(toast);
+        }, 300);
+    }, 3000);
 }
 
 // ─── MOBILE MENU ────────────────────────────────────────────
@@ -406,13 +687,45 @@ function initMobileMenu() {
         const syncScrolledState = () => {
             navbar.classList.toggle('scrolled', window.scrollY > 50);
         };
-
         syncScrolledState();
         window.addEventListener('scroll', syncScrolledState, { passive: true });
     }
 }
 
-/** Re-render all data-driven sections */
+// ─── MODAL WIRING ────────────────────────────────────────────
+
+function attachModalListeners() {
+    const cancelBlock   = document.getElementById('cancelBlockBtn');
+    const confirmBlock  = document.getElementById('confirmBlockBtn');
+    const cancelUnblock = document.getElementById('cancelUnblockBtn');
+    const confirmUnblock = document.getElementById('confirmUnblockBtn');
+    const closePremium  = document.getElementById('closePremiumDetailBtn');
+
+    if (cancelBlock)    cancelBlock.addEventListener('click', closeBlockModal);
+    if (confirmBlock)   confirmBlock.addEventListener('click', confirmBlock_handler);
+    if (cancelUnblock)  cancelUnblock.addEventListener('click', closeUnblockModal);
+    if (confirmUnblock) confirmUnblock.addEventListener('click', confirmUnblock_handler);
+    if (closePremium)   closePremium.addEventListener('click', closePremiumDetailModal);
+
+    ['blockListingModal', 'unblockListingModal', 'premiumDetailModal'].forEach(id => {
+        const modal = document.getElementById(id);
+        if (modal) {
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.classList.remove('active');
+                    _pendingBlockId = null;
+                    _pendingUnblockId = null;
+                }
+            });
+        }
+    });
+}
+
+function confirmBlock_handler() { confirmBlock(); }
+function confirmUnblock_handler() { confirmUnblock(); }
+
+// ─── REFRESH ALL ─────────────────────────────────────────────
+
 function refreshAll() {
     renderKPIs();
     renderBookingAnalytics();
@@ -421,6 +734,9 @@ function refreshAll() {
     renderCategoryDistribution();
     renderUserOverview();
     renderFeedbackAnalytics();
+    renderListingManagement();
+    renderBlockedListings();
+    renderPremiumUsersAnalytics();
 }
 
 // ─── INITIALISE ─────────────────────────────────────────────
@@ -449,8 +765,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     refreshAll();
     initMobileMenu();
+    attachModalListeners();
 
-    // Listen for storage changes from OTHER tabs/windows
+    // Cross-tab storage changes
     window.addEventListener('storage', (e) => {
         if (e.key === STORAGE_KEYS.USERS || e.key === STORAGE_KEYS.LISTINGS ||
             e.key === STORAGE_KEYS.BOOKINGS || e.key === STORAGE_KEYS.FEEDBACK) {
@@ -458,7 +775,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Listen for custom same-tab updates dispatched by dispatchStorageUpdate()
+    // Same-tab updates dispatched by dispatchStorageUpdate()
     window.addEventListener('rentiq_storage_update', () => {
         refreshAll();
     });

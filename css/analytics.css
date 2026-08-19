@@ -350,3 +350,145 @@ body.light-theme .rating-total {
         align-items: flex-start;
     }
 }
+
+/* ─── Listing Management & Blocked Listings Sections ─── */
+
+.analytics-mgmt-section {
+    margin-bottom: 48px;
+}
+
+.analytics-mgmt-section .section-title {
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 6px;
+}
+
+/* Blocked status badge */
+.badge-blocked {
+    background: rgba(239, 68, 68, 0.12);
+    color: #f87171;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    padding: 3px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+/* Block button — muted destructive look */
+.btn-block-text {
+    color: #f87171 !important;
+}
+
+.btn-block-text:hover {
+    background: rgba(239, 68, 68, 0.1) !important;
+}
+
+/* Premium User Details modal rows */
+.premium-detail-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    font-size: 14px;
+    gap: 12px;
+}
+
+.premium-detail-row:last-child {
+    border-bottom: none;
+}
+
+.premium-detail-label {
+    color: var(--text-secondary);
+    font-weight: 500;
+    flex-shrink: 0;
+}
+
+.premium-detail-value {
+    color: var(--text-primary);
+    font-weight: 600;
+    text-align: right;
+}
+
+/* Light theme overrides for new sections */
+body.light-theme .badge-blocked {
+    background: rgba(239, 68, 68, 0.08);
+    color: #dc2626;
+    border-color: rgba(239, 68, 68, 0.25);
+}
+
+body.light-theme .premium-detail-row {
+    border-color: rgba(0, 0, 0, 0.08);
+}
+
+body.light-theme .premium-detail-label {
+    color: #6b7280;
+}
+
+body.light-theme .premium-detail-value {
+    color: #111827;
+}
+
+/* ─── Dedicated Internal Vertical Scrollbar for Listing Management ─── */
+
+.listing-management-container {
+    max-height: 460px;
+    overflow-y: auto;
+    position: relative;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.15) rgba(255, 255, 255, 0.02);
+}
+
+/* Sticky Table Header inside the Listing Management container */
+.listing-management-container .platform-table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: #0a1228;
+    box-shadow: 0 1px 0 var(--border);
+}
+
+/* Subtle, professional scrollbar styling */
+.listing-management-container::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+.listing-management-container::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 4px;
+}
+
+.listing-management-container::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 4px;
+}
+
+.listing-management-container::-webkit-scrollbar-thumb:hover {
+    background: rgba(59, 130, 246, 0.4);
+}
+
+/* Light theme overrides for sticky header and scrollbar */
+body.light-theme .listing-management-container .platform-table thead th {
+    background: #f8fafc;
+    box-shadow: 0 1px 0 rgba(0, 0, 0, 0.1);
+}
+
+body.light-theme .listing-management-container::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.03);
+}
+
+body.light-theme .listing-management-container::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.2);
+}
+
+body.light-theme .listing-management-container::-webkit-scrollbar-thumb:hover {
+    background: rgba(59, 130, 246, 0.6);
+}
+
+body.light-theme .listing-management-container {
+    scrollbar-color: rgba(0, 0, 0, 0.2) rgba(0, 0, 0, 0.03);
+}
+
+

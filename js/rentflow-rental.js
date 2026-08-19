@@ -122,6 +122,10 @@
   }
   function distanceText(km) { return km == null ? 'Distance unavailable' : (km < 1 ? `${Math.round(km*1000)} m away` : `${km.toFixed(1)} km away`); }
   function createBooking(listing, startDate, endDate, bill) {
+    if ((listing.status || '').toLowerCase() === 'blocked') {
+      showToast('This listing is blocked and cannot be booked.', 'error');
+      return null;
+    }
     const user = getCurrentUser();
     const booking = {
       bookingId: 'RF-' + Date.now(), listingId: listing.id, renterId: user?.useremail || 'guest', renterName: user?.username || user?.name || 'Guest',

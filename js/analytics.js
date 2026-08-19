@@ -410,7 +410,7 @@ function renderListingManagement() {
                 <td>${sellerName}</td>
                 <td><span class="badge ${badgeClass}">${status.toUpperCase()}</span></td>
                 <td>
-                    <button class="action-btn" onclick="goEditListing('${listing.id}')">Edit Listing</button>
+                    <button class="action-btn" onclick="openListingDetailModal('${listing.id}')">View</button>
                     ${blockBtn}
                 </td>
             </tr>
@@ -465,7 +465,7 @@ function renderBlockedListings() {
                 <td>₹${price.toLocaleString('en-IN')}${listing.period ? '/' + listing.period : ''}</td>
                 <td><span class="badge badge-blocked">BLOCKED</span></td>
                 <td>
-                    <button class="action-btn" onclick="goEditListing('${listing.id}')">Edit Listing</button>
+                    <button class="action-btn" onclick="openListingDetailModal('${listing.id}')">View</button>
                     <button class="action-btn" onclick="openUnblockModal('${listing.id}')">Unblock</button>
                 </td>
             </tr>
@@ -572,10 +572,64 @@ function confirmUnblock() {
     closeUnblockModal();
 }
 
-// ─── EDIT LISTING ────────────────────────────────────────────
+// ─── LISTING DETAIL MODAL ─────────────────────────────────────
 
-function goEditListing(id) {
-    window.location.href = `edit-listing.html?id=${id}`;
+function openListingDetailModal(id) {
+    const listings = getListings();
+    const listing = listings.find(l => l.id === id);
+    if (!listing) return;
+
+    const row = (label, value) => `
+        <div class="premium-detail-row">
+            <span class="premium-detail-label">${label}</span>
+            <span class="premium-detail-value" style="text-align: right;">${value}</span>
+        </div>
+    `;
+
+    let html = '';
+    const imgUrl = listing.images?.[0] || listing.imageUrl;
+    if (imgUrl) {
+        html += `<div style="text-align: center; margin-bottom: 16px;"><img src="${imgUrl}" alt="${listing.title || listing.name || 'Listing'}" style="max-width: 100%; max-height: 180px; border-radius: 8px; object-fit: cover;"></div>`;
+    }
+
+    if (listing.id) html += row('Listing ID', listing.id);
+    const title = listing.title || listing.name;
+    if (title) html += row('Title', title);
+    if (listing.category) html += row('Category', listing.category);
+    if (listing.description || listing.desc) html += row('Description', listing.description || listing.desc);
+
+    const price = listing.price || listing.basePrice;
+    if (price !== undefined && price !== null) {
+        const period = listing.period ? ` / ${listing.period}` : '';
+        html += row('Price', `₹${Number(price).toLocaleString('en-IN')}${period}`);
+    }
+
+    const location = listing.location || listing.city || listing.seller?.city || listing.seller?.address;
+    if (location) html += row('Location', location);
+
+    const sellerName = typeof listing.seller === 'object' ? listing.seller?.name : listing.seller;
+    if (sellerName) html += row('Seller', sellerName);
+
+    if (listing.status) {
+        let badgeClass = 'badge-normal';
+        if (listing.status === 'Active') badgeClass = 'badge-low';
+        if (listing.status === 'Blocked') badgeClass = 'badge-blocked';
+        if (listing.status === 'Inactive' || listing.status === 'Pending') badgeClass = 'badge-orange';
+        html += row('Status', `<span class="badge ${badgeClass}">${listing.status.toUpperCase()}</span>`);
+    }
+
+    if (listing.availability !== undefined) html += row('Availability', listing.availability ? 'Available' : 'Unavailable');
+
+    const content = document.getElementById('listingDetailContent');
+    if (content) content.innerHTML = html;
+
+    const modal = document.getElementById('listingDetailModal');
+    if (modal) modal.classList.add('active');
+}
+
+function closeListingDetailModal() {
+    const modal = document.getElementById('listingDetailModal');
+    if (modal) modal.classList.remove('active');
 }
 
 // ─── PREMIUM USER DETAIL MODAL ───────────────────────────────
@@ -700,14 +754,16 @@ function attachModalListeners() {
     const cancelUnblock = document.getElementById('cancelUnblockBtn');
     const confirmUnblock = document.getElementById('confirmUnblockBtn');
     const closePremium  = document.getElementById('closePremiumDetailBtn');
+    const closeListing  = document.getElementById('closeListingDetailBtn');
 
     if (cancelBlock)    cancelBlock.addEventListener('click', closeBlockModal);
     if (confirmBlock)   confirmBlock.addEventListener('click', confirmBlock_handler);
     if (cancelUnblock)  cancelUnblock.addEventListener('click', closeUnblockModal);
     if (confirmUnblock) confirmUnblock.addEventListener('click', confirmUnblock_handler);
     if (closePremium)   closePremium.addEventListener('click', closePremiumDetailModal);
+    if (closeListing)   closeListing.addEventListener('click', closeListingDetailModal);
 
-    ['blockListingModal', 'unblockListingModal', 'premiumDetailModal'].forEach(id => {
+    ['blockListingModal', 'unblockListingModal', 'premiumDetailModal', 'listingDetailModal'].forEach(id => {
         const modal = document.getElementById(id);
         if (modal) {
             modal.addEventListener('click', (e) => {

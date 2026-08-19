@@ -347,6 +347,11 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
 
+        // Location Search Input Filtering
+        if (locationInput) {
+            locationInput.addEventListener("input", filterAndSortListings);
+        }
+
         // Location Auto-Detect (Promises, Async/Await, Fetch API)
         autoLocateBtn.addEventListener("click", handleAutoLocate);
 
@@ -423,12 +428,20 @@ document.addEventListener("DOMContentLoaded", () => {
      * Uses Array.prototype.filter() and Array.prototype.sort().
      */
     function filterAndSortListings() {
-        filteredListings = allListings;
-        visibleCount = 20;
+        const query = locationInput ? locationInput.value.toLowerCase().trim() : '';
 
-        if (currentCategory !== "All") {
-            filteredListings = allListings.filter(item => item.category === currentCategory);
-        }
+        filteredListings = allListings.filter(item => {
+            if ((item.status || '').toLowerCase() === 'blocked') return false;
+            const matchesCategory = currentCategory === "All" || item.category === currentCategory;
+            const matchesLocation = !query ||
+                (item.title || '').toLowerCase().includes(query) ||
+                (item.description || '').toLowerCase().includes(query) ||
+                (item.seller?.address || '').toLowerCase().includes(query) ||
+                (item.seller?.city || '').toLowerCase().includes(query);
+            return matchesCategory && matchesLocation;
+        });
+
+        visibleCount = 20;
 
         if (userLocation) {
             // Sort by distance (closest first)
@@ -472,7 +485,10 @@ document.addEventListener("DOMContentLoaded", () => {
     // Make functions globally accessible for inline onclick handlers
     window.openDetailsModal = function(listingId) {
         const listing = allListings.find(l => l.id === listingId);
-        if (!listing) return;
+        if (!listing || (listing.status || '').toLowerCase() === 'blocked') {
+            showToast("This listing is unavailable.", "error");
+            return;
+        }
 
         const isPro = checkProStatus();
         const contactDisplay = isPro 
@@ -517,7 +533,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     window.openBookingModal = function(listingId) {
         const listing = allListings.find(l => l.id === listingId);
-        if (!listing) return;
+        if (!listing || (listing.status || '').toLowerCase() === 'blocked') {
+            showToast("This listing is blocked and cannot be booked.", "error");
+            return;
+        }
 
         activeBookingListingId = listingId;
         
@@ -686,7 +705,10 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         const listing = allListings.find(l => l.id === activeBookingListingId);
-        if (!listing) return;
+        if (!listing || (listing.status || '').toLowerCase() === 'blocked') {
+            showToast("This listing is blocked and cannot be booked.", "error");
+            return;
+        }
 
         // Construct Booking Object
         const deposit = listing.securityDeposit || Math.round(listing.price * 0.1);

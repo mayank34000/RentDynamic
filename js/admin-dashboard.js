@@ -10,14 +10,17 @@ const sampleReports = [
     { id: 'RP-02', type: 'Feedback Report', reason: 'Offensive language', status: 'Reviewed' }
 ];
 
-const sampleActivity = [
-    { text: 'Listing submitted — Camping Tent', time: '2 min ago', dot: 'dot-purple' },
-    { text: 'Booking confirmed — BK-1021', time: '15 min ago', dot: 'dot-green' },
-    { text: 'Content reported — RP-01', time: '1 hr ago', dot: 'dot-orange' },
-    { text: 'Listing removed — Old Camera', time: '3 hrs ago', dot: 'dot-pink' },
-    { text: 'Feedback submitted — FB-02', time: '5 hrs ago', dot: 'dot-blue' },
-    { text: 'Booking cancelled — BK-1023', time: '8 hrs ago', dot: 'dot-orange' }
-];
+function timeAgo(dateVal) {
+    if (!dateVal) return '';
+    const diff = Math.max(0, Date.now() - new Date(dateVal).getTime());
+    const mins  = Math.floor(diff / 60000);
+    const hours = Math.floor(diff / 3600000);
+    const days  = Math.floor(diff / 86400000);
+    if (mins < 1)   return 'just now';
+    if (mins < 60)  return mins + ' min ago';
+    if (hours < 24) return hours + ' hr' + (hours > 1 ? 's' : '') + ' ago';
+    return days + ' day' + (days > 1 ? 's' : '') + ' ago';
+}
 
 
 // ─── STATE ──────────────────────────────────────────────────
@@ -106,8 +109,7 @@ function renderListings() {
             if (listing.status === 'Inactive' || listing.status === 'Pending') statusClass = 'badge-orange';
 
             // Build dynamic actions based on status
-            let actionsHtml = `<button class="action-btn" onclick="viewListing('${listing.id}')">View</button>
-                               <button class="action-btn" onclick="editListing('${listing.id}')">Edit</button>`;
+            let actionsHtml = `<button class="action-btn" onclick="viewListing('${listing.id}')">View</button>`;
                                
             if (listing.status === 'Active') {
                 actionsHtml += `<button class="action-btn" onclick="toggleListing('${listing.id}', 'Disabled')">Disable</button>`;
@@ -235,19 +237,60 @@ function renderFeedbackAndReports() {
 function renderActivity() {
     const list = document.getElementById('activityList');
     if (!list) return;
-    
-    let html = '';
-    sampleActivity.forEach(item => {
-        html += `
-            <div class="activity-item">
-                <span class="activity-dot ${item.dot}"></span>
-                <span class="activity-text">${item.text}</span>
-                <span class="activity-time">${item.time}</span>
-            </div>
-        `;
+
+    const events = [];
+
+    // Bookings
+    getBookings().forEach(b => {
+        const ts = b.bookedAt || b.createdAt;
+        const id = b.bookingId || b.id || '';
+        const title = b.itemTitle || b.listing || id;
+        const status = (b.status || '').toLowerCase();
+        let dot = 'dot-blue';
+        let text = '';
+        if (status === 'confirmed')  { dot = 'dot-green';  text = `Booking confirmed — ${title}`; }
+        else if (status === 'cancelled') { dot = 'dot-orange'; text = `Booking cancelled — ${title}`; }
+        else if (status === 'completed') { dot = 'dot-green';  text = `Booking completed — ${title}`; }
+        else                          { dot = 'dot-blue';   text = `Booking created — ${title}`; }
+        if (ts) events.push({ text, dot, ts: new Date(ts).getTime() });
     });
 
-    list.innerHTML = html;
+    // Listings
+    getListings().forEach(l => {
+        const ts = l.createdAt || l.date;
+        const title = l.title || l.name || l.id;
+        const status = (l.status || '').toLowerCase();
+        let dot = 'dot-purple';
+        let text = '';
+        if (status === 'blocked')  { dot = 'dot-pink';   text = `Listing blocked — ${title}`; }
+        else if (status === 'pending') { dot = 'dot-orange'; text = `Listing submitted — ${title}`; }
+        else                       { dot = 'dot-purple';  text = `Listing added — ${title}`; }
+        if (ts) events.push({ text, dot, ts: new Date(ts).getTime() });
+    });
+
+    // Feedback
+    getFeedback().forEach(fb => {
+        const ts = fb.date || fb.submittedAt;
+        const id = fb.id || '';
+        if (ts) events.push({ text: `Feedback submitted — ${id}`, dot: 'dot-blue', ts: new Date(ts).getTime() });
+    });
+
+    // Sort newest first, cap at 10
+    events.sort((a, b) => b.ts - a.ts);
+    const recent = events.slice(0, 10);
+
+    if (recent.length === 0) {
+        list.innerHTML = '<div style="color:#9ca3af; font-size:14px; padding:12px;">No recent activity.</div>';
+        return;
+    }
+
+    list.innerHTML = recent.map(item => `
+        <div class="activity-item">
+            <span class="activity-dot ${item.dot}"></span>
+            <span class="activity-text">${item.text}</span>
+            <span class="activity-time">${timeAgo(item.ts)}</span>
+        </div>
+    `).join('');
 }
 function renderPremiumUsers() {
     const list = document.getElementById('premiumList');
@@ -281,7 +324,61 @@ function renderPremiumUsers() {
 // ─── ACTIONS & MODALS ────────────────────────────────────────
 
 function viewListing(id) {
-    alert(`Viewing listing ${id}`);
+    const listings = getListings();
+    const listing = listings.find(l => l.id === id);
+    if (!listing) return;
+
+    const row = (label, value) => `
+        <div style="display:flex; justify-content:space-between; align-items:center; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.06); font-size:14px;">
+            <span style="color:#9ca3af; font-weight:500;">${label}</span>
+            <span style="color:#f8fafc; font-weight:600; text-align:right;">${value}</span>
+        </div>
+    `;
+
+    let html = '';
+    const imgUrl = listing.images?.[0] || listing.imageUrl;
+    if (imgUrl) {
+        html += `<div style="text-align: center; margin-bottom: 16px;"><img src="${imgUrl}" alt="${listing.title || listing.name || 'Listing'}" style="max-width: 100%; max-height: 180px; border-radius: 8px; object-fit: cover;"></div>`;
+    }
+
+    if (listing.id) html += row('Listing ID', listing.id);
+    const title = listing.title || listing.name;
+    if (title) html += row('Title', title);
+    if (listing.category) html += row('Category', listing.category);
+    if (listing.description || listing.desc) html += row('Description', listing.description || listing.desc);
+
+    const price = listing.price || listing.basePrice;
+    if (price !== undefined && price !== null) {
+        const period = listing.period ? ` / ${listing.period}` : '';
+        html += row('Price', `₹${Number(price).toLocaleString('en-IN')}${period}`);
+    }
+
+    const location = listing.location || listing.city || listing.seller?.city || listing.seller?.address;
+    if (location) html += row('Location', location);
+
+    const sellerName = typeof listing.seller === 'object' ? listing.seller?.name : listing.seller;
+    if (sellerName) html += row('Seller', sellerName);
+
+    if (listing.status) {
+        let badgeClass = 'badge-normal';
+        if (listing.status === 'Active') badgeClass = 'badge-low';
+        if (listing.status === 'Blocked') badgeClass = 'badge-blocked';
+        if (listing.status === 'Inactive' || listing.status === 'Pending') badgeClass = 'badge-orange';
+        html += row('Status', `<span class="badge ${badgeClass}">${listing.status.toUpperCase()}</span>`);
+    }
+
+    if (listing.availability !== undefined) html += row('Availability', listing.availability ? 'Available' : 'Unavailable');
+
+    const content = document.getElementById('adminListingDetailContent');
+    if (content) content.innerHTML = html;
+
+    const modal = document.getElementById('adminListingDetailModal');
+    if (modal) modal.classList.add('active');
+}
+
+function closeAdminListingDetailModal() {
+    const modal = document.getElementById('adminListingDetailModal');
+    if (modal) modal.classList.remove('active');
 }
 
 function editListing(id) {
@@ -440,17 +537,21 @@ function attachModalListeners() {
     const cancelBtn = document.getElementById('cancelRemoveBtn');
     const confirmBtn = document.getElementById('confirmRemoveBtn');
     const closePremiumBtn = document.getElementById('closeAdminPremiumDetailBtn');
+    const closeListingBtn = document.getElementById('closeAdminListingDetailBtn');
 
     if (cancelBtn) cancelBtn.addEventListener('click', closeRemoveModal);
     if (confirmBtn) confirmBtn.addEventListener('click', confirmRemoveListing);
     if (closePremiumBtn) closePremiumBtn.addEventListener('click', closeAdminPremiumDetailModal);
+    if (closeListingBtn) closeListingBtn.addEventListener('click', closeAdminListingDetailModal);
 
-    const premModal = document.getElementById('adminPremiumDetailModal');
-    if (premModal) {
-        premModal.addEventListener('click', (e) => {
-            if (e.target === premModal) closeAdminPremiumDetailModal();
-        });
-    }
+    ['adminPremiumDetailModal', 'adminListingDetailModal'].forEach(id => {
+        const modal = document.getElementById(id);
+        if (modal) {
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) modal.classList.remove('active');
+            });
+        }
+    });
 }
 
 function initMobileMenu() {
@@ -495,6 +596,7 @@ function refreshAll() {
     renderBookings();
     renderPremiumUsers();
     renderFeedbackAndReports();
+    renderActivity();
 }
 
 // ─── INITIALISE ──────────────────────────────────────────────

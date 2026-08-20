@@ -124,7 +124,7 @@ The analytics section provides:
 ## 📁 Project Structure
 
 ```text
-RentDynamic-main/
+RentFlow-main/
 │
 ├── assets/
 │   ├── facebook.png
@@ -248,7 +248,7 @@ RentDynamic-main/
 
 ```bash
 git clone <your-repository-url>
-cd RentDynamic-main
+cd RentFlow-main
 ```
 
 ### 2. Open the project

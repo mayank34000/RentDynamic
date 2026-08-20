@@ -85,6 +85,7 @@ document.addEventListener("DOMContentLoaded", () => {
     let userLocation = null; // { lat, lon, city }
     let filteredListings = [];
     let visibleCount = 20;
+    let searchQuery = ''; // tracks what the user actually typed — kept separate from locationInput.value
     
     // DOM Elements
     const listingsGrid = document.getElementById("listings-grid");
@@ -349,7 +350,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // Location Search Input Filtering
         if (locationInput) {
-            locationInput.addEventListener("input", filterAndSortListings);
+            locationInput.addEventListener("input", () => {
+                searchQuery = locationInput.value.toLowerCase().trim();
+                filterAndSortListings();
+            });
         }
 
         // Location Auto-Detect (Promises, Async/Await, Fetch API)
@@ -358,7 +362,6 @@ document.addEventListener("DOMContentLoaded", () => {
         // Modal Close Buttons
         document.getElementById("close-booking-modal").addEventListener("click", () => bookingModal.classList.remove("show"));
         document.getElementById("close-pro-modal").addEventListener("click", () => proModal.classList.remove("show"));
-        document.getElementById("close-details-modal").addEventListener("click", () => document.getElementById("product-details-modal").classList.remove("show"));
         
         // Close modals on outside click
         document.querySelectorAll(".modal-backdrop").forEach(backdrop => {
@@ -408,10 +411,17 @@ document.addEventListener("DOMContentLoaded", () => {
             const data = await response.json();
             const preciseLocation = data.display_name ? data.display_name.split(",").slice(0, 3).join(",").trim() : "Unknown Location";
             
-            locationInput.value = preciseLocation;
+            // Show the detected location as placeholder text only.
+            // Do NOT put it in .value — that would make filterAndSortListings treat
+            // it as a text search query and exclude all listings whose address doesn't
+            // contain the exact geocoded string.  Instead, keep the input empty so the
+            // text filter is skipped and only the distance sort (below) takes effect,
+            // showing the nearest available listings even if none are in the exact area.
+            locationInput.value = "";
+            locationInput.placeholder = `📍 ${preciseLocation}`;
             showToast(`Location detected: ${preciseLocation}`);
             
-            // Re-render to show distances
+            // Re-render sorted by nearest distance (userLocation is already set above)
             filterAndSortListings();
 
         } catch (error) {
@@ -426,9 +436,19 @@ document.addEventListener("DOMContentLoaded", () => {
     /**
      * Filters listings by category and sorts them by distance if location is known.
      * Uses Array.prototype.filter() and Array.prototype.sort().
+     *
+     * searchQuery — set only when the user types in the input — determines WHAT listings appear.
+     * userLocation — set only by Locate Me — determines HOW matching listings are ranked by distance.
+     * These two concerns are fully independent:
+     *   • Search with no location  → matching listings in default order
+     *   • Location with no search  → all listings sorted nearest-first
+     *   • Search + location        → matching listings sorted nearest-first
      */
     function filterAndSortListings() {
-        const query = locationInput ? locationInput.value.toLowerCase().trim() : '';
+        // Use the tracked typed query, NOT locationInput.value.
+        // locationInput.value may contain a geocoded place label written by Locate Me,
+        // which must never be treated as a text search filter.
+        const query = searchQuery;
 
         filteredListings = allListings.filter(item => {
             if ((item.status || '').toLowerCase() === 'blocked') return false;
@@ -444,7 +464,9 @@ document.addEventListener("DOMContentLoaded", () => {
         visibleCount = 20;
 
         if (userLocation) {
-            // Sort by distance (closest first)
+            // Sort by distance (closest first).
+            // This only re-orders whatever the text filter already passed through —
+            // it never adds listings that were excluded by the search query.
             filteredListings.sort((a, b) => {
                 const distA = calculateDistance(userLocation.lat, userLocation.lon, a.lat, a.lon);
                 const distB = calculateDistance(userLocation.lat, userLocation.lon, b.lat, b.lon);
@@ -497,8 +519,41 @@ document.addEventListener("DOMContentLoaded", () => {
         const contactClass = isPro ? 'text-green-500' : 'text-blue-400 cursor-pointer unlock-trigger';
         const initial = listing.seller?.name?.charAt(0).toUpperCase() || 'S';
 
+        // Build valid images array (filter out null/empty/invalid entries)
+        const rawImages = Array.isArray(listing.images) ? listing.images : [];
+        const validImages = rawImages.filter(img => img && typeof img === 'string' && img.trim() !== '');
+        const images = validImages.length > 0 ? validImages : ['https://via.placeholder.com/400x300'];
+
+        // Build carousel slides HTML
+        const slidesHtml = images.map((img, idx) => `
+            <div class="rdl-carousel-slide" data-index="${idx}">
+                <img src="${img}" alt="${listing.title} - image ${idx + 1}" class="rdl-carousel-img" />
+            </div>
+        `).join('');
+
+        // Build pagination dots HTML
+        const dotsHtml = images.map((_, idx) => `
+            <button class="rdl-dot${idx === 0 ? ' rdl-dot-active' : ''}" data-dot="${idx}" aria-label="Go to image ${idx + 1}"></button>
+        `).join('');
+
+        // Build nav arrows (only shown if more than 1 image)
+        const navHtml = images.length > 1 ? `
+            <button class="rdl-nav rdl-nav-prev" id="rdl-prev" aria-label="Previous image">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+            </button>
+            <button class="rdl-nav rdl-nav-next" id="rdl-next" aria-label="Next image">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+            </button>
+        ` : '';
+
         const content = `
-            <img src="${listing.images?.[0] || 'https://via.placeholder.com/400x300'}" alt="${listing.title}" style="width:100%; height: 250px; object-fit:cover; border-radius: 8px; margin-bottom: 16px;">
+            <div class="rdl-carousel-wrapper">
+                <div class="rdl-carousel-track" id="rdl-track">
+                    ${slidesHtml}
+                </div>
+                ${navHtml}
+                ${images.length > 1 ? `<div class="rdl-dots-row" id="rdl-dots">${dotsHtml}</div>` : ''}
+            </div>
             <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom: 12px;">
                 <h2 style="font-size: 1.25rem; font-weight: 700;">${listing.title}</h2>
                 <div style="background:var(--blue); color:#fff; padding:4px 8px; border-radius:4px; font-size:0.75rem; font-weight:600;">${listing.category}</div>
@@ -528,8 +583,100 @@ document.addEventListener("DOMContentLoaded", () => {
             });
         });
 
+        // Initialize carousel
+        initDetailsCarousel(images.length);
+
         document.getElementById("product-details-modal").classList.add("show");
     };
+
+    /**
+     * Initializes the image carousel inside the product details modal.
+     * Handles click/drag (mouse + trackpad) navigation, arrow buttons, and dot indicators.
+     * @param {number} total - Total number of valid images
+     */
+    function initDetailsCarousel(total) {
+        if (total <= 1) return; // Nothing to do for single image
+
+        const track = document.getElementById('rdl-track');
+        const prevBtn = document.getElementById('rdl-prev');
+        const nextBtn = document.getElementById('rdl-next');
+        const dotsContainer = document.getElementById('rdl-dots');
+        let current = 0;
+
+        function goTo(index) {
+            // Clamp to valid range
+            if (index < 0) index = 0;
+            if (index >= total) index = total - 1;
+            current = index;
+            track.style.transform = `translateX(-${current * 100}%)`;
+
+            // Update dots
+            if (dotsContainer) {
+                dotsContainer.querySelectorAll('.rdl-dot').forEach((dot, i) => {
+                    dot.classList.toggle('rdl-dot-active', i === current);
+                });
+            }
+        }
+
+        // Arrow button listeners
+        if (prevBtn) prevBtn.addEventListener('click', () => goTo(current - 1));
+        if (nextBtn) nextBtn.addEventListener('click', () => goTo(current + 1));
+
+        // Dot click listeners
+        if (dotsContainer) {
+            dotsContainer.querySelectorAll('.rdl-dot').forEach(dot => {
+                dot.addEventListener('click', () => {
+                    goTo(parseInt(dot.getAttribute('data-dot'), 10));
+                });
+            });
+        }
+
+        // Mouse drag / trackpad swipe support
+        let dragStartX = 0;
+        let isDragging = false;
+
+        track.addEventListener('mousedown', (e) => {
+            dragStartX = e.clientX;
+            isDragging = true;
+            track.style.cursor = 'grabbing';
+        });
+
+        track.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            // Prevent text selection while dragging
+            e.preventDefault();
+        });
+
+        track.addEventListener('mouseup', (e) => {
+            if (!isDragging) return;
+            isDragging = false;
+            track.style.cursor = 'grab';
+            const delta = e.clientX - dragStartX;
+            if (Math.abs(delta) > 40) {
+                goTo(delta < 0 ? current + 1 : current - 1);
+            }
+        });
+
+        track.addEventListener('mouseleave', () => {
+            if (isDragging) {
+                isDragging = false;
+                track.style.cursor = 'grab';
+            }
+        });
+
+        // Touch / trackpad swipe support
+        let touchStartX = 0;
+        track.addEventListener('touchstart', (e) => {
+            touchStartX = e.touches[0].clientX;
+        }, { passive: true });
+
+        track.addEventListener('touchend', (e) => {
+            const delta = e.changedTouches[0].clientX - touchStartX;
+            if (Math.abs(delta) > 40) {
+                goTo(delta < 0 ? current + 1 : current - 1);
+            }
+        }, { passive: true });
+    }
 
     window.openBookingModal = function(listingId) {
         const listing = allListings.find(l => l.id === listingId);

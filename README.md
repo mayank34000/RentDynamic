@@ -199,46 +199,88 @@ RentFlow-main/
 ## 🖼️ Project Screenshots
 
 ### 🏠 Homepage
-<p align="center"><img src="screenshots/homepage.jpeg" alt="RentFlow Homepage" width="900"></p>
+
+<p align="center">
+  <img src="./assets/homepage.jpeg" alt="RentFlow Homepage" width="900">
+</p>
 
 ### 🔎 Browse Available Rentals
-<p align="center"><img src="screenshots/browse-rentals.jpeg" alt="Browse Available Rentals" width="900"></p>
+
+<p align="center">
+  <img src="./assets/browse-rentals.jpeg" alt="Browse Available Rentals" width="900">
+</p>
 
 ### ➕ Create a New Listing
-<p align="center"><img src="screenshots/create-listing.jpeg" alt="Create a New Listing" width="900"></p>
+
+<p align="center">
+  <img src="./assets/create-listing.jpeg" alt="Create a New Listing" width="900">
+</p>
 
 ### 📄 Rental Receipt
-<p align="center"><img src="screenshots/rental-receipt.jpeg" alt="Rental Receipt" width="700"></p>
+
+<p align="center">
+  <img src="./assets/rental-receipt.jpeg" alt="Rental Receipt" width="700">
+</p>
 
 ### 👤 User Profile
-<p align="center"><img src="screenshots/profile.jpeg" alt="RentFlow User Profile" width="900"></p>
+
+<p align="center">
+  <img src="./assets/profile.jpeg" alt="RentFlow User Profile" width="900">
+</p>
 
 ### ⭐ RentFlow Premium
-<p align="center"><img src="screenshots/premium.jpeg" alt="RentFlow Premium" width="700"></p>
+
+<p align="center">
+  <img src="./assets/premium.jpeg" alt="RentFlow Premium" width="700">
+</p>
 
 ### 💬 Feedback
-<p align="center"><img src="screenshots/feedback.jpeg" alt="RentFlow Feedback Page" width="900"></p>
+
+<p align="center">
+  <img src="./assets/feedback.jpeg" alt="RentFlow Feedback Page" width="900">
+</p>
 
 ### 📞 Contact & FAQ
-<p align="center"><img src="screenshots/contact-faq.jpeg" alt="Contact and FAQ" width="900"></p>
+
+<p align="center">
+  <img src="./assets/contact-faq.jpeg" alt="Contact and FAQ" width="900">
+</p>
 
 ### ℹ️ About RentFlow
-<p align="center"><img src="screenshots/about.jpeg" alt="About RentFlow" width="900"></p>
+
+<p align="center">
+  <img src="./assets/about.jpeg" alt="About RentFlow" width="900">
+</p>
 
 ### 👨‍💼 Admin Dashboard
-<p align="center"><img src="screenshots/admin-dashboard.jpeg" alt="Admin Dashboard" width="900"></p>
+
+<p align="center">
+  <img src="./assets/admin-dashboard.jpeg" alt="Admin Dashboard" width="900">
+</p>
 
 ### 📊 Admin Analytics
-<p align="center"><img src="screenshots/analytics-dashboard.jpeg" alt="Analytics Dashboard" width="900"></p>
+
+<p align="center">
+  <img src="./assets/analytics-dashboard.jpeg" alt="Admin Analytics Dashboard" width="900">
+</p>
 
 ### 🛠️ Admin Listing & Booking Management
-<p align="center"><img src="screenshots/admin-management.jpeg" alt="Admin Management" width="900"></p>
+
+<p align="center">
+  <img src="./assets/admin-management.jpeg" alt="Admin Listing and Booking Management" width="900">
+</p>
 
 ### 🚫 Listing Management & Blocked Listings
-<p align="center"><img src="screenshots/listing-management.jpeg" alt="Listing Management and Blocked Listings" width="900"></p>
+
+<p align="center">
+  <img src="./assets/listing-management.jpeg" alt="Listing Management and Blocked Listings" width="900">
+</p>
 
 ### 🚀 Upcoming Features
-<p align="center"><img src="screenshots/upcoming-features.jpeg" alt="Upcoming Features" width="900"></p>
+
+<p align="center">
+  <img src="./assets/upcoming-features.jpeg" alt="Upcoming Features" width="900">
+</p>
 
 ---
 

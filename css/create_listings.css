@@ -140,6 +140,56 @@
     min-height: 90px;
 }
 
+/* City / Location field with auto-locate button */
+.city-location-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.city-location-icon {
+    position: absolute;
+    left: 13px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-secondary);
+    pointer-events: none;
+    flex-shrink: 0;
+}
+
+.city-location-wrapper .city-location-input {
+    padding-left: 40px;
+    padding-right: 160px; /* room for button */
+}
+
+.city-locate-btn {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(37, 99, 235, 0.15);
+    border: 1px solid rgba(59, 130, 246, 0.35);
+    color: var(--accent-blue-bright, #60a5fa);
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 6px 12px;
+    border-radius: 8px;
+    white-space: nowrap;
+    transition: background 0.2s, border-color 0.2s;
+}
+
+.city-locate-btn:hover {
+    background: rgba(37, 99, 235, 0.28);
+    border-color: rgba(59, 130, 246, 0.6);
+}
+
+.city-locate-btn:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+
 .dropzone-container {
     border: 1.5px dashed rgba(255, 255, 255, 0.15);
     border-radius: 14px;

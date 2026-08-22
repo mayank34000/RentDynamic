@@ -9,6 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let uploadedImages = [];
     let editingListingId = null;
+    let detectedCoords = null; // { lat, lon } — set when user clicks "Current Location"
 
     const listingForm = document.getElementById('listing-form');
     const titleInput = document.getElementById('item-title');
@@ -56,6 +57,23 @@ document.addEventListener('DOMContentLoaded', () => {
         titleInput.addEventListener('blur', checkForDuplicateListing);
     }
 
+    // Wire up the "Current Location" button in the City / Location field
+    const cityAutoLocateBtn = document.getElementById('city-auto-locate-btn');
+    if (cityAutoLocateBtn) {
+        cityAutoLocateBtn.addEventListener('click', handleCityAutoLocate);
+    }
+
+    // If the user manually edits the city field, drop the GPS fix so we don't attach stale coords
+    if (sellerCityInput) {
+        sellerCityInput.addEventListener('input', () => {
+            // Only clear when coming from keyboard (button is not mid-locate i.e. not disabled)
+            if (!cityAutoLocateBtn || !cityAutoLocateBtn.disabled) {
+                detectedCoords = null;
+            }
+        });
+    }
+
+
     setupImageUpload();
 
     if (listingForm) {
@@ -66,6 +84,59 @@ document.addEventListener('DOMContentLoaded', () => {
     renderMyListingsDashboard();
     renderPendingRequests();
     renderCompletedSettlements();
+
+    /**
+     * Uses the Geolocation API to detect coordinates, then reverse-geocodes via
+     * OpenStreetMap Nominatim to fill in the seller-city field with a human-readable address.
+     */
+    async function handleCityAutoLocate() {
+        if (!navigator.geolocation) {
+            showToast('Geolocation is not supported by your browser.', 'error');
+            return;
+        }
+
+        cityAutoLocateBtn.textContent = 'Locating…';
+        cityAutoLocateBtn.disabled = true;
+
+        try {
+            // Promisify geolocation so we can use async/await
+            const position = await new Promise((resolve, reject) => {
+                navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 10000 });
+            });
+
+            const { latitude, longitude } = position.coords;
+            detectedCoords = { lat: latitude, lon: longitude }; // persist for form submit
+
+
+            // Reverse-geocode with OpenStreetMap Nominatim — same zoom & parsing as Browse Rentals
+            const response = await fetch(
+                `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=18&addressdetails=1`
+            );
+            if (!response.ok) throw new Error('Network response was not ok');
+
+            const data = await response.json();
+
+            // Use the same slice(0,3) logic as booking.js so both pages show identical text
+            const detectedLocation = data.display_name
+                ? data.display_name.split(',').slice(0, 3).join(',').trim()
+                : 'Unknown Location';
+
+            // Populate the input and trigger the live preview to refresh
+            sellerCityInput.value = detectedLocation;
+            sellerCityInput.dispatchEvent(new Event('input'));
+
+            showToast(`📍 Location detected: ${detectedLocation}`);
+
+        } catch (error) {
+            console.error('Location error:', error);
+            showToast('Failed to detect location. Please enter it manually.', 'error');
+        } finally {
+            cityAutoLocateBtn.textContent = '📍 Current Location';
+            cityAutoLocateBtn.disabled = false;
+        }
+    }
+
+
 
     function updateLivePreviewAndCalculator() {
         const title = titleInput.value.trim() || 'Your Product Name';
@@ -240,6 +311,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         name: sellerName,
                         phone: sellerPhone,
                         city: sellerCity,
+                        address: sellerCity, // shown in the address line on listing cards
                         email: JSON.parse(localStorage.getItem('current_user'))?.useremail || 'aryanharit14@gmail.com'
                     },
                     images: imagesList,
@@ -249,6 +321,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     autoRenew,
                     updatedAt: new Date().toISOString()
                 };
+                // Carry coords forward if the GPS fix is still active for this edit
+                if (detectedCoords) {
+                    existingListings[index].lat = detectedCoords.lat;
+                    existingListings[index].lon = detectedCoords.lon;
+                }
             }
             editingListingId = null;
         } else {
@@ -263,8 +340,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     name: sellerName,
                     phone: sellerPhone,
                     city: sellerCity,
+                    address: sellerCity, // shown in the address line on listing cards
                     email: JSON.parse(localStorage.getItem('current_user'))?.useremail || 'aryanharit14@gmail.com'
                 },
+                // lat/lon are set when the user clicked "Current Location"; null otherwise
+                lat: detectedCoords ? detectedCoords.lat : null,
+                lon: detectedCoords ? detectedCoords.lon : null,
                 images: imagesList,
                 securityDeposit,
                 commission,
@@ -277,6 +358,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toLocaleDateString('en-IN'), // 30 days valid
                 autoRenew
             };
+
 
             existingListings.unshift(newListing);
         }
@@ -340,7 +422,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                     <div class="dash-meta-stats">
                         <span>${item.viewsCount || 0} views</span>
-                        <span>${item.inquiriesCount || 0} chats</span>
                         <span>Expires: ${item.expiresAt || '30 days'}</span>
                     </div>
                     <div class="dash-actions">
